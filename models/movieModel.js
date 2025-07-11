@@ -1,0 +1,63 @@
+const mongoose = require("mongoose");
+const movieSchema = new mongoose.Schema({
+  tmdbId: {
+    type: Number,
+    required: [true, "TMDb ID is required"],
+    unique: true,
+  },
+  title: {
+    type: String,
+    required: [true, "Movie title is required"],
+  },
+  description: {
+    type: String,
+    required: [true, "Movie description is required"],
+  },
+  releaseYear: {
+    type: Number,
+    required: [true, "Release year is required"],
+  },
+  runtime: {
+    type: String,
+    required: [true, "Runtime is required"],
+  },
+  genres: {
+    type: [String],
+    required: [true, "Genres are required"],
+  },
+  poster: {
+    type: String,
+    required: [true, "Poster URL is required"],
+  },
+  backdrop: {
+    type: String,
+    required: [true, "Backdrop image URL is required"],
+  },
+  embedUrl: {
+    type: String,
+    required: [true, "Embed video URL is required"],
+  },
+  cast: [
+    {
+      name: { type: String, required: true },
+      character: { type: String, required: true },
+    },
+  ],
+  ratings: {
+    voteAverage: {
+      type: Number,
+      required: [true, "Vote average is required"],
+    },
+    voteCount: {
+      type: Number,
+      required: [true, "Vote count is required"],
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Movie = mongoose.model("Movie", movieSchema);
+module.exports = Movie;

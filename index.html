@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Player - Silent Zone</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+      }
+
+      #pl_but_background {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        background-image: url("https://image.tmdb.org/t/p/w780/rH60D4bS64CYGBIXps9OgSDl3RT.jpg");
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+      }
+
+      #iframe_title {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #fff;
+        font-size: 28px;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 10px 15px;
+        border-radius: 8px;
+      }
+
+      #pl_but {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 64px;
+        color: #fff;
+        transform: translate(-50%, -50%);
+        opacity: 0.8;
+      }
+
+      .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        display: none;
+      }
+
+      .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+    </style>
+
+    <!-- Font Awesome for play icon -->
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <!-- Thumbnail with play button -->
+    <div id="pl_but_background">
+      <div id="iframe_title">Silent Zone (2025)</div>
+      <i id="pl_but" class="fas fa-play"></i>
+    </div>
+
+    <!-- Video iframe (hidden initially) -->
+    <div class="video-container" id="video_container">
+      <iframe
+        src="https://vidsrc.in/embed/movie?tmdb=1419229"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <script>
+      document
+        .getElementById("pl_but_background")
+        .addEventListener("click", () => {
+          document.getElementById("pl_but_background").style.display = "none";
+          document.getElementById("video_container").style.display = "block";
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+const express = require("express");
+const cors = require("cors");
+const movieRoutes = require("./routes/moviesRoutes");
+const watchlistRoutes = require("./routes/watchlistRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const userRoutes = require("./routes/userRoutes");
+const app = express();
+app.use(express.json());
+app.use(cors());
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+app.use("/api/movies", movieRoutes);
+app.use("/api/watchlist", watchlistRoutes);
+app.use("/api/movies/:movieId/reviews", reviewRoutes);
+app.use("/api/users", userRoutes);
+module.exports = app;
