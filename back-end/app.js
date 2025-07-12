@@ -1,0 +1,21 @@
+const express = require("express");
+const cors = require("cors");
+
+const movieRoutes = require("./routes/moviesRoutes");
+const watchlistRoutes = require("./routes/watchlistRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const userRoutes = require("./routes/userRoutes");
+const accountRoutes = require("./routes/accountRoutes");
+const authRoutes = require("./routes/authRoutes");
+const app = express();
+app.use(express.json());
+app.use(cors());
+app.use("/public", express.static("public"));
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/account", accountRoutes);
+app.use("/api/watchlist", watchlistRoutes);
+app.use("/api/movies/:movieId/reviews", reviewRoutes);
+app.use("/api/movies", movieRoutes);
+
+module.exports = app;
