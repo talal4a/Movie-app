@@ -1,26 +1,19 @@
 const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
-dotenv.config();
-
+const transporter = nodemailer.createTransport({
+  host: "sandbox.smtp.mailtrap.io",
+  port: 587,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
+  await transporter.sendMail({
+    from: '"Movie App" <no-reply@movieapp.com>',
     to: options.email,
     subject: options.subject,
     text: options.message,
-  };
-
-  await transporter.sendMail(mailOptions);
+    html: options.html,
+  });
 };
-
 module.exports = sendEmail;

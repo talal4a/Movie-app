@@ -120,9 +120,10 @@ exports.forgotPassword = async (req, res) => {
     // 1. Get user by email
     user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(404).json({
-        status: "fail",
-        message: "No user found with that email address.",
+      return res.status(200).json({
+        status: "success",
+        message:
+          "If an account with that email exists, a password reset link has been sent.",
       });
     }
 
@@ -131,26 +132,50 @@ exports.forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // 3. Create reset URL
-    const resetURL = `${req.protocol}://${req.get(
-      "host"
-    )}/api/auth/resetPassword/${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    // 4. Email content
-    const message = `Hi ${user.name},\n\nYou requested a password reset.\nPlease click the link below to reset your password:\n\n${resetURL}\n\nIf you didn't request this, you can safely ignore this email.\n\n– Movie Website Support`;
+    const message = `
+  <div style="font-family: sans-serif; padding: 20px;">
+    <h2>Password Reset Requested</h2>
+    <p>Hi ${user.name},</p>
+    <p>You requested to reset your password. Click the button below to reset:</p>
+    <a href="${resetURL}" 
+       style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+      Verify & Reset Password
+    </a>
+    <p>If you didn’t request this, ignore this email.</p>
+  </div>
+`;
 
-    // 5. Send the email
-    await sendEmail({
-      email: user.email,
-      subject: "Reset your password (valid for 10 minutes)",
-      message,
-    });
+    try {
+      // 5. Try to send the email
+      await sendEmail({
+        email: user.email,
+        subject: "Reset your password (valid for 10 minutes)",
+        html: message,
+      });
 
-    res.status(200).json({
-      status: "success",
-      message: "Password reset token sent to your email!",
-    });
+      res.status(200).json({
+        status: "success",
+        message: "Password reset token sent to your email!",
+      });
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+
+      // Return success but log the error (for security, don't expose SMTP errors to client)
+      res.status(200).json({
+        status: "success",
+        message:
+          "If an account with that email exists, a password reset link has been sent.",
+      });
+
+      // Still clear the reset token since we couldn't send the email
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+    }
   } catch (err) {
-    console.error("Email sending error:", err.message);
+    console.error("Password reset error:", err);
 
     if (user) {
       user.passwordResetToken = undefined;
@@ -159,8 +184,9 @@ exports.forgotPassword = async (req, res) => {
     }
 
     res.status(500).json({
-      status: "fail",
-      message: "Error sending email. Try again later.",
+      status: "error",
+      message:
+        "There was an error processing your request. Please try again later.",
     });
   }
 };

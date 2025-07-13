@@ -8,37 +8,42 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { signup } from './../api/auth';
-export default function Signup() {
+import { resetPassword } from '../api/auth';
+
+export default function ResetPassword() {
+  const { token } = useParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
     password: '',
     confirmPassword: '',
   });
-  const navigate = useNavigate();
+  const [message, setMessage] = useState('');
+
   const mutation = useMutation({
-    mutationFn: signup,
-    onSuccess: (data) => {
-      localStorage.setItem('token', data.token);
-      navigate('/');
+    mutationFn: () => resetPassword({ token, ...formData }),
+    onSuccess: () => {
+      setMessage('✅ Password reset successful. Redirecting to login...');
+      setTimeout(() => navigate('/auth/login'), 2000);
     },
     onError: (err) => {
-      alert(err.response?.data?.message || 'Signup failed');
+      setMessage(err.response?.data?.message || '❌ Reset failed');
     },
   });
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutation.mutate(formData);
+    mutation.mutate();
   };
+
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-black text-white font-sans">
       <img
@@ -51,43 +56,13 @@ export default function Signup() {
         <Card className="bg-black/70 backdrop-blur-sm text-white shadow-lg border border-white/10">
           <CardHeader>
             <CardTitle className="text-3xl text-center font-bold">
-              Sign Up
+              Reset Password
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-1">
-              <Label htmlFor="name" className="text-sm text-gray-300">
-                Name
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                className="bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400"
-                placeholder="Enter your name"
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="email" className="text-sm text-gray-300">
-                Email
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-1">
               <Label htmlFor="password" className="text-sm text-gray-300">
-                Password
+                New Password
               </Label>
               <Input
                 id="password"
@@ -96,7 +71,7 @@ export default function Signup() {
                 value={formData.password}
                 onChange={handleChange}
                 className="bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400"
-                placeholder="Enter your password"
+                placeholder="Enter new password"
                 required
               />
             </div>
@@ -114,7 +89,7 @@ export default function Signup() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className="bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400"
-                placeholder="Confirm your password"
+                placeholder="Confirm new password"
                 required
               />
             </div>
@@ -123,17 +98,17 @@ export default function Signup() {
               className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold"
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? 'Signing up...' : 'Sign Up'}
+              {mutation.isPending ? 'Resetting...' : 'Reset Password'}
             </Button>
-            <div className="text-sm text-zinc-400 text-center">
-              <span>Already have account? </span>
-              <Link
-                to="/auth/login"
-                className="text-white hover:underline font-medium"
+            {message && (
+              <p
+                className={`text-center text-sm font-medium mt-3 ${
+                  message.startsWith('✅') ? 'text-green-400' : 'text-red-400'
+                }`}
               >
-                Login now
-              </Link>
-            </div>
+                {message}
+              </p>
+            )}
           </CardContent>
         </Card>
       </form>
