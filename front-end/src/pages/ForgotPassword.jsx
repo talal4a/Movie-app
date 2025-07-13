@@ -40,8 +40,11 @@ export default function ForgotPassword() {
         className="absolute inset-0 w-full h-full object-cover opacity-50"
       />
       <div className="absolute inset-0 bg-black bg-opacity-70" />
-      <form onSubmit={handleSubmit} className="z-10 w-full max-w-md px-4">
-        <Card className="bg-black/70 backdrop-blur-sm text-white shadow-lg border border-white/10">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
+      >
+        <Card className="bg-transparent text-white shadow-md border-none">
           <CardHeader>
             <CardTitle className="text-3xl text-center font-bold">
               Forgot Password
