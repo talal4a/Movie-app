@@ -17,5 +17,4 @@ app.use("/api/account", accountRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/movies/:movieId/reviews", reviewRoutes);
 app.use("/api/movies", movieRoutes);
-
 module.exports = app;

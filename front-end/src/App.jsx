@@ -16,74 +16,76 @@ function App() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/movie/:id" element={<MovieDetail />} />
-        <Route
-          path="/my-list"
-          element={
-            <PrivateRoute>
-              <MyList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/auth/login"
-          element={
-            <GuestRoute>
-              <Login />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/auth/signup"
-          element={
-            <GuestRoute>
-              <Signup />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <GuestRoute>
-              <ForgotPassword />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/reset-password/:token"
-          element={
-            <GuestRoute>
-              <ResetPassword />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <PrivateRoute>
-              <Account />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <AdminDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <main className="min-h-screen bg-background text-foreground bg-black ">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route
+            path="/my-list"
+            element={
+              <PrivateRoute>
+                <MyList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/auth/login"
+            element={
+              <GuestRoute>
+                <Login />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/auth/signup"
+            element={
+              <GuestRoute>
+                <Signup />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <GuestRoute>
+                <ForgotPassword />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <GuestRoute>
+                <ResetPassword />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <PrivateRoute>
+                <Account />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
       ;
     </>
   );

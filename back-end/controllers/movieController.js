@@ -1,7 +1,6 @@
 const axios = require("axios");
 const Movie = require("../models/movieModel");
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-
 exports.createMovie = async (req, res) => {
   try {
     const { title, embedUrl } = req.body;
@@ -45,7 +44,7 @@ exports.createMovie = async (req, res) => {
       character: member.character || "N/A",
     }));
 
-    // ✅ Extract genres as array of strings
+    // Extract genres as array of strings
     const genres = details.genres.map((g) => g.name);
 
     // 4. Create and save the movie
@@ -55,7 +54,7 @@ exports.createMovie = async (req, res) => {
       description: details.overview,
       releaseYear: parseInt(details.release_date.split("-")[0]),
       runtime: `${details.runtime} min`,
-      genres, // ✅ add this line
+      genres,
       poster: `https://image.tmdb.org/t/p/w500${details.poster_path}`,
       backdrop: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
       embedUrl,
@@ -72,7 +71,7 @@ exports.createMovie = async (req, res) => {
     res.status(500).json({ status: "error", message: "Something went wrong" });
   }
 };
-// controllers/movieController.js
+
 exports.getAllMovies = async (req, res) => {
   try {
     const queryObj = {};
@@ -132,6 +131,7 @@ exports.getMovieById = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
+
 exports.deleteMovie = async (req, res) => {
   try {
     await Movie.findByIdAndDelete(req.params.id);
@@ -140,6 +140,7 @@ exports.deleteMovie = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
+
 exports.updateMovie = async (req, res) => {
   try {
     const updated = await Movie.findByIdAndUpdate(req.params.id, req.body, {
@@ -149,5 +150,21 @@ exports.updateMovie = async (req, res) => {
     res.status(200).json({ status: "success", data: updated });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+exports.getFeaturedMovie = async (req, res) => {
+  try {
+    const featured = await Movie.findOne().sort({ createdAt: 1 });
+    res.status(200).json({
+      status: "success",
+      data: featured,
+    });
+  } catch (err) {
+    console.error("Error in getFeaturedMovie:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch featured movie",
+    });
   }
 };
