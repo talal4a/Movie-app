@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { getMovieById } from '../api/auth';
 import Spinner from '../components/Spinner';
 import Review from '../components/Review';
+import ReviewsList from '../components/ReviewList';
 export default function MovieDetail() {
   const { id } = useParams();
   const [showPlayer, setShowPlayer] = useState(false);
@@ -91,6 +92,7 @@ export default function MovieDetail() {
               )}
             </div>
             <Review id={movie._id} />
+            <ReviewsList id={movie._id} />
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">

@@ -51,8 +51,7 @@ export const getMovieById = async (id) => {
 };
 export const getReviewsByMovieId = async (movieId) => {
   const res = await axiosInstance.get(`movies/${movieId}/reviews`);
-  if (!res.ok) throw new Error('Failed to fetch reviews');
-  return res.json();
+  return res.data;
 };
 export const postReviews = async (movieId, reviewData) => {
   const res = await axiosInstance.post(`movies/${movieId}/reviews`, reviewData);

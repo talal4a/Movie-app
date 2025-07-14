@@ -11,18 +11,19 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../api/auth';
-
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '@/slice/userSlice';
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
+      dispatch(setCredentials({ user: data.user, token: data.token }));
       localStorage.setItem('token', data.token);
       navigate('/');
     },
@@ -30,19 +31,16 @@ export default function Login() {
       alert(err.response?.data?.message || 'Login failed');
     },
   });
-
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     mutation.mutate(formData);
   };
-
   return (
     <div className="relative min-h-screen bg-black text-white">
       <img
@@ -60,7 +58,7 @@ export default function Login() {
         >
           <Card className="bg-transparent text-white shadow-md border-none">
             <CardHeader>
-              <CardTitle className="text-3xl text-center">Sign In</CardTitle>
+              <CardTitle className="text-3xl text-center">Log In</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
