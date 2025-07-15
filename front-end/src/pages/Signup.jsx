@@ -11,7 +11,10 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from './../api/auth';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '@/slice/userSlice';
 export default function Signup() {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,6 +26,8 @@ export default function Signup() {
     mutationFn: signup,
     onSuccess: (data) => {
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      dispatch(setCredentials({ token: data.token, user: data.user }));
       navigate('/');
     },
     onError: (err) => {

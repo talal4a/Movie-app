@@ -20,7 +20,7 @@ exports.updateMe = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: updatedUser,
+      data: { user: updatedUser },
     });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
