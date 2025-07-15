@@ -12,10 +12,10 @@ import ResetPassword from './pages/ResetPassword';
 import Account from './pages/Account';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './components/NotFound';
+import MobileNavbar from './components/MobileNavBar';
 function App() {
   return (
     <>
-      <Navbar />
       <main className="min-h-screen bg-background text-foreground bg-black ">
         <Routes>
           <Route
@@ -26,7 +26,14 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route
+            path="/movie/:id"
+            element={
+              <PrivateRoute>
+                <MovieDetail />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/my-list"
             element={

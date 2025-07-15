@@ -13,7 +13,6 @@ import {
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -21,21 +20,9 @@ export default function NavBar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const notifications = [
-    {
-      id: 1,
-      title: 'New episodes available',
-      show: 'Stranger Things',
-      time: '2h ago',
-    },
-    { id: 2, title: 'Added to your list', show: 'The Crown', time: '1d ago' },
-    { id: 3, title: 'Recommended for you', show: 'Dark', time: '3d ago' },
-  ];
 
   const activeClass = (isActive) =>
     isActive
@@ -66,9 +53,6 @@ export default function NavBar() {
         <span className="text-red-600 font-black text-2xl tracking-tight cursor-pointer hover:text-red-500 transition-colors">
           CINEVERSE
         </span>
-        <div className="ml-3 bg-gradient-to-r from-red-600 to-red-800 text-white px-2 py-1 rounded text-xs font-bold">
-          HD
-        </div>
       </div>
       <ul className="flex space-x-8 mx-auto">
         <li>
@@ -124,52 +108,6 @@ export default function NavBar() {
                   </div>
                 </div>
               )}
-            </div>
-          )}
-        </div>
-
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="hover:text-gray-300 transition-colors duration-200 p-2 hover:bg-gray-800 rounded-full relative"
-          >
-            <Bell size={20} />
-            <span className="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full w-2 h-2"></span>
-          </button>
-
-          {showNotifications && (
-            <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-80 shadow-2xl">
-              <div className="p-4 border-b border-gray-700">
-                <h3 className="font-semibold text-lg">Notifications</h3>
-              </div>
-              <div className="max-h-64 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className="p-4 hover:bg-gray-800 border-b border-gray-700 cursor-pointer"
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          {notification.show}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {notification.time}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-4 border-t border-gray-700">
-                <button className="text-sm text-gray-400 hover:text-white transition-colors">
-                  View all notifications
-                </button>
-              </div>
             </div>
           )}
         </div>

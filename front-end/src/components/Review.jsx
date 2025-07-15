@@ -24,7 +24,7 @@ export default function Review({ id }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="w-full p-3 rounded bg-gray-700 text-white mb-2"
-          placeholder="Share your thoughts..."
+          place="Show your thoughts"
           rows={3}
         />
         <input

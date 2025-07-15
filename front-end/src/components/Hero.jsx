@@ -35,11 +35,9 @@ export default function Hero() {
           }}
         />
       </div>
-
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
-
       <div className="relative z-10 flex flex-col justify-center h-full px-8 lg:px-16 max-w-7xl">
         <h1 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black mb-6 tracking-tight leading-[0.9] max-w-4xl">
           <span className="bg-gradient-to-r from-white via-red-200 to-red-400 bg-clip-text text-transparent animate-pulse">
@@ -66,34 +64,31 @@ export default function Hero() {
             <span>{movie.ratings?.voteAverage?.toFixed(1)} </span>
           </span>
         </div>
-
         <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mb-8 leading-relaxed">
           {movie.description}
         </p>
-
-        <div className="flex items-center space-x-4 mb-8 flex-wrap">
+        <div className="flex  gap-4 mb-8 flex-wrap">
           <button
             onClick={handlePlay}
-            className="bg-white text-black font-bold px-8 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-lg shadow-lg transform hover:scale-105"
+            className="bg-white  text-black font-bold px-8 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-lg shadow-lg transform hover:scale-105 w-[150px]"
           >
             <Play className="w-6 h-6 fill-current" />
             <span>{isPlaying ? 'Pause' : 'Play'}</span>
           </button>
 
-          <button className="bg-gray-600 bg-opacity-80 text-white px-8 py-3 rounded-md hover:bg-gray-500 transition-all duration-200 flex items-center space-x-2 text-lg backdrop-blur-sm">
+          <button className="bg-gray-600 bg-opacity-80 text-white px-8 py-3 rounded-md hover:bg-gray-500 transition-all duration-200 flex items-center space-x-2 text-lg backdrop-blur-sm w-[170px]">
             <Plus className="w-6 h-6" />
             <span>My List</span>
           </button>
 
           <button
             onClick={() => setShowMoreInfo(!showMoreInfo)}
-            className="bg-gray-700 bg-opacity-80 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-all duration-200 flex items-center space-x-2 text-lg backdrop-blur-sm"
+            className="bg-gray-700 bg-opacity-80 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-all duration-200 flex items-center space-x-2 text-lg backdrop-blur-sm w-[180px]"
           >
             <Info className="w-6 h-6" />
             <span>More Info</span>
           </button>
         </div>
-
         {showMoreInfo && (
           <div className="bg-black bg-opacity-90 p-6 rounded-lg max-w-3xl backdrop-blur-sm border border-gray-700 animate-fadeIn">
             <h3 className="text-2xl font-bold mb-4">Cast & Crew</h3>
