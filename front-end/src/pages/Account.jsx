@@ -14,9 +14,13 @@ import Spinner from '@/components/Spinner';
 import { useMutation } from '@tanstack/react-query';
 import { updatePassword, updateProfile } from '@/api/auth';
 import { setCredentials } from '@/slice/userSlice';
+
 export default function Account() {
   const user = useSelector((state) => state.user?.user);
   const loading = useSelector((state) => state.user?.loading);
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth?.token);
+
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     photo: null,
@@ -35,24 +39,15 @@ export default function Account() {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleProfileChange = (field, value) => {
-    setProfileData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setProfileData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePasswordChange = (field, value) => {
-    setPasswordData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
   const togglePasswordVisibility = (field) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleSaveProfile = async () => {
@@ -60,7 +55,6 @@ export default function Account() {
       await updateProfileMutation.mutateAsync(profileData);
       setProfilePhotoPreview(null);
     } catch (error) {
-      console.error('Error updating profile:', error);
       alert(error.response?.data?.message || 'Failed to update profile');
     }
   };
@@ -79,27 +73,25 @@ export default function Account() {
       alert(error.message || 'Failed to update password');
     }
   };
+
   const handleProfilePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePhotoPreview(reader.result);
-        setProfileData((prev) => ({
-          ...prev,
-          photo: file,
-        }));
+        setProfileData((prev) => ({ ...prev, photo: file }));
       };
       reader.readAsDataURL(file);
     }
   };
+
   useEffect(() => {
     if (user) {
       setProfileData({ name: user.name, email: user.email });
     }
   }, [user]);
-  const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth?.token);
+
   const updateProfileMutation = useMutation({
     mutationFn: () => updateProfile(profileData),
     onSuccess: (updatedUser) => {
@@ -108,43 +100,44 @@ export default function Account() {
       setIsEditing(false);
     },
     onError: (err) => {
-      console.error('Update profile error:', err);
       alert(err.response?.data?.message || 'Failed to update profile');
     },
   });
-  console.log('Redux user:', user);
+
   if (loading) return <Spinner />;
+
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-12">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent mb-2">
+    <div className="min-h-screen bg-black text-white px-4 sm:px-6 py-8 sm:py-10">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="text-center mb-6 sm:mb-10">
+          <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent mb-2">
             Account Settings
           </h1>
-          <p className="text-gray-400">
+          <p className="text-sm sm:text-base text-gray-400">
             Manage your profile and security settings
           </p>
         </div>
-        <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-8 shadow-2xl">
+
+        <div className="bg-gray-900/80 border border-gray-700/50 rounded-lg p-5 sm:p-6 shadow-xl">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold flex items-center gap-2">
-              <User className="text-red-500" size={24} />
+            <h2 className="text-lg sm:text-2xl font-semibold flex items-center gap-2">
+              <User className="text-red-500" size={22} />
               Profile Information
             </h2>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md transition-colors duration-200 flex items-center gap-2"
+              className="px-4 py-2 text-sm sm:text-base bg-red-600 hover:bg-red-700 rounded-md"
             >
               {isEditing ? 'Cancel' : 'Edit'}
             </button>
           </div>
-          <div className="flex items-center space-x-6 mb-8">
+
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center mb-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center text-3xl font-bold shadow-lg overflow-hidden">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center text-2xl font-bold shadow-lg overflow-hidden">
                 {profilePhotoPreview ? (
                   <img
                     src={profilePhotoPreview}
-                    alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 ) : user?.avatar ? (
@@ -159,7 +152,7 @@ export default function Account() {
               {isEditing && (
                 <>
                   <button
-                    className="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors duration-200 border-2 border-black"
+                    className="absolute -bottom-2 -right-2 w-8 h-8 bg-gray-800 hover:bg-gray-700 rounded-full border-2 border-black flex items-center justify-center"
                     onClick={() =>
                       document.getElementById('photo-upload').click()
                     }
@@ -176,20 +169,17 @@ export default function Account() {
                 </>
               )}
             </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold mb-1">
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-1">
                 {user?.name || 'User'}
               </h3>
-              <p className="text-gray-400 mb-2">
-                {user?.email || 'user@example.com'}
-              </p>
-              <div className="flex items-center gap-2 text-sm text-green-400">
-                <ShieldCheck size={16} />
-                <span>Verified Account</span>
+              <p className="text-gray-400 text-sm mb-1">{user?.email}</p>
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-green-400">
+                <ShieldCheck size={16} /> <span>Verified Account</span>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Full Name
@@ -199,8 +189,7 @@ export default function Account() {
                 value={profileData.name}
                 onChange={(e) => handleProfileChange('name', e.target.value)}
                 disabled={!isEditing}
-                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                placeholder="Enter your full name"
+                className="w-full px-4 py-2 bg-gray-800/60 border border-gray-600 rounded-md disabled:opacity-50"
               />
             </div>
             <div>
@@ -209,147 +198,105 @@ export default function Account() {
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-3 top-3.5 text-gray-400"
-                  size={18}
+                  className="absolute left-3 top-3 text-gray-400"
+                  size={16}
                 />
                 <input
                   type="email"
                   value={profileData.email}
-                  onChange={(e) => handleProfileChange('email', e.target.value)}
-                  disabled={true}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800/80 border border-gray-600 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  placeholder="Enter your email"
+                  disabled
+                  className="w-full pl-10 py-2 bg-gray-800/60 border border-gray-600 rounded-md text-sm disabled:opacity-50"
                 />
               </div>
             </div>
           </div>
+
           {isEditing && (
-            <div className="mt-6 flex justify-end">
+            <div className="mt-5 text-right">
               <button
                 onClick={handleSaveProfile}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-md transition-all duration-200 flex items-center gap-2 font-medium"
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-md flex items-center gap-2"
               >
-                <Save size={18} />
-                Save Changes
+                <Save size={16} /> Save Changes
               </button>
             </div>
           )}
         </div>
-        <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-8 shadow-2xl">
-          <div className="flex items-center mb-6">
-            <h2 className="text-2xl font-semibold flex items-center gap-2">
-              <Lock className="text-red-500" size={24} />
-              Security Settings
-            </h2>
-          </div>
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Current Password
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-3.5 text-gray-400"
-                  size={18}
-                />
-                <input
-                  type={showPasswords.current ? 'text' : 'password'}
-                  value={passwordData.currentPassword}
-                  onChange={(e) =>
-                    handlePasswordChange('currentPassword', e.target.value)
-                  }
-                  className="w-full pl-10 pr-12 py-3 bg-gray-800/80 border border-gray-600 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => togglePasswordVisibility('current')}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-300 transition-colors duration-200"
-                >
-                  {showPasswords.current ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-3.5 text-gray-400"
-                  size={18}
-                />
-                <input
-                  type={showPasswords.new ? 'text' : 'password'}
-                  value={passwordData.newPassword}
-                  onChange={(e) =>
-                    handlePasswordChange('newPassword', e.target.value)
-                  }
-                  className="w-full pl-10 pr-12 py-3 bg-gray-800/80 border border-gray-600 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => togglePasswordVisibility('new')}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-300 transition-colors duration-200"
-                >
-                  {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-3.5 text-gray-400"
-                  size={18}
-                />
-                <input
-                  type={showPasswords.confirm ? 'text' : 'password'}
-                  value={passwordData.confirmPassword}
-                  onChange={(e) =>
-                    handlePasswordChange('confirmPassword', e.target.value)
-                  }
-                  className="w-full pl-10 pr-12 py-3 bg-gray-800/80 border border-gray-600 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Confirm new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => togglePasswordVisibility('confirm')}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-300 transition-colors duration-200"
-                >
-                  {showPasswords.confirm ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50">
-              <h4 className="text-sm font-medium text-gray-300 mb-2">
+
+        {/* Password */}
+        <div className="bg-gray-900/80 border border-gray-700/50 rounded-lg p-5 sm:p-6 shadow-xl">
+          <h2 className="text-lg sm:text-2xl font-semibold flex items-center gap-2 mb-4">
+            <Lock className="text-red-500" size={22} /> Security Settings
+          </h2>
+
+          <div className="space-y-5">
+            {['currentPassword', 'newPassword', 'confirmPassword'].map(
+              (key) => {
+                const labelMap = {
+                  currentPassword: 'Current Password',
+                  newPassword: 'New Password',
+                  confirmPassword: 'Confirm New Password',
+                };
+                const fieldKey =
+                  key === 'currentPassword'
+                    ? 'current'
+                    : key === 'newPassword'
+                      ? 'new'
+                      : 'confirm';
+                return (
+                  <div key={key}>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      {labelMap[key]}
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        className="absolute left-3 top-3 text-gray-400"
+                        size={16}
+                      />
+                      <input
+                        type={showPasswords[fieldKey] ? 'text' : 'password'}
+                        value={passwordData[key]}
+                        onChange={(e) =>
+                          handlePasswordChange(key, e.target.value)
+                        }
+                        className="w-full pl-10 pr-10 py-2 bg-gray-800/60 border border-gray-600 rounded-md text-sm"
+                        placeholder={`Enter ${labelMap[key]}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility(fieldKey)}
+                        className="absolute right-3 top-3 text-gray-400"
+                      >
+                        {showPasswords[fieldKey] ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+            )}
+
+            <div className="bg-gray-900/50 p-4 rounded-md border border-gray-700/50 text-sm text-gray-400 space-y-1">
+              <p className="text-gray-300 font-medium">
                 Password Requirements:
-              </h4>
-              <ul className="text-sm text-gray-400 space-y-1">
-                <li>• At least 8 characters long</li>
-                <li>• Include uppercase and lowercase letters</li>
-                <li>• Include at least one number</li>
-                <li>• Include at least one special character</li>
+              </p>
+              <ul className="list-disc list-inside">
+                <li>At least 8 characters long</li>
+                <li>Include uppercase and lowercase letters</li>
+                <li>Include at least one number</li>
+                <li>Include at least one special character</li>
               </ul>
             </div>
-            <div className="flex justify-end">
+
+            <div className="text-right">
               <button
                 onClick={handleSavePassword}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-md transition-all duration-200 flex items-center gap-2 font-medium"
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 rounded-md flex items-center gap-2"
               >
-                <ShieldCheck size={18} />
-                Update Password
+                <ShieldCheck size={16} /> Update Password
               </button>
             </div>
           </div>

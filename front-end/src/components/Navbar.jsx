@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
-import {
-  Search,
-  Bell,
-  ChevronDown,
-  User,
-  Settings,
-  LogOut,
-  Gift,
-  HelpCircle,
-} from 'lucide-react';
-
+import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '@/slice/userSlice';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/auth/login');
+  };
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -70,48 +68,12 @@ export default function NavBar() {
       <div className="flex items-center space-x-4">
         <div className="relative">
           <button
-            onClick={() => setShowSearch(!showSearch)}
+            onClick={() => navigate('/search')}
             className="hover:text-gray-300 transition-colors duration-200 p-2 hover:bg-gray-800 rounded-full"
           >
             <Search size={20} />
           </button>
-
-          {showSearch && (
-            <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg p-4 w-80 shadow-2xl">
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-3 text-gray-400"
-                />
-                <input
-                  type="text"
-                  placeholder="Search movies, TV shows..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-800 text-white pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600"
-                  autoFocus
-                />
-              </div>
-              {searchQuery && (
-                <div className="mt-3 space-y-2">
-                  <div className="text-sm text-gray-400 mb-2">
-                    Recent searches
-                  </div>
-                  <div className="text-sm text-gray-300 hover:text-white cursor-pointer py-1">
-                    Stranger Things
-                  </div>
-                  <div className="text-sm text-gray-300 hover:text-white cursor-pointer py-1">
-                    The Crown
-                  </div>
-                  <div className="text-sm text-gray-300 hover:text-white cursor-pointer py-1">
-                    Dark
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
-
         <div className="relative">
           <button
             onClick={() => setShowProfile(!showProfile)}
@@ -126,7 +88,6 @@ export default function NavBar() {
               className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
             />
           </button>
-
           {showProfile && (
             <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl">
               <div className="p-4 border-b border-gray-700">
@@ -150,27 +111,18 @@ export default function NavBar() {
                   <span className="text-sm">Account</span>
                 </a>
                 <a
-                  href="/settings"
-                  className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors"
-                >
-                  <Settings size={16} />
-                  <span className="text-sm">Settings</span>
-                </a>
-                <a
                   href="/help"
                   className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors"
                 >
                   <HelpCircle size={16} />
                   <span className="text-sm">Help Center</span>
                 </a>
-                <div className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer">
-                  <Gift size={16} />
-                  <span className="text-sm">Gift Cards</span>
-                </div>
               </div>
-
               <div className="border-t border-gray-700 py-2">
-                <button className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left">
+                <button
+                  className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left"
+                  onClick={handleLogout}
+                >
                   <LogOut size={16} />
                   <span className="text-sm">Sign out</span>
                 </button>

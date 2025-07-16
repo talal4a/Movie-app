@@ -48,11 +48,9 @@ export default function MovieDetail() {
               <span>{movie.runtime}</span>
               <span className="border border-gray-500 px-1 text-xs">HD</span>
             </div>
-
             <p className="text-lg text-gray-200 mb-8 leading-relaxed max-w-xl">
               {movie.description}
             </p>
-
             <div className="flex gap-4 flex-wrap">
               <button
                 onClick={() => setShowPlayer(true)}

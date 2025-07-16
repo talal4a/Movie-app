@@ -103,3 +103,9 @@ export const updatePassword = async (passwordData) => {
   }
   return res.data.data;
 };
+export const searchMovies = async (query) => {
+  const response = await axiosInstance.get(`/movies`, {
+    params: { search: query },
+  });
+  return response.data.data;
+};

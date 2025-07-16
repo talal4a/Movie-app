@@ -1,19 +1,30 @@
 import PrivateRoute from './components/PrivateRoute';
 import GuestRoute from './components/GuestRoute';
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import MovieDetail from './pages/MovieDetail';
 import MyList from './pages/MyList';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import SearchPage from './pages/SearchPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Account from './pages/Account';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './components/NotFound';
-import MobileNavbar from './components/MobileNavBar';
+import { useEffect } from 'react';
 function App() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth',
+      });
+    });
+  }, [pathname]);
+
   return (
     <>
       <main className="min-h-screen bg-background text-foreground bg-black ">
@@ -79,6 +90,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Account />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <PrivateRoute>
+                <SearchPage />
               </PrivateRoute>
             }
           />
