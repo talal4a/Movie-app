@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-
 const movieRoutes = require("./routes/moviesRoutes");
 const watchlistRoutes = require("./routes/watchlistRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");

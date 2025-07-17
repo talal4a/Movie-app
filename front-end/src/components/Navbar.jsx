@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '@/slice/userSlice';
+import UserAvatar from './UserAvatar';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
-
   const [showProfile, setShowProfile] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user?.user);
   const handleLogout = () => {
     dispatch(logout());
     navigate('/auth/login');
   };
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -27,18 +25,11 @@ export default function NavBar() {
       ? 'text-white font-semibold relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-red-600'
       : 'text-gray-300 hover:text-white transition-colors duration-200';
 
-  const NavItem = ({ to, children, isActive = false }) => (
-    <a
-      href={to}
-      className={activeClass(isActive)}
-      onClick={(e) => {
-        e.preventDefault();
-      }}
-    >
+  const NavItem = ({ to, children }) => (
+    <NavLink to={to} className={({ isActive }) => activeClass(isActive)}>
       {children}
-    </a>
+    </NavLink>
   );
-
   return (
     <nav
       className={`fixed z-50 flex items-center px-6 py-3 text-white w-full transition-all duration-300 ${
@@ -54,9 +45,7 @@ export default function NavBar() {
       </div>
       <ul className="flex space-x-8 mx-auto">
         <li>
-          <NavItem to="/" isActive={true}>
-            Home
-          </NavItem>
+          <NavItem to="/">Home</NavItem>
         </li>
         <li>
           <NavItem to="/movies">Movies</NavItem>
@@ -66,58 +55,54 @@ export default function NavBar() {
         </li>
       </ul>
       <div className="flex items-center space-x-4">
-        <div className="relative">
-          <button
-            onClick={() => navigate('/search')}
-            className="hover:text-gray-300 transition-colors duration-200 p-2 hover:bg-gray-800 rounded-full"
-          >
-            <Search size={20} />
-          </button>
-        </div>
+        <button
+          onClick={() => navigate('/search')}
+          className="hover:text-gray-300 transition-colors duration-200 p-2 hover:bg-gray-800 rounded-full"
+        >
+          <Search size={20} />
+        </button>
         <div className="relative">
           <button
             onClick={() => setShowProfile(!showProfile)}
             className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors duration-200"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              T
-            </div>
-            <span className="text-sm font-medium">Talal</span>
+            <UserAvatar user={user} size={40} />
+            <span className="font-semibold">{user?.name || 'User'}</span>
             <ChevronDown
               size={16}
               className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
             />
           </button>
+
           {showProfile && (
-            <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl">
+            <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl z-50">
               <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    T
-                  </div>
+                  <UserAvatar user={user} size={40} />
                   <div>
-                    <p className="font-semibold">Talal</p>
+                    <p className="font-semibold">{user?.name || 'User'}</p>
                     <p className="text-sm text-gray-400">Premium Member</p>
                   </div>
                 </div>
               </div>
 
               <div className="py-2">
-                <a
-                  href="/account"
+                <NavLink
+                  to="/account"
                   className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors"
                 >
                   <User size={16} />
                   <span className="text-sm">Account</span>
-                </a>
-                <a
-                  href="/help"
+                </NavLink>
+                <NavLink
+                  to="/help"
                   className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors"
                 >
                   <HelpCircle size={16} />
                   <span className="text-sm">Help Center</span>
-                </a>
+                </NavLink>
               </div>
+
               <div className="border-t border-gray-700 py-2">
                 <button
                   className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left"

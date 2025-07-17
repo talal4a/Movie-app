@@ -1,18 +1,14 @@
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { searchMovies } from '@/api/auth';
-import Spinner from '@/components/Spinner';
 import { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import MovieCard from '@/components/MovieCard';
-
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-
-  // Debounce user input
   const debouncedSearch = debounce((value) => {
     if (value.length >= 3) {
       setSearchParams({ q: value });
@@ -22,13 +18,10 @@ export default function SearchPage() {
       setQuery('');
     }
   }, 500);
-
-  // Trigger debounce on user input
   useEffect(() => {
     debouncedSearch(searchInput);
     return () => debouncedSearch.cancel();
   }, [searchInput]);
-
   const {
     data: movies,
     isLoading,
@@ -38,53 +31,35 @@ export default function SearchPage() {
     queryFn: () => searchMovies(query),
     enabled: query.length >= 3,
   });
-
   const clearSearch = () => {
     setSearchInput('');
     setQuery('');
     setSearchParams({});
   };
-
   return (
     <div className="min-h-screen bg-black   text-white relative overflow-hidden">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(255,0,0,0.1),transparent_50%),radial-gradient(circle_at_80%_20%,rgba(255,0,0,0.1),transparent_50%)]"></div>
       </div>
-
-      {/* Main Content */}
       <div className="relative z-10">
-        {/* Header with Search */}
         <div className="relative">
-          {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-transparent"></div>
           <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
             <div className="max-w-3xl mx-auto">
-              {/* Search Title */}
               <div className="text-center mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-4">
                   Search
                 </h1>
                 <p className="text-gray-400 text-lg">
-                  Discover thousands of movies and TV shows
+                  Discover thousands of movies
                 </p>
               </div>
-
-              {/* Enhanced Search Bar */}
               <div className="relative group">
                 <div
                   className={`relative transition-all duration-500 ease-out ${
                     isFocused ? 'transform scale-[1.02]' : ''
                   }`}
                 >
-                  {/* Glow effect */}
-                  <div
-                    className={`absolute -inset-1 bg-gradient-to-r from-red-600 via-red-500 to-red-600 rounded-xl blur opacity-0 transition-all duration-500 ${
-                      isFocused ? 'opacity-30' : 'group-hover:opacity-20'
-                    }`}
-                  ></div>
-
-                  {/* Main search container */}
                   <div
                     className={`relative flex items-center bg-gray-900/90 backdrop-blur-xl rounded-xl border transition-all duration-500 ${
                       isFocused
@@ -92,7 +67,6 @@ export default function SearchPage() {
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
                   >
-                    {/* Search Icon */}
                     <div className="pl-6 pr-4">
                       <svg
                         className={`w-6 h-6 transition-all duration-300 ${
@@ -110,19 +84,15 @@ export default function SearchPage() {
                         />
                       </svg>
                     </div>
-
-                    {/* Input Field */}
                     <input
                       type="text"
-                      placeholder="Search for movies, TV shows, documentaries..."
+                      placeholder="Search for movies"
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       onFocus={() => setIsFocused(true)}
                       onBlur={() => setIsFocused(false)}
                       className="flex-1 bg-transparent text-white placeholder-gray-400 py-5 pr-4 outline-none text-lg font-medium"
                     />
-
-                    {/* Clear Button */}
                     {searchInput && (
                       <button
                         onClick={clearSearch}
@@ -143,7 +113,6 @@ export default function SearchPage() {
                         </svg>
                       </button>
                     )}
-                    {/* Loading indicator in search bar */}
                     {isLoading && (
                       <div className="pr-6 pl-2">
                         <div className="animate-spin rounded-full h-5 w-5 border-2 border-red-500 border-t-transparent"></div>
@@ -151,7 +120,6 @@ export default function SearchPage() {
                     )}
                   </div>
                 </div>
-                {/* Search Hint */}
                 {query.length < 3 && searchInput.length > 0 && (
                   <div className="absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-xl border border-gray-700 rounded-b-xl mt-2 p-4 text-gray-400 text-sm shadow-2xl animate-in slide-in-from-top-2 duration-200">
                     <div className="flex items-center gap-2">
@@ -176,9 +144,7 @@ export default function SearchPage() {
             </div>
           </div>
         </div>
-        {/* Results Section */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-          {/* Error State */}
           {error && (
             <div className="text-center py-20 animate-in fade-in duration-500">
               <div className="relative">
@@ -208,7 +174,6 @@ export default function SearchPage() {
               </div>
             </div>
           )}
-          {/* No Results */}
           {query && movies?.length === 0 && !isLoading && (
             <div className="text-center py-20 animate-in fade-in duration-500">
               <div className="relative">
@@ -240,7 +205,6 @@ export default function SearchPage() {
               </div>
             </div>
           )}
-
           {movies?.length > 0 && (
             <div className="animate-in fade-in duration-700">
               <div className="mb-8">
@@ -248,12 +212,11 @@ export default function SearchPage() {
                   Search Results
                 </h2>
                 <p className="text-gray-400">
-                  {movies.length} {movies.length === 1 ? 'result' : 'results'}{' '}
+                  {movies.length} {movies.length === 1 ? 'result' : 'results'}
                   for "
                   <span className="text-red-500 font-semibold">{query}</span>"
                 </p>
               </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
                 {movies.map((movie, index) => (
                   <div
@@ -292,8 +255,7 @@ export default function SearchPage() {
                   Find your next favorite
                 </h3>
                 <p className="text-gray-400 text-lg max-w-md mx-auto">
-                  Search through our vast collection of movies, TV shows, and
-                  documentaries.
+                  Search through our vast collection of movies.
                 </p>
               </div>
             </div>

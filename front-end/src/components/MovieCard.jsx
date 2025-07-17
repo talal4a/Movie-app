@@ -1,8 +1,30 @@
-import { Plus, Play } from 'lucide-react';
+import { Plus, Play, Check } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 export default function MovieCard({ movie }) {
+  const dispatch = useDispatch();
+  const watchlist = useSelector((state) => state.watchList.items);
+  const isSaved = watchlist.some((item) => item._id === movie._id);
+  const [justAdded, setJustAdded] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const toggleWatchlist = () => {
+    if (isSaved) {
+      dispatch(removeFromWatchlist(movie._id));
+      setJustAdded(false);
+    } else {
+      dispatch(addToWatchlist(movie._id));
+      setJustAdded(true);
+      setButtonDisabled(true);
+      setTimeout(() => {
+        setJustAdded(false);
+        setButtonDisabled(false);
+      }, 2000);
+    }
+  };
   return (
-    <Link to={`/movie/${movie._id}`}>
+    <Link to={`/movie/${movie._id}`} className="block">
       <div className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 w-45">
         <div className="w-full h-60 overflow-hidden relative">
           <img
@@ -16,8 +38,30 @@ export default function MovieCard({ movie }) {
             </button>
           </div>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 mt-[90px]">
-            <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
-              <Plus className="w-5 h-5" />
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                if (!buttonDisabled) toggleWatchlist();
+              }}
+              disabled={buttonDisabled}
+              className={`rounded-full p-3 shadow-lg transition-all duration-300 ${
+                isSaved || justAdded
+                  ? 'bg-green-500 text-white cursor-not-allowed'
+                  : 'bg-white text-black hover:scale-110'
+              }`}
+              title={isSaved ? 'Already in Watchlist' : 'Add to Watchlist'}
+            >
+              <span
+                className={`transition-all duration-300 ease-in-out ${
+                  justAdded ? 'animate-ping-once' : ''
+                }`}
+              >
+                {isSaved || justAdded ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <Plus className="w-5 h-5" />
+                )}
+              </span>
             </button>
           </div>
         </div>
@@ -25,7 +69,6 @@ export default function MovieCard({ movie }) {
           <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
           <p className="text-xs text-gray-400">{movie.releaseYear}</p>
           <p className="text-xs text-gray-400">{movie.runtime}</p>
-
           <div className="flex flex-wrap gap-1">
             {movie.genres?.slice(0, 2).map((genre, index) => (
               <span

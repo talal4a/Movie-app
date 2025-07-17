@@ -1,26 +1,21 @@
 const mongoose = require("mongoose");
 const Review = require("../models/reviewModel");
-
 exports.createReview = async (req, res) => {
   try {
     const { review, rating } = req.body;
     const movieId = req.params.movieId;
-
-    // Validate movieId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(movieId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid movie ID format",
       });
     }
-
     const newReview = await Review.create({
       review,
       rating,
       movie: movieId,
       user: req.user.id,
     });
-
     res.status(201).json({
       status: "success",
       data: newReview,
@@ -32,23 +27,18 @@ exports.createReview = async (req, res) => {
     });
   }
 };
-
 exports.getMovieReviews = async (req, res) => {
   try {
     const movieId = req.params.movieId;
-
-    // Validate movieId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(movieId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid movie ID format",
       });
     }
-
     const reviews = await Review.find({ movie: movieId })
-      .populate("user", "name email") // Optionally populate user info
-      .sort("-createdAt"); // Sort by newest first
-
+      .populate("user", "name email")
+      .sort("-createdAt");
     res.status(200).json({
       status: "success",
       results: reviews.length,
@@ -71,7 +61,6 @@ exports.upsertReview = async (req, res) => {
       { review, rating },
       { new: true, upsert: true, runValidators: true }
     );
-    // Recalculate average rating
     await Review.calcAverageRatings(movieId);
 
     res.status(200).json({

@@ -14,13 +14,12 @@ import Spinner from '@/components/Spinner';
 import { useMutation } from '@tanstack/react-query';
 import { updatePassword, updateProfile } from '@/api/auth';
 import { setCredentials } from '@/slice/userSlice';
-
+import UserAvatar from '@/components/UserAvatar';
 export default function Account() {
   const user = useSelector((state) => state.user?.user);
   const loading = useSelector((state) => state.user?.loading);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth?.token);
-
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     photo: null,
@@ -103,13 +102,11 @@ export default function Account() {
       alert(err.response?.data?.message || 'Failed to update profile');
     },
   });
-
   if (loading) return <Spinner />;
-
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 py-8 sm:py-10">
+    <div className="min-h-screen bg-black text-white px-4  sm:px-6 py-8 sm:py-10">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="text-center mb-6 sm:mb-10">
+        <div className="text-center mb-6 sm:mb-10 pt-[30px]">
           <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent mb-2">
             Account Settings
           </h1>
@@ -117,7 +114,6 @@ export default function Account() {
             Manage your profile and security settings
           </p>
         </div>
-
         <div className="bg-gray-900/80 border border-gray-700/50 rounded-lg p-5 sm:p-6 shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg sm:text-2xl font-semibold flex items-center gap-2">
@@ -131,24 +127,9 @@ export default function Account() {
               {isEditing ? 'Cancel' : 'Edit'}
             </button>
           </div>
-
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center mb-6">
             <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-red-600 to-red-500 flex items-center justify-center text-2xl font-bold shadow-lg overflow-hidden">
-                {profilePhotoPreview ? (
-                  <img
-                    src={profilePhotoPreview}
-                    className="w-full h-full object-cover"
-                  />
-                ) : user?.avatar ? (
-                  <img
-                    src={`http://localhost:8000/img/users/${user.avatar}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
-                )}
-              </div>
+              <UserAvatar user={user} size={80} />
               {isEditing && (
                 <>
                   <button
@@ -210,7 +191,6 @@ export default function Account() {
               </div>
             </div>
           </div>
-
           {isEditing && (
             <div className="mt-5 text-right">
               <button
@@ -222,8 +202,6 @@ export default function Account() {
             </div>
           )}
         </div>
-
-        {/* Password */}
         <div className="bg-gray-900/80 border border-gray-700/50 rounded-lg p-5 sm:p-6 shadow-xl">
           <h2 className="text-lg sm:text-2xl font-semibold flex items-center gap-2 mb-4">
             <Lock className="text-red-500" size={22} /> Security Settings
@@ -254,6 +232,7 @@ export default function Account() {
                         size={16}
                       />
                       <input
+                        autoComplete="new-password"
                         type={showPasswords[fieldKey] ? 'text' : 'password'}
                         value={passwordData[key]}
                         onChange={(e) =>
@@ -278,7 +257,6 @@ export default function Account() {
                 );
               }
             )}
-
             <div className="bg-gray-900/50 p-4 rounded-md border border-gray-700/50 text-sm text-gray-400 space-y-1">
               <p className="text-gray-300 font-medium">
                 Password Requirements:
@@ -290,7 +268,6 @@ export default function Account() {
                 <li>Include at least one special character</li>
               </ul>
             </div>
-
             <div className="text-right">
               <button
                 onClick={handleSavePassword}

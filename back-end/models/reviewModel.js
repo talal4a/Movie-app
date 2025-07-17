@@ -32,7 +32,7 @@ reviewSchema.index({ movie: 1, user: 1 }, { unique: true });
 
 // ✅ Auto-populate user's name when fetching reviews
 reviewSchema.pre(/^find/, function (next) {
-  this.populate("user", "name");
+  this.populate("user", "name avatar");
   next();
 });
 

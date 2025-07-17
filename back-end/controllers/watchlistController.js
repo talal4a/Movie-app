@@ -1,14 +1,10 @@
 const User = require("../models/userModel");
 const Movie = require("../models/movieModel");
-
-// Add movie to watchlist
 exports.addToWatchlist = async (req, res) => {
   try {
     const userId = req.user.id;
     const movieId = req.params.movieId;
-
     const user = await User.findById(userId);
-
     if (user.watchlist.includes(movieId)) {
       return res.status(400).json({
         status: "fail",
@@ -29,7 +25,6 @@ exports.addToWatchlist = async (req, res) => {
   }
 };
 
-// Remove movie from watchlist
 exports.removeFromWatchlist = async (req, res) => {
   try {
     const userId = req.user.id;
