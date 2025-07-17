@@ -4,22 +4,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '@/slice/userSlice';
 import UserAvatar from './UserAvatar';
+import { useToast } from '@/context/ToastContext';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user?.user);
   const handleLogout = () => {
     dispatch(logout());
     navigate('/auth/login');
+    showToast({ message: 'Logout sucessfully', type: 'success' });
   };
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const activeClass = (isActive) =>
     isActive
       ? 'text-white font-semibold relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-red-600'

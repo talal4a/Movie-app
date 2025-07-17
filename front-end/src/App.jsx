@@ -20,23 +20,19 @@ function App() {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user?.user);
-
   useEffect(() => {
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     });
   }, [pathname]);
-
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());
     }
   }, [user]);
-
   return (
     <main className="min-h-screen bg-black text-white">
       <Routes>
-        {/* Routes with Navbar */}
         <Route element={<MainLayout />}>
           <Route
             path="/"

@@ -13,7 +13,9 @@ import { useMutation } from '@tanstack/react-query';
 import { login } from '../api/auth';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/slice/userSlice';
+import { useToast } from '@/context/ToastContext';
 export default function Login() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -25,10 +27,11 @@ export default function Login() {
     onSuccess: (data) => {
       dispatch(setCredentials({ user: data.user, token: data.token }));
       localStorage.setItem('token', data.token);
+      showToast({ message: 'Logged in successfully', type: 'success' });
       navigate('/');
     },
-    onError: (err) => {
-      alert(err.response?.data?.message || 'Login failed');
+    onError: () => {
+      showToast({ message: 'Logged in failed', type: 'error' });
     },
   });
   const handleChange = (e) => {
