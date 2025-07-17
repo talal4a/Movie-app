@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '@/slice/userSlice';
 import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
@@ -15,7 +15,7 @@ export default function NavBar() {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/auth/login');
-    showToast({ message: 'Logout sucessfully', type: 'success' });
+    showToast({ message: 'Logout successfully', type: 'success' });
   };
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
@@ -26,7 +26,6 @@ export default function NavBar() {
     isActive
       ? 'text-white font-semibold relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-red-600'
       : 'text-gray-300 hover:text-white transition-colors duration-200';
-
   const NavItem = ({ to, children }) => (
     <NavLink to={to} className={({ isActive }) => activeClass(isActive)}>
       {children}
@@ -42,7 +41,7 @@ export default function NavBar() {
     >
       <div className="flex items-center">
         <span className="text-red-600 font-black text-2xl tracking-tight cursor-pointer hover:text-red-500 transition-colors">
-          CINEVERSE
+          <Link to="/">CINEVERSE</Link>
         </span>
       </div>
       <ul className="flex space-x-8 mx-auto">

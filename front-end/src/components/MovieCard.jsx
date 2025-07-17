@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useToast } from '@/context/ToastContext';
 export default function MovieCard({ movie }) {
   const dispatch = useDispatch();
+  const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
-  const isSaved = watchlist.some((item) => item._id === movie._id);
+  const isSaved = Array.isArray(watchlist) && watchlist.some((item) => item && item._id === movie._id);
   const [justAdded, setJustAdded] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const toggleWatchlist = () => {
@@ -42,11 +44,15 @@ export default function MovieCard({ movie }) {
               onClick={(e) => {
                 e.preventDefault();
                 if (!buttonDisabled) toggleWatchlist();
+                showToast({
+                  message: 'Add to List  successfully',
+                  type: 'success',
+                });
               }}
               disabled={buttonDisabled}
               className={`rounded-full p-3 shadow-lg transition-all duration-300 ${
                 isSaved || justAdded
-                  ? 'bg-green-500 text-white cursor-not-allowed'
+                  ? 'bg-gray-500 text-white cursor-not-allowed'
                   : 'bg-white text-black hover:scale-110'
               }`}
               title={isSaved ? 'Already in Watchlist' : 'Add to Watchlist'}

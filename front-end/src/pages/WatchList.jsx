@@ -1,9 +1,15 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromWatchlist } from '@/slice/watchListSlice';
+import { removeFromWatchlist, fetchWatchlist } from '@/slice/watchListSlice';
 import MovieCard from '@/components/MovieCard';
+import { useToast } from '@/context/ToastContext';
+import { useEffect } from 'react';
 export default function WatchListPage() {
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const watchlist = useSelector((state) => state.watchList.items || []);
+  useEffect(() => {
+    dispatch(fetchWatchlist());
+  }, [dispatch]);
   const removeMovie = (id) => {
     dispatch(removeFromWatchlist(id));
   };
@@ -18,7 +24,13 @@ export default function WatchListPage() {
             <div key={movie._id} className="relative">
               <MovieCard movie={movie} disableLink={true} />
               <button
-                onClick={() => removeMovie(movie._id)}
+                onClick={() => {
+                  removeMovie(movie._id);
+                  showToast({
+                    message: 'Remove to List  successfully',
+                    type: 'success',
+                  });
+                }}
                 className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded"
               >
                 Remove

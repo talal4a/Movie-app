@@ -6,6 +6,7 @@ import { getMovieById } from '../api/auth';
 import Spinner from '../components/Spinner';
 import Review from '../components/Review';
 import ReviewsList from '../components/ReviewList';
+import VideoPlayer from '@/components/VideoPlayer';
 export default function MovieDetail() {
   const { id } = useParams();
   const [showPlayer, setShowPlayer] = useState(false);
@@ -135,24 +136,11 @@ export default function MovieDetail() {
           </div>
         </div>
       </div>
-
       {showPlayer && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
-          <div className="w-[90%] max-w-5xl relative">
-            <iframe
-              src={movie.embedUrl}
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              className="w-full aspect-video rounded-xl"
-            />
-            <button
-              onClick={() => setShowPlayer(false)}
-              className="absolute top-3 right-3 bg-black/70 text-white rounded-full p-2 hover:bg-black/90"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+        <VideoPlayer
+          embedUrl={movie.embedUrl}
+          onClose={() => setShowPlayer(false)}
+        />
       )}
     </div>
   );

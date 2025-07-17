@@ -1,24 +1,46 @@
 import { useState } from 'react';
-import { Play, Plus, ThumbsUp, ChevronDown } from 'lucide-react';
+import { Play, Plus, ThumbsUp, Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMovies } from '../api/auth';
 import Spinner from './Spinner';
+import VideoPlayer from './VideoPlayer';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
+import { useToast } from '@/context/ToastContext';
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const handlePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
+  const [justAdded, setJustAdded] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const dispatch = useDispatch();
+  const { showToast } = useToast();
+  const watchlist = useSelector((state) => state.watchList.items);
   const { isLoading, data: movie } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
     keepPreviousData: true,
     staleTime: 1000,
   });
-
+  const isSaved = Array.isArray(watchlist) && watchlist.some((item) => item && item._id === movie?._id);
+  const handlePlay = () => setIsPlaying(true);
+  const toggleWatchlist = () => {
+    if (!movie) return;
+    if (isSaved) {
+      dispatch(removeFromWatchlist(movie._id));
+      showToast({ message: 'Removed from List', type: 'success' });
+    } else {
+      dispatch(addToWatchlist(movie._id));
+      setJustAdded(true);
+      setButtonDisabled(true);
+      showToast({ message: 'Added to List successfully', type: 'success' });
+      setTimeout(() => {
+        setJustAdded(false);
+        setButtonDisabled(false);
+      }, 2000);
+    }
+  };
   if (isLoading || !movie) {
     return <Spinner />;
   }
-
   return (
     <section className="relative w-full h-screen text-white overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
@@ -64,20 +86,41 @@ export default function Hero() {
         <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mb-8 leading-relaxed">
           {movie.description}
         </p>
+
         <div className="flex gap-4 mb-8 flex-nowrap sm:flex-wrap">
           <button
             onClick={handlePlay}
-            className="bg-white  text-black font-bold px-8 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-lg shadow-lg transform hover:scale-105 w-[140px]"
+            className="bg-white text-black font-bold px-8 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-lg shadow-lg transform hover:scale-105 w-[140px]"
           >
             <Play className="w-6 h-6 fill-current" />
-            <span>{isPlaying ? 'Pause' : 'Play'}</span>
+            <span>Play</span>
           </button>
-          <button className="bg-gray-600 bg-opacity-80 text-white px-8 py-3 rounded-md hover:bg-gray-500 transition-all duration-200 flex items-center space-x-2 text-lg backdrop-blur-sm w-[160px]">
-            <Plus className="w-6 h-6" />
+
+          <button
+            onClick={toggleWatchlist}
+            disabled={buttonDisabled}
+            className={`px-8 py-3 rounded-md text-lg flex items-center space-x-2 backdrop-blur-sm w-[160px] transition-all duration-200 ${
+              isSaved || justAdded
+                ? 'bg-gray-600 text-white cursor-not-allowed'
+                : 'bg-gray-600 bg-opacity-80 text-white hover:bg-gray-500'
+            }`}
+          >
+            {isSaved || justAdded ? (
+              <Check className="w-6 h-6" />
+            ) : (
+              <Plus className="w-6 h-6" />
+            )}
             <span>My List</span>
           </button>
         </div>
       </div>
+
+      {isPlaying && (
+        <VideoPlayer
+          embedUrl={movie.embedUrl}
+          onClose={() => setIsPlaying(false)}
+        />
+      )}
     </section>
   );
 }

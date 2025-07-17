@@ -15,10 +15,12 @@ import { useMutation } from '@tanstack/react-query';
 import { updatePassword, updateProfile } from '@/api/auth';
 import { setCredentials } from '@/slice/userSlice';
 import UserAvatar from '@/components/UserAvatar';
+import { useToast } from '@/context/ToastContext';
 export default function Account() {
   const user = useSelector((state) => state.user?.user);
   const loading = useSelector((state) => state.user?.loading);
   const dispatch = useDispatch();
+  const { showToast } = useToast();
   const token = useSelector((state) => state.auth?.token);
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -53,8 +55,8 @@ export default function Account() {
     try {
       await updateProfileMutation.mutateAsync(profileData);
       setProfilePhotoPreview(null);
-    } catch (error) {
-      alert(error.response?.data?.message || 'Failed to update profile');
+    } catch (err) {
+      showToast({ message: 'Profile is not updated', type: 'error' });
     }
   };
 
@@ -62,14 +64,17 @@ export default function Account() {
     try {
       const updatedUser = await updatePassword(passwordData);
       dispatch(setCredentials({ user: updatedUser, token }));
-      alert('Password updated successfully');
+      showToast({
+        message: 'Password  updated successfully',
+        type: 'success',
+      });
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
-    } catch (error) {
-      alert(error.message || 'Failed to update password');
+    } catch (err) {
+      showToast({ message: 'Fail to update Password', type: 'error' });
     }
   };
 
@@ -95,11 +100,14 @@ export default function Account() {
     mutationFn: () => updateProfile(profileData),
     onSuccess: (updatedUser) => {
       dispatch(setCredentials({ user: updatedUser, token }));
-      alert('Profile updated successfully!');
+      showToast({
+        message: 'Profile is updated successfully',
+        type: 'success',
+      });
       setIsEditing(false);
     },
-    onError: (err) => {
-      alert(err.response?.data?.message || 'Failed to update profile');
+    onError: () => {
+      showToast({ message: 'Fail to update Password', type: 'error' });
     },
   });
   if (loading) return <Spinner />;

@@ -4,24 +4,26 @@ exports.addToWatchlist = async (req, res) => {
   try {
     const userId = req.user.id;
     const movieId = req.params.movieId;
+
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
     const user = await User.findById(userId);
+
     if (user.watchlist.includes(movieId)) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Movie already in watchlist",
-      });
+      return res.status(400).json({ message: "Movie already in watchlist" });
     }
 
     user.watchlist.push(movieId);
     await user.save();
 
-    res.status(200).json({
-      status: "success",
-      message: "Movie added to watchlist",
-      watchlist: user.watchlist,
-    });
-  } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    // Return the full movie object so the frontend can update immediately
+    res.status(200).json({ message: "Movie added to watchlist", movie });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 

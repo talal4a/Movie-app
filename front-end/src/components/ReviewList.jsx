@@ -3,12 +3,12 @@ import { getReviewsByMovieId, deleteReview, upsertReviews } from '../api/auth';
 import UserAvatar from './UserAvatar';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-
+import { useToast } from '@/context/ToastContext';
 export default function ReviewList({ id }) {
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(5);
   const [editingReviewId, setEditingReviewId] = useState(null);
-
+  const { showToast } = useToast();
   const user = useSelector((state) => state.user?.user);
   const queryClient = useQueryClient();
 
@@ -18,9 +18,9 @@ export default function ReviewList({ id }) {
     retry: false,
   });
 
-  const handleDelete = async (reviewId) => {
+  const handleDelete = async () => {
     try {
-      await deleteReview(id); // Assuming movieId is needed in your API
+      await deleteReview(id);
       queryClient.invalidateQueries(['reviews', id]);
     } catch (err) {
       console.error('Failed to delete review:', err);
@@ -97,7 +97,6 @@ export default function ReviewList({ id }) {
                 </span>
               </div>
 
-              {/* Review text or edit form */}
               {editingReviewId === review._id ? (
                 <form
                   onSubmit={handleUpdateSubmit}
@@ -120,6 +119,12 @@ export default function ReviewList({ id }) {
                   <div className="flex gap-2 mt-2">
                     <button
                       type="submit"
+                      onClick={() => {
+                        showToast({
+                          message: 'Review is updated sucessfully',
+                          type: 'success',
+                        });
+                      }}
                       className="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded"
                     >
                       Save
@@ -141,13 +146,21 @@ export default function ReviewList({ id }) {
                   {review.user?._id === user?.id && (
                     <div className="flex gap-2 justify-end mt-2">
                       <button
-                        onClick={() => handleEdit(review)}
+                        onClick={() => {
+                          handleEdit(review);
+                        }}
                         className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1 rounded text-sm"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(review._id)}
+                        onClick={() => {
+                          handleDelete(review._id);
+                          showToast({
+                            message: 'Review is deleted sucessfully',
+                            type: 'success',
+                          });
+                        }}
                         className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-sm"
                       >
                         Delete
