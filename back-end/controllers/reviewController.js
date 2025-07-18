@@ -4,23 +4,19 @@ exports.createReview = async (req, res) => {
   try {
     const { review, rating } = req.body;
     const movieId = req.params.movieId;
-
     if (!mongoose.Types.ObjectId.isValid(movieId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid movie ID format",
       });
     }
-
     const newReview = await Review.create({
       review,
       rating,
       movie: movieId,
       user: req.user.id,
     });
-
     await Review.calcAverageRatings(movieId);
-
     res.status(201).json({
       status: "success",
       data: newReview,

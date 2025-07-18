@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-// Define the schema
+const Movie = require("./movieModel");
 const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
@@ -26,50 +26,47 @@ const reviewSchema = new mongoose.Schema({
     required: [true, "Review must belong to a user"],
   },
 });
-
-// ✅ Prevent duplicate reviews (1 review per movie per user)
 reviewSchema.index({ movie: 1, user: 1 }, { unique: true });
-
-// ✅ Auto-populate user's name when fetching reviews
 reviewSchema.pre(/^find/, function (next) {
   this.populate("user", "name avatar");
   next();
 });
-
-// ✅ Static method to calculate average ratings
 reviewSchema.statics.calcAverageRatings = async function (movieId) {
   const stats = await this.aggregate([
     { $match: { movie: movieId } },
     {
       $group: {
         _id: "$movie",
-        nRatings: { $sum: 1 },
         avgRating: { $avg: "$rating" },
+        count: { $sum: 1 },
       },
     },
   ]);
 
-  await mongoose.model("Movie").findByIdAndUpdate(movieId, {
-    "ratings.user.voteCount": stats[0]?.nRatings || 0,
-    "ratings.user.voteAverage": stats[0]?.avgRating || 0,
-  });
+  if (stats.length > 0) {
+    await Movie.findByIdAndUpdate(movieId, {
+      "ratings.averageUserRating": stats[0].avgRating,
+      "ratings.userRatingCount": stats[0].count,
+    });
+  } else {
+    await Movie.findByIdAndUpdate(movieId, {
+      "ratings.averageUserRating": 0,
+      "ratings.userRatingCount": 0,
+    });
+  }
 };
 
-// ✅ Recalculate on review save
 reviewSchema.post("save", function () {
   this.constructor.calcAverageRatings(this.movie);
 });
 
-// ✅ Recalculate on review delete
 reviewSchema.post("findOneAndDelete", async function (doc) {
   if (doc) await doc.constructor.calcAverageRatings(doc.movie);
 });
 
-// ✅ Recalculate on review update (optional)
 reviewSchema.post("findOneAndUpdate", async function (doc) {
   if (doc) await doc.constructor.calcAverageRatings(doc.movie);
 });
 
-// Export the model
 const Review = mongoose.model("Review", reviewSchema);
 module.exports = Review;

@@ -8,7 +8,9 @@ export default function MovieCard({ movie }) {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
-  const isSaved = Array.isArray(watchlist) && watchlist.some((item) => item && item._id === movie._id);
+  const isSaved =
+    Array.isArray(watchlist) &&
+    watchlist.some((item) => item && item._id === movie._id);
   const [justAdded, setJustAdded] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const toggleWatchlist = () => {
@@ -87,7 +89,7 @@ export default function MovieCard({ movie }) {
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-yellow-400 text-xs font-medium">
-              ⭐ {movie.ratings?.voteAverage?.toFixed(1) || 'N/A'}
+              ⭐ {movie.tmdbRatings.average?.toFixed(1) || 'N/A'}
             </span>
           </div>
         </div>

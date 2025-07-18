@@ -91,12 +91,10 @@ export default function ReviewList({ id }) {
                     </span>
                   </div>
                 </div>
-
                 <span className="text-sm text-gray-500">
                   {new Date(review.createdAt).toLocaleDateString()}
                 </span>
               </div>
-
               {editingReviewId === review._id ? (
                 <form
                   onSubmit={handleUpdateSubmit}
@@ -111,7 +109,7 @@ export default function ReviewList({ id }) {
                   <input
                     type="number"
                     min="1"
-                    max="10" // <-- Change from 5 to 10
+                    max="5"
                     value={editRating}
                     onChange={(e) => setEditRating(Number(e.target.value))}
                     className="w-20 p-1 rounded bg-gray-700 text-white"

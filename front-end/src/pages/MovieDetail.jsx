@@ -26,7 +26,6 @@ export default function MovieDetail() {
     queryKey: ['movie', id],
     queryFn: () => getMovieById(id),
   });
-
   const isSaved =
     Array.isArray(watchlist) &&
     movie &&
@@ -50,9 +49,7 @@ export default function MovieDetail() {
   useEffect(() => {
     document.body.style.overflow = showPlayer ? 'hidden' : '';
   }, [showPlayer]);
-
   if (isLoading || !movie) return <Spinner />;
-
   return (
     <div className="bg-black text-white min-h-screen">
       <div className="relative h-[80vh] overflow-hidden">
@@ -72,7 +69,7 @@ export default function MovieDetail() {
             </h1>
             <div className="flex items-center gap-4 text-sm text-gray-300 mb-6">
               <span className="text-green-400 font-semibold">
-                {Math.round(movie.ratings?.voteAverage * 10)}% Match
+                {Math.round(movie.tmdbRatings.average * 10)}% Match
               </span>
               <span className="border border-gray-500 px-1 text-xs">
                 {movie.ratings?.certification || 'PG-13'}
@@ -83,6 +80,7 @@ export default function MovieDetail() {
             <p className="text-lg text-gray-200 mb-8 leading-relaxed max-w-xl">
               {movie.description}
             </p>
+
             <div className="flex gap-4 flex-wrap">
               <button
                 onClick={() => setShowPlayer(true)}
@@ -158,13 +156,12 @@ export default function MovieDetail() {
                   <span className="text-gray-400">Runtime: </span>
                   <span className="text-white">{movie.runtime}</span>
                 </div>
-                <div>
-                  {' '}
-                  <span className="text-gray-400">Rating: </span>
-                  <p>Rating: {movie.ratings?.tmdb?.voteAverage || 'N/A'}⭐</p>
-                  <p>Votes: {movie.ratings?.tmdb?.voteCount || 0}⭐</p>
-                </div>
               </div>
+              <p>
+                TMDb Rating: {movie?.tmdbRatings?.average?.toFixed(1) ?? 'N/A'}{' '}
+                ⭐
+              </p>
+              <p>Total Votes: {movie?.tmdbRatings?.count ?? 0}</p>
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">
                   About this movie:

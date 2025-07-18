@@ -4,8 +4,6 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY;
 exports.createMovie = async (req, res) => {
   try {
     const { title, embedUrl } = req.body;
-
-    // 1. Search movie by title
     const searchRes = await axios.get(
       "https://api.themoviedb.org/3/search/movie",
       {
@@ -22,7 +20,6 @@ exports.createMovie = async (req, res) => {
 
     const movieId = movie.id;
 
-    // 2. Get full movie details
     const detailsRes = await axios.get(
       `https://api.themoviedb.org/3/movie/${movieId}`,
       {
@@ -30,8 +27,6 @@ exports.createMovie = async (req, res) => {
       }
     );
     const details = detailsRes.data;
-
-    // 3. Get cast information
     const creditsRes = await axios.get(
       `https://api.themoviedb.org/3/movie/${movieId}/credits`,
       {
@@ -43,11 +38,7 @@ exports.createMovie = async (req, res) => {
       name: member.name,
       character: member.character || "N/A",
     }));
-
-    // Extract genres as array of strings
     const genres = details.genres.map((g) => g.name);
-
-    // 4. Create and save the movie
     const newMovie = await Movie.create({
       tmdbId: movieId,
       title,
@@ -59,50 +50,46 @@ exports.createMovie = async (req, res) => {
       backdrop: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
       embedUrl,
       cast,
-      ratings: {
-        voteAverage: details.vote_average,
-        voteCount: details.vote_count,
+      tmdbRatings: {
+        average: details.vote_average,
+        count: details.vote_count,
+      },
+      userRatings: {
+        average: 0,
+        count: 0,
       },
     });
-
     res.status(201).json({ status: "success", data: newMovie });
   } catch (err) {
     console.error("Create Movie Error:", err.message);
     res.status(500).json({ status: "error", message: "Something went wrong" });
   }
 };
-
 exports.getAllMovies = async (req, res) => {
   try {
     const queryObj = {};
 
-    // 1. Filter by genre
     if (req.query.genre) {
       queryObj.genres = { $in: [req.query.genre] };
     }
 
-    // 2. Filter by year
     if (req.query.year) {
       queryObj.releaseYear = +req.query.year;
     }
 
-    // 3. Search by title (case-insensitive)
     if (req.query.search) {
       queryObj.title = { $regex: req.query.search, $options: "i" };
     }
 
-    // 4. Sorting (default: newest first)
     let sortBy = "-createdAt";
     if (req.query.sort) {
       sortBy = req.query.sort.split(",").join(" ");
     }
 
-    // 5. Pagination
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Final query
     const movies = await Movie.find(queryObj)
       .sort(sortBy)
       .skip(skip)

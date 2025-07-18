@@ -43,15 +43,14 @@ const movieSchema = new mongoose.Schema({
       character: { type: String, required: true },
     },
   ],
-  ratings: {
-    tmdb: {
-      voteAverage: Number,
-      voteCount: Number,
-    },
-    user: {
-      voteAverage: Number,
-      voteCount: Number,
-    }
+  tmdbRatings: {
+    average: { type: Number },
+    count: { type: Number },
+  },
+
+  userRatings: {
+    average: { type: Number, default: 0 },
+    count: { type: Number, default: 0 },
   },
   createdAt: {
     type: Date,
