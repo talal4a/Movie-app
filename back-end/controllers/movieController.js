@@ -117,7 +117,6 @@ exports.getAllMovies = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
-
 exports.getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);

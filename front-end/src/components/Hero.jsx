@@ -82,11 +82,9 @@ export default function Hero() {
             {movie.ratings?.voteAverage?.toFixed(1)}
           </div>
         </div>
-
         <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mb-8 leading-relaxed">
           {movie.description}
         </p>
-
         <div className="flex gap-4 mb-8 flex-nowrap sm:flex-wrap">
           <button
             onClick={handlePlay}
@@ -95,7 +93,6 @@ export default function Hero() {
             <Play className="w-6 h-6 fill-current" />
             <span>Play</span>
           </button>
-
           <button
             onClick={toggleWatchlist}
             disabled={buttonDisabled}
@@ -110,11 +107,11 @@ export default function Hero() {
             ) : (
               <Plus className="w-6 h-6" />
             )}
+            
             <span>My List</span>
           </button>
         </div>
       </div>
-
       {isPlaying && (
         <VideoPlayer
           embedUrl={movie.embedUrl}

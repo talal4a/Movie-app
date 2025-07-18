@@ -50,8 +50,8 @@ reviewSchema.statics.calcAverageRatings = async function (movieId) {
   ]);
 
   await mongoose.model("Movie").findByIdAndUpdate(movieId, {
-    "ratings.voteCount": stats[0]?.nRatings || 0,
-    "ratings.voteAverage": stats[0]?.avgRating || 0,
+    "ratings.user.voteCount": stats[0]?.nRatings || 0,
+    "ratings.user.voteAverage": stats[0]?.avgRating || 0,
   });
 };
 

@@ -72,7 +72,7 @@ export default function ReviewList({ id }) {
                     {review.user?.name || 'Anonymous'}
                   </h4>
                   <div className="flex items-center mt-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(10)].map((_, i) => (
                       <svg
                         key={i}
                         className={`w-4 h-4 ${
@@ -87,7 +87,7 @@ export default function ReviewList({ id }) {
                       </svg>
                     ))}
                     <span className="ml-2 text-sm text-gray-400">
-                      {review.rating}/5
+                      {review.rating}/10
                     </span>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export default function ReviewList({ id }) {
                   <input
                     type="number"
                     min="1"
-                    max="5"
+                    max="10" // <-- Change from 5 to 10
                     value={editRating}
                     onChange={(e) => setEditRating(Number(e.target.value))}
                     className="w-20 p-1 rounded bg-gray-700 text-white"

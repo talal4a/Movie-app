@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import StarRating from './StarRating';
-export default function Review({ id }) {
+export default function Review({ id, refetchMovie }) {
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
   const [hasReviewed, setHasReviewed] = useState(false);
@@ -24,12 +24,17 @@ export default function Review({ id }) {
     e.preventDefault();
     try {
       await postReviews(id, { review: text, rating });
-      setText('');
+
+      if (refetchMovie) refetchMovie();
+
       queryClient.invalidateQueries(['reviews', id]);
+
+      setText('');
     } catch (err) {
       console.error('Failed to post review:', err);
     }
   };
+
   return (
     <div className="mt-8 px-4 sm:px-6 md:px-8">
       <h3 className="text-lg font-semibold text-white mb-4 text-center sm:text-left">

@@ -44,14 +44,14 @@ const movieSchema = new mongoose.Schema({
     },
   ],
   ratings: {
-    voteAverage: {
-      type: Number,
-      required: [true, "Vote average is required"],
+    tmdb: {
+      voteAverage: Number,
+      voteCount: Number,
     },
-    voteCount: {
-      type: Number,
-      required: [true, "Vote count is required"],
-    },
+    user: {
+      voteAverage: Number,
+      voteCount: Number,
+    }
   },
   createdAt: {
     type: Date,

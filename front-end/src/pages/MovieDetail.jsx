@@ -1,27 +1,58 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Play, Plus } from 'lucide-react';
+import { Play, Plus, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getMovieById } from '../api/auth';
 import Spinner from '../components/Spinner';
 import Review from '../components/Review';
 import ReviewsList from '../components/ReviewList';
 import VideoPlayer from '@/components/VideoPlayer';
+import { useDispatch, useSelector } from 'react-redux';
+import { useToast } from '@/context/ToastContext';
+import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 export default function MovieDetail() {
   const { id } = useParams();
   const [showPlayer, setShowPlayer] = useState(false);
-  const { data: movie, isLoading } = useQuery({
+  const [justAdded, setJustAdded] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const dispatch = useDispatch();
+  const { showToast } = useToast();
+  const watchlist = useSelector((state) => state.watchList?.items || []);
+  const {
+    data: movie,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['movie', id],
     queryFn: () => getMovieById(id),
   });
-  useEffect(() => {
-    if (showPlayer) {
-      document.body.style.overflow = 'hidden';
+
+  const isSaved =
+    Array.isArray(watchlist) &&
+    movie &&
+    watchlist.some((item) => item?._id === movie._id);
+  const toggleWatchlist = () => {
+    if (!movie) return;
+    if (isSaved) {
+      dispatch(removeFromWatchlist(movie._id));
+      showToast({ message: 'Removed from Watchlist', type: 'success' });
     } else {
-      document.body.style.overflow = '';
+      dispatch(addToWatchlist(movie._id));
+      setJustAdded(true);
+      setButtonDisabled(true);
+      showToast({ message: 'Added to Watchlist', type: 'success' });
+      setTimeout(() => {
+        setJustAdded(false);
+        setButtonDisabled(false);
+      }, 2000);
     }
+  };
+  useEffect(() => {
+    document.body.style.overflow = showPlayer ? 'hidden' : '';
   }, [showPlayer]);
+
   if (isLoading || !movie) return <Spinner />;
+
   return (
     <div className="bg-black text-white min-h-screen">
       <div className="relative h-[80vh] overflow-hidden">
@@ -60,9 +91,21 @@ export default function MovieDetail() {
                 <Play className="w-5 h-5" fill="currentColor" />
                 Play
               </button>
-              <button className="bg-gray-600/80 text-white px-8 py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center gap-2">
-                <Plus className="w-5 h-5" />
-                My List
+              <button
+                onClick={toggleWatchlist}
+                disabled={buttonDisabled}
+                className={`px-8 py-3 rounded font-semibold transition-colors flex items-center gap-2 ${
+                  isSaved || justAdded
+                    ? 'bg-gray-400 text-black cursor-not-allowed'
+                    : 'bg-gray-600/80 text-white hover:bg-gray-600'
+                }`}
+              >
+                {isSaved || justAdded ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <Plus className="w-5 h-5" />
+                )}
+                <span>My List</span>
               </button>
             </div>
           </div>
@@ -90,7 +133,7 @@ export default function MovieDetail() {
                 </div>
               )}
             </div>
-            <Review id={movie._id} />
+            <Review id={movie._id} refetchMovie={refetch} />
             <ReviewsList id={movie._id} />
             <div className="space-y-6">
               <div>
@@ -106,7 +149,6 @@ export default function MovieDetail() {
                   ))}
                 </div>
               </div>
-
               <div className="space-y-3 text-sm">
                 <div>
                   <span className="text-gray-400">Release Year: </span>
@@ -117,13 +159,12 @@ export default function MovieDetail() {
                   <span className="text-white">{movie.runtime}</span>
                 </div>
                 <div>
+                  {' '}
                   <span className="text-gray-400">Rating: </span>
-                  <span className="text-white">
-                    {Number(movie.ratings?.voteAverage).toFixed(1)} ⭐
-                  </span>
+                  <p>Rating: {movie.ratings?.tmdb?.voteAverage || 'N/A'}⭐</p>
+                  <p>Votes: {movie.ratings?.tmdb?.voteCount || 0}⭐</p>
                 </div>
               </div>
-
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">
                   About this movie:
