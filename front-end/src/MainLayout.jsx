@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import NavBar from './components/Navbar';
 import useIsMobile from './hooks/useIsMobile';
 import MobileNavbar from './components/MobileNavBar';
-import { Toast } from './components/Toast';
+import NetflixFooter from './components/Footer';
 const MainLayout = () => {
   const isMobile = useIsMobile();
   return (
@@ -11,6 +11,7 @@ const MainLayout = () => {
       <main>
         <Outlet />
       </main>
+      <NetflixFooter />
     </>
   );
 };

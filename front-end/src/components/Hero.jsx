@@ -20,7 +20,9 @@ export default function Hero() {
     keepPreviousData: true,
     staleTime: 1000,
   });
-  const isSaved = Array.isArray(watchlist) && watchlist.some((item) => item && item._id === movie?._id);
+  const isSaved =
+    Array.isArray(watchlist) &&
+    watchlist.some((item) => item && item._id === movie?._id);
   const handlePlay = () => setIsPlaying(true);
   const toggleWatchlist = () => {
     if (!movie) return;
@@ -47,11 +49,12 @@ export default function Hero() {
         <img
           src={movie.backdrop}
           alt={movie.title}
-          className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-[3000ms] ease-out"
+          className="w-full h-full object-cover"
           style={{
             objectPosition: 'center top',
             minHeight: '100vh',
             minWidth: '100vw',
+            transform: 'translateY(30px)',
           }}
         />
       </div>
@@ -85,29 +88,29 @@ export default function Hero() {
         <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mb-8 leading-relaxed">
           {movie.description}
         </p>
-        <div className="flex gap-4 mb-8 flex-nowrap sm:flex-wrap">
+        <div className="flex flex-nowrap gap-4 mb-8">
           <button
             onClick={handlePlay}
-            className="bg-white text-black font-bold px-8 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-lg shadow-lg transform hover:scale-105 w-[140px]"
+            className="bg-white text-black font-bold px-6 py-3 rounded-md hover:bg-gray-200 transition-all duration-200 flex items-center space-x-2 text-base shadow-lg transform hover:scale-105 w-auto min-w-[100px]"
           >
-            <Play className="w-6 h-6 fill-current" />
+            <Play className="w-5 h-5 fill-current" />
             <span>Play</span>
           </button>
+
           <button
             onClick={toggleWatchlist}
             disabled={buttonDisabled}
-            className={`px-8 py-3 rounded-md text-lg flex items-center space-x-2 backdrop-blur-sm w-[160px] transition-all duration-200 ${
+            className={`px-6 py-3 rounded-md text-base flex items-center space-x-2 backdrop-blur-sm w-auto min-w-[100px] transition-all duration-200 ${
               isSaved || justAdded
                 ? 'bg-gray-600 text-white cursor-not-allowed'
                 : 'bg-gray-600 bg-opacity-80 text-white hover:bg-gray-500'
             }`}
           >
             {isSaved || justAdded ? (
-              <Check className="w-6 h-6" />
+              <Check className="w-5 h-5" />
             ) : (
-              <Plus className="w-6 h-6" />
+              <Plus className="w-5 h-5" />
             )}
-            
             <span>My List</span>
           </button>
         </div>

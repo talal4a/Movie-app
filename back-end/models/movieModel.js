@@ -41,6 +41,7 @@ const movieSchema = new mongoose.Schema({
     {
       name: { type: String, required: true },
       character: { type: String, required: true },
+      avatar: String,
     },
   ],
   tmdbRatings: {

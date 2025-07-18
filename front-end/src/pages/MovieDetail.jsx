@@ -58,6 +58,12 @@ export default function MovieDetail() {
             src={movie.backdrop}
             alt={movie.title}
             className="w-full h-full object-cover object-top"
+            style={{
+              objectPosition: 'center top',
+              minHeight: '100vh',
+              minWidth: '100vw',
+              transform: 'translateY(13px)',
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
@@ -116,17 +122,30 @@ export default function MovieDetail() {
               {movie.cast?.length > 0 && (
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Cast</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {movie.cast.slice(0, 6).map((actor, index) => (
-                      <div key={index} className="text-gray-300">
-                        <div className="font-medium text-white">
-                          {actor.name}
+                  <div className="flex flex-wrap gap-4 space-y-1">
+                    {movie.cast
+                      .filter((actor) => actor.avatar)
+                      .slice(0, 6)
+                      .map((actor, index) => (
+                        <div
+                          key={index}
+                          className="flex w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.33%-0.5rem)] items-center gap-4"
+                        >
+                          <img
+                            src={actor.avatar}
+                            alt={actor.name}
+                            className="w-16 h-16 rounded-full object-cover border border-gray-700"
+                          />
+                          <div>
+                            <div className="font-medium text-white">
+                              {actor.name}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              {actor.character}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-400">
-                          {actor.character}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
               )}
@@ -138,9 +157,12 @@ export default function MovieDetail() {
                 <h3 className="text-sm font-medium text-gray-400 mb-2">
                   Genres:
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-x-2 gap-y-1 md:max-w-[90%]">
                   {movie.genres.map((genre, i) => (
-                    <span key={i} className="text-white text-sm">
+                    <span
+                      key={i}
+                      className="text-white text-xs sm:text-sm md:text-xs lg:text-sm whitespace-nowrap"
+                    >
                       {genre}
                       {i < movie.genres.length - 1 && ', '}
                     </span>
@@ -153,15 +175,21 @@ export default function MovieDetail() {
                   <span className="text-white">{movie.releaseYear}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Runtime: </span>
+                  <div></div>
                   <span className="text-white">{movie.runtime}</span>
                 </div>
               </div>
-              <p>
-                TMDb Rating: {movie?.tmdbRatings?.average?.toFixed(1) ?? 'N/A'}{' '}
-                ⭐
-              </p>
-              <p>Total Votes: {movie?.tmdbRatings?.count ?? 0}</p>
+              <div>
+                <span className="text-gray-400"> TMDb Rating: </span>
+                <span>
+                  {movie?.tmdbRatings?.average?.toFixed(1) ?? 'N/A'} ⭐
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-400"> Total Votes: </span>
+                <span>{movie?.tmdbRatings?.count ?? 0}</span>
+              </div>
+
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">
                   About this movie:

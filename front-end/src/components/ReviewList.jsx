@@ -72,7 +72,7 @@ export default function ReviewList({ id }) {
                     {review.user?.name || 'Anonymous'}
                   </h4>
                   <div className="flex items-center mt-1 mb-2">
-                    {[...Array(10)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
                         className={`w-4 h-4 ${
@@ -87,7 +87,7 @@ export default function ReviewList({ id }) {
                       </svg>
                     ))}
                     <span className="ml-2 text-sm text-gray-400">
-                      {review.rating}/10
+                      {review.rating}/5
                     </span>
                   </div>
                 </div>

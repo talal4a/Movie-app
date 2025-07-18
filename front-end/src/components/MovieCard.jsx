@@ -38,7 +38,7 @@ export default function MovieCard({ movie }) {
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
-              <Play className="w-6 h-6" />
+              <Play className="w-6 h-6 fill-current" />
             </button>
           </div>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 mt-[90px]">
@@ -77,11 +77,12 @@ export default function MovieCard({ movie }) {
           <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
           <p className="text-xs text-gray-400">{movie.releaseYear}</p>
           <p className="text-xs text-gray-400">{movie.runtime}</p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex gap-1">
             {movie.genres?.slice(0, 2).map((genre, index) => (
               <span
                 key={index}
-                className="text-[10px] bg-gray-700 px-2 py-0.5 rounded-full"
+                className={`text-[10px] bg-gray-700 px-2 py-0.5 rounded-full
+        ${index === 1 ? 'hidden md:inline' : ''}`}
               >
                 {genre}
               </span>

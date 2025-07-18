@@ -10,16 +10,13 @@ exports.createMovie = async (req, res) => {
         params: { api_key: TMDB_API_KEY, query: title },
       }
     );
-
     const movie = searchRes.data.results[0];
     if (!movie) {
       return res
         .status(404)
         .json({ status: "fail", message: "Movie not found in TMDb" });
     }
-
     const movieId = movie.id;
-
     const detailsRes = await axios.get(
       `https://api.themoviedb.org/3/movie/${movieId}`,
       {
@@ -33,10 +30,14 @@ exports.createMovie = async (req, res) => {
         params: { api_key: TMDB_API_KEY },
       }
     );
+    const isMobile = window.innerWidth < 768;
     const credits = creditsRes.data;
     const cast = credits.cast.slice(0, 5).map((member) => ({
       name: member.name,
       character: member.character || "N/A",
+      avatar: member.profile_path
+        ? `https://image.tmdb.org/t/p/original${member.profile_path}`
+        : null,
     }));
     const genres = details.genres.map((g) => g.name);
     const newMovie = await Movie.create({
@@ -46,8 +47,12 @@ exports.createMovie = async (req, res) => {
       releaseYear: parseInt(details.release_date.split("-")[0]),
       runtime: `${details.runtime} min`,
       genres,
-      poster: `https://image.tmdb.org/t/p/w500${details.poster_path}`,
-      backdrop: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
+      poster: `https://image.tmdb.org/t/p/${isMobile ? "w500" : "original"}${
+        details.poster_path
+      }`,
+      backdrop: `https://image.tmdb.org/t/p/${isMobile ? "w780" : "original"}${
+        details.backdrop_path
+      }`,
       embedUrl,
       cast,
       tmdbRatings: {
