@@ -76,7 +76,6 @@ function App() {
           />
         </Route>
 
-        {/* Routes WITHOUT Navbar */}
         <Route
           path="/search"
           element={
