@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SocketProvider } from './context/SocketProvider';
 import PrivateRoute from './components/PrivateRoute';
 import GuestRoute from './components/GuestRoute';
 import MainLayout from './MainLayout';
@@ -16,127 +17,134 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import NotFound from './components/NotFound';
 import { fetchWatchlist } from './slice/watchListSlice';
-import WatchParty from './pages/WatchParty';
+import Watchroom from './pages/Watchroom';
+
 function App() {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user?.user);
+
+  // Reset scroll to top on route change
   useEffect(() => {
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     });
   }, [pathname]);
+
+  // Fetch watchlist when user is authenticated
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());
     }
-  }, [user]);
+  }, [user, dispatch]);
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <Routes>
-        <Route element={<MainLayout />}>
+    <SocketProvider>
+      <main className="min-h-screen bg-black text-white">
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/movie/:id"
+              element={
+                <PrivateRoute>
+                  <MovieDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-list"
+              element={
+                <PrivateRoute>
+                  <WatchListPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute>
+                  <Account />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/watch/:roomId"
+              element={
+                <PrivateRoute>
+                  <Watchroom />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <SearchPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <PrivateRoute>
+                  <NotFound />
+                </PrivateRoute>
+              }
+            />
+          </Route>
+          
+          {/* Public routes */}
           <Route
-            path="/"
+            path="/auth/login"
             element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
+              <GuestRoute>
+                <Login />
+              </GuestRoute>
             }
           />
           <Route
-            path="/movie/:id"
+            path="/auth/signup"
             element={
-              <PrivateRoute>
-                <MovieDetail />
-              </PrivateRoute>
+              <GuestRoute>
+                <Signup />
+              </GuestRoute>
             }
           />
           <Route
-            path="/my-list"
+            path="/forgot-password"
             element={
-              <PrivateRoute>
-                <WatchListPage />
-              </PrivateRoute>
+              <GuestRoute>
+                <ForgotPassword />
+              </GuestRoute>
             }
           />
           <Route
-            path="/account"
+            path="/reset-password/:token"
             element={
-              <PrivateRoute>
-                <Account />
-              </PrivateRoute>
+              <GuestRoute>
+                <ResetPassword />
+              </GuestRoute>
             }
           />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/watch/:roomId"
-            element={
-              <PrivateRoute>
-                <WatchParty />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <PrivateRoute>
-                <NotFound />
-              </PrivateRoute>
-            }
-          />
-        </Route>
-        <Route
-          path="/search"
-          element={
-            <PrivateRoute>
-              <SearchPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/auth/login"
-          element={
-            <GuestRoute>
-              <Login />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/auth/signup"
-          element={
-            <GuestRoute>
-              <Signup />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <GuestRoute>
-              <ForgotPassword />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/reset-password/:token"
-          element={
-            <GuestRoute>
-              <ResetPassword />
-            </GuestRoute>
-          }
-        />
-
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </main>
+        </Routes>
+      </main>
+    </SocketProvider>
   );
 }
 

@@ -6,21 +6,17 @@ import React, {
   useState,
 } from 'react';
 import { io } from 'socket.io-client';
-
 const SocketContext = createContext({
   socket: null,
   isConnected: false,
 });
-
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef(null);
-
   useEffect(() => {
     const connectSocket = () => {
       const token = localStorage.getItem('token');
-
       // Only create new socket if one doesn't exist or is disconnected
       if (!socketRef.current || !socketRef.current.connected) {
         const newSocket = io('http://localhost:8000', {
@@ -38,6 +34,11 @@ export const SocketProvider = ({ children }) => {
         newSocket.on('connect', () => {
           console.log('✅ WebSocket connected');
           setIsConnected(true);
+        });
+
+        // Log all incoming messages for debugging
+        newSocket.onAny((event, ...args) => {
+          console.log(`📨 [${event}]`, args);
         });
 
         // Handle connection errors
