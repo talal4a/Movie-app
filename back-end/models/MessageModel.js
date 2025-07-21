@@ -4,6 +4,7 @@ const messageSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Room",
     required: true,
+    type: String,
   },
   senderId: {
     type: mongoose.Schema.Types.ObjectId,

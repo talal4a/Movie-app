@@ -1,64 +1,29 @@
 const Message = require("../models/messageModel");
 const User = require("../models/userModel");
-const roomHosts = {};
+const mongoose = require("mongoose");
 module.exports = function (io) {
   io.on("connection", (socket) => {
     console.log("User connected to chat:", socket.id);
-    socket.on("join-room", async ({ roomId, userId }) => {
-      try {
-        const user = await User.findById(userId).select("name avatar role");
-        if (!user) {
-          console.error(`User with ID ${userId} not found`);
-          return;
-        }
-        if (!roomHosts[roomId]) {
-          roomHosts[roomId] = userId;
-          console.log(`Assigned ${user.name} as host of room ${roomId}`);
-        }
-        const roleInRoom =
-          roomHosts[roomId] === userId ? "host" : "participant";
-        socket.join(roomId);
-        socket.data.user = {
-          id: user._id,
-          name: user.name,
-          avatar: user.avatar,
-          role: roleInRoom,
-          socketId: socket.id,
-        };
-        console.log(
-          `User ${user.name} joined room: ${roomId} as ${roleInRoom}`
-        );
-        socket.to(roomId).emit("user-joined", {
-          id: socket.id,
-          name: user.name,
-          avatar: user.avatar,
-          role: roleInRoom,
-        });
-      } catch (error) {
-        console.error("Error joining room:", error);
-      }
+    const user = socket.data.user;
+    socket.on("typing", ({ roomId }) => {
+      socket.to(roomId).emit("user-typing", {
+        userId: user.id,
+        name: user.name
+      });
     });
-    const mongoose = require("mongoose");
-    socket.on("send-message", async ({ roomId, message }) => {
-      const user = socket.data.user;
-
-      if (!user) {
-        console.warn("Message send attempted without valid user context.");
-        return;
-      }
-
-      if (!mongoose.Types.ObjectId.isValid(roomId)) {
-        console.error("Invalid roomId provided:", roomId);
-        return;
-      }
-
+    socket.on("stop-typing", ({ roomId }) => {
+      socket.to(roomId).emit("user-stopped-typing", {
+        userId: user.id,
+      });
+    });
+    socket.on("send-message", async ({ roomId, message,senderId }) => {
+      if (!user || !roomId) return;
       try {
         const newMessage = await Message.create({
-          roomId: new mongoose.Types.ObjectId(roomId),
-          senderId: user.id,
+          roomId,
+          senderId: senderId,
           text: message,
         });
-
         io.to(roomId).emit("receive-message", {
           _id: newMessage._id,
           roomId,
@@ -72,7 +37,55 @@ module.exports = function (io) {
           timestamp: newMessage.sentAt,
         });
       } catch (err) {
-        console.error("Error saving message to DB:", err);
+        console.error("Error sending message:", err);
+      }
+    });
+    socket.on("delete-message", async ({ messageId, roomId }) => {
+      try {
+        await Message.findByIdAndDelete(messageId);
+        io.to(roomId).emit("message-deleted", { messageId });
+      } catch (err) {
+        console.error("Error deleting message:", err);
+      }
+    });
+    socket.on("edit-message", async ({ messageId, newText, roomId }) => {
+      try {
+        const updated = await Message.findByIdAndUpdate(
+          messageId,
+          { text: newText },
+          { new: true }
+        );
+        io.to(roomId).emit("message-edited", {
+          messageId: updated._id,
+          newText: updated.text,
+        });
+      } catch (err) {
+        console.error("Error editing message:", err);
+      }
+    });
+    socket.on("get-messages", async ({ roomId }) => {
+      try {
+        const messages = await Message.find({ roomId })
+          .populate("senderId", "name avatar role")
+          .sort({ sentAt: 1 });
+
+        socket.emit(
+          "message-history",
+          messages.map((msg) => ({
+            _id: msg._id,
+            text: msg.text,
+            roomId: msg.roomId,
+            sender: {
+              id: msg.senderId._id,
+              name: msg.senderId.name,
+              avatar: msg.senderId.avatar,
+              role: msg.senderId.role,
+            },
+            timestamp: msg.sentAt,
+          }))
+        );
+      } catch (err) {
+        console.error("Error fetching history:", err);
       }
     });
 

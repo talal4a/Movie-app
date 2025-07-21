@@ -16,6 +16,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import NotFound from './components/NotFound';
 import { fetchWatchlist } from './slice/watchListSlice';
+import WatchParty from './pages/WatchParty';
 function App() {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
@@ -30,6 +31,7 @@ function App() {
       dispatch(fetchWatchlist());
     }
   }, [user]);
+
   return (
     <main className="min-h-screen bg-black text-white">
       <Routes>
@@ -74,8 +76,23 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/watch/:roomId"
+            element={
+              <PrivateRoute>
+                <WatchParty />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <PrivateRoute>
+                <NotFound />
+              </PrivateRoute>
+            }
+          />
         </Route>
-
         <Route
           path="/search"
           element={
