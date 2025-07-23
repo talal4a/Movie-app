@@ -12,6 +12,7 @@ import { useToast } from '@/context/ToastContext';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 export default function MovieDetail() {
   const { id } = useParams();
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
@@ -49,6 +50,15 @@ export default function MovieDetail() {
   useEffect(() => {
     document.body.style.overflow = showPlayer ? 'hidden' : '';
   }, [showPlayer]);
+  useEffect(() => {
+    if (!movie?.backdrop) return;
+    const img = new Image();
+    img.src = movie.backdrop;
+    img.onload = () => {
+      setImageLoaded(true);
+    };
+  }, [movie?.backdrop]);
+
   if (isLoading || !movie) return <Spinner />;
   return (
     <div className="bg-black text-white min-h-screen">
@@ -58,6 +68,7 @@ export default function MovieDetail() {
             src={movie.backdrop}
             alt={movie.title}
             className="w-full h-full object-cover object-top"
+            fetchPriority="high"
             style={{
               objectPosition: 'center top',
               minHeight: '100vh',

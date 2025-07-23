@@ -4,10 +4,13 @@ import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useToast } from '@/context/ToastContext';
-export default function MovieCard({ movie }) {
+import { useLazyImage } from '@/hooks/useLazyImage';
+export default function MovieCard({ movie, index }) {
   const dispatch = useDispatch();
   const { showToast } = useToast();
+  const [isLoaded, setIsLoaded] = useState(false);
   const watchlist = useSelector((state) => state.watchList.items);
+  const { imgRef, isVisible, src } = useLazyImage(movie.poster, index < 4);
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie._id);
@@ -32,9 +35,14 @@ export default function MovieCard({ movie }) {
       <div className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 w-45">
         <div className="w-full h-60 overflow-hidden relative">
           <img
-            src={movie.poster}
+            ref={imgRef}
+            src={src}
+            loading={index < 4 ? 'eager' : 'lazy'}
             alt={movie.title}
-            className="w-full h-full object-cover object-top"
+            onLoad={() => setIsLoaded(true)}
+            className={`w-full h-full object-cover object-top transition-all duration-700 ease-in-out ${
+              isLoaded ? 'blur-0 scale-100' : 'blur-md scale-105'
+            } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">

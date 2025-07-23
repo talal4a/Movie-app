@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Play, Plus, ThumbsUp, Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMovies } from '../api/auth';
@@ -9,6 +9,7 @@ import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
 export default function Hero() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const dispatch = useDispatch();
@@ -40,23 +41,35 @@ export default function Hero() {
       }, 2000);
     }
   };
+  useEffect(() => {
+    if (!movie?.backdrop) return;
+    const img = new Image();
+    img.src = movie.backdrop;
+    img.onload = () => {
+      setImageLoaded(true);
+    };
+  }, [movie?.backdrop]);
+
   if (isLoading || !movie) {
     return <Spinner />;
   }
   return (
     <section className="relative w-full h-screen text-white overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
-        <img
-          src={movie.backdrop}
-          alt={movie.title}
-          className="w-full h-full object-cover"
-          style={{
-            objectPosition: 'center top',
-            minHeight: '100vh',
-            minWidth: '100vw',
-            transform: 'translateY(30px)',
-          }}
-        />
+        {imageLoaded && (
+          <img
+            src={movie.backdrop}
+            alt={movie.title}
+            className="w-full h-full object-cover"
+            fetchPriority="high"
+            style={{
+              objectPosition: 'center top',
+              minHeight: '100vh',
+              minWidth: '100vw',
+              transform: 'translateY(30px)',
+            }}
+          />
+        )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
