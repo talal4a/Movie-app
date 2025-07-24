@@ -159,3 +159,15 @@ exports.getFeaturedMovie = async (req, res) => {
     });
   }
 };
+exports.getMovieByCollection = async (req, res) => {
+  try {
+    const collectionName = req.params.collectionName.trim();
+    const movies = await Movie.find({
+      collection: { $regex: new RegExp(`^${collectionName}$`, "i") },
+    });
+    res.json(movies);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch collection movies" });
+  }
+};

@@ -9,6 +9,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: [true, "Movie title is required"],
   },
+  collection: String,
   description: {
     type: String,
     required: [true, "Movie description is required"],
@@ -52,10 +53,7 @@ const movieSchema = new mongoose.Schema({
     average: { type: Number, default: 0 },
     count: { type: Number, default: 0 },
   },
-  preview: {
-    type: String,
-    default: null,
-  },
+
   createdAt: {
     type: Date,
     default: Date.now,
