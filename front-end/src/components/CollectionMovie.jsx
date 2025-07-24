@@ -1,5 +1,6 @@
 import { getMoviesByCollection } from '@/api/movies';
 import { useQuery } from '@tanstack/react-query';
+import MovieCard from './MovieCard';
 const CollectionMovies = ({ collectionName }) => {
   const {
     data: movies = [],
@@ -13,21 +14,16 @@ const CollectionMovies = ({ collectionName }) => {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Failed to load movies.</p>;
   return (
-    <div>
-      <h2>{collectionName} Movies</h2>
-      {movies.length === 0 ? (
-        <p>No movies found in this collection.</p>
-      ) : (
-        <div className="movie-list">
-          {movies.map((movie) => (
-            <div key={movie._id} className="movie-card">
-              <img src={movie.poster} alt={movie.title} />
-              <h4>{movie.title}</h4>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <section className="py-12 ">
+      <h2 className="text-2xl font-semibold text-white mb-4">
+        {collectionName}
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+        {movies.map((movie, index) => (
+          <MovieCard key={movie._id} movie={movie} index={index} />
+        ))}
+      </div>
+    </section>
   );
 };
 export default CollectionMovies;

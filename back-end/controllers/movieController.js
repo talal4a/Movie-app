@@ -3,35 +3,39 @@ const Movie = require("../models/movieModel");
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 exports.createMovie = async (req, res) => {
   try {
-    const { title, embedUrl } = req.body;
-    const searchRes = await axios.get(
-      "https://api.themoviedb.org/3/search/movie",
-      {
-        params: { api_key: TMDB_API_KEY, query: title },
-      }
-    );
-    const movie = searchRes.data.results[0];
-    if (!movie) {
-      return res
-        .status(404)
-        .json({ status: "fail", message: "Movie not found in TMDb" });
+    const { title, embedUrl, tmdbId } = req.body;
+
+    if (!tmdbId || !embedUrl || !title) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Title, TMDb ID, and embed URL are required",
+      });
     }
-    const movieId = movie.id;
+
+    const existingMovie = await Movie.findOne({ tmdbId });
+    if (existingMovie) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Movie already exists",
+      });
+    }
 
     const detailsRes = await axios.get(
-      `https://api.themoviedb.org/3/movie/${movieId}`,
+      `https://api.themoviedb.org/3/movie/${tmdbId}`,
       {
         params: { api_key: TMDB_API_KEY },
       }
     );
     const details = detailsRes.data;
+
     const creditsRes = await axios.get(
-      `https://api.themoviedb.org/3/movie/${movieId}/credits`,
+      `https://api.themoviedb.org/3/movie/${tmdbId}/credits`,
       {
         params: { api_key: TMDB_API_KEY },
       }
     );
     const credits = creditsRes.data;
+
     const cast = credits.cast.slice(0, 5).map((member) => ({
       name: member.name,
       character: member.character || "N/A",
@@ -39,13 +43,16 @@ exports.createMovie = async (req, res) => {
         ? `https://image.tmdb.org/t/p/w500${member.profile_path}`
         : null,
     }));
+
     const collection = details.belongs_to_collection
       ? details.belongs_to_collection.name
       : null;
+
     const genres = details.genres.map((g) => g.name);
+
     const newMovie = await Movie.create({
-      tmdbId: movieId,
-      title,
+      tmdbId,
+      title: title || details.title,
       collection,
       description: details.overview,
       releaseYear: parseInt(details.release_date.split("-")[0]),
@@ -64,12 +71,14 @@ exports.createMovie = async (req, res) => {
         count: 0,
       },
     });
+
     res.status(201).json({ status: "success", data: newMovie });
   } catch (err) {
     console.error("Create Movie Error:", err.message);
     res.status(500).json({ status: "error", message: "Something went wrong" });
   }
 };
+
 exports.getAllMovies = async (req, res) => {
   try {
     const queryObj = {};
@@ -82,6 +91,9 @@ exports.getAllMovies = async (req, res) => {
     if (req.query.search) {
       queryObj.title = { $regex: req.query.search, $options: "i" };
     }
+    if (req.query.excludeCollection === "true") {
+      queryObj.collection = { $exists: false };
+    }
     let sortBy = "-createdAt";
     if (req.query.sort) {
       sortBy = req.query.sort.split(",").join(" ");
@@ -93,7 +105,6 @@ exports.getAllMovies = async (req, res) => {
       .sort(sortBy)
       .skip(skip)
       .limit(limit);
-
     res.status(200).json({
       status: "success",
       results: movies.length,
@@ -116,7 +127,6 @@ exports.getMovieById = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
-
 exports.deleteMovie = async (req, res) => {
   try {
     await Movie.findByIdAndDelete(req.params.id);

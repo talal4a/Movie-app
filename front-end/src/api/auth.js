@@ -44,7 +44,9 @@ export const getAllMovies = async () => {
 };
 
 export const fetchLatestMovies = async () => {
-  const res = await axiosInstance.get('/movies?sort=-createdAt&limit=6');
+  const res = await axiosInstance.get(
+    '/movies?sort=-createdAt&limit=6&excludeCollection=true'
+  );
   return res.data.data;
 };
 
