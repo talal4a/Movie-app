@@ -16,6 +16,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import NotFound from './components/NotFound';
 import { fetchWatchlist } from './slice/watchListSlice';
+import MoviePage from './pages/MoviePage';
 function App() {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
@@ -74,7 +75,14 @@ function App() {
               </PrivateRoute>
             }
           />
-
+          <Route
+            path="/movies"
+            element={
+              <PrivateRoute>
+                <MoviePage />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/search"
             element={
