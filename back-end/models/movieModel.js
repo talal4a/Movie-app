@@ -38,7 +38,6 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: [true, "Embed video URL is required"],
   },
-  tags: ["jim-carrey"],
   cast: [
     {
       name: { type: String, required: true },

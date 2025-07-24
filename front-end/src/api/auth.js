@@ -32,17 +32,18 @@ export const resetPassword = async ({ token, password, confirmPassword }) => {
   });
   return res.data;
 };
-
 export const fetchMovies = async () => {
   const res = await axiosInstance.get('/movies/featured');
   return res.data.data;
 };
-
 export const getAllMovies = async () => {
   const res = await axiosInstance.get('/movies?sort=createdAt&limit=6');
   return res.data.data;
 };
-
+export const getMoviesByTag = async (tag) => {
+  const allMovies = await getAllMovies();
+  return allMovies.filter((movie) => movie.tags?.includes(tag));
+};
 export const fetchLatestMovies = async () => {
   const res = await axiosInstance.get(
     '/movies?sort=-createdAt&limit=6&excludeCollection=true'

@@ -49,7 +49,6 @@ exports.createMovie = async (req, res) => {
       : null;
 
     const genres = details.genres.map((g) => g.name);
-
     const newMovie = await Movie.create({
       tmdbId,
       title: title || details.title,
