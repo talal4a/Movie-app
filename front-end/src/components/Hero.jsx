@@ -76,9 +76,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
       <div className="relative z-10 flex flex-col justify-center h-full px-8 lg:px-16 max-w-7xl">
         <h1 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black mb-6 tracking-tight leading-[0.9] max-w-4xl">
-          <span className="bg-gradient-to-r from-white via-red-200 to-red-400 bg-clip-text text-transparent animate-pulse">
-            {movie.title?.split(' ')[0]}
-          </span>
+          <span className="text-white  ">{movie.title?.split(' ')[0]}</span>
           <br />
           <span className="text-white">
             {movie.title?.split(' ').slice(1).join(' ')}

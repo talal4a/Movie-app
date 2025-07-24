@@ -48,10 +48,13 @@ const movieSchema = new mongoose.Schema({
     average: { type: Number },
     count: { type: Number },
   },
-
   userRatings: {
     average: { type: Number, default: 0 },
     count: { type: Number, default: 0 },
+  },
+  preview: {
+    type: String,
+    default: null,
   },
   createdAt: {
     type: Date,
