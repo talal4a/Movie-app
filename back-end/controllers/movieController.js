@@ -17,6 +17,7 @@ exports.createMovie = async (req, res) => {
         .json({ status: "fail", message: "Movie not found in TMDb" });
     }
     const movieId = movie.id;
+
     const detailsRes = await axios.get(
       `https://api.themoviedb.org/3/movie/${movieId}`,
       {
@@ -30,29 +31,28 @@ exports.createMovie = async (req, res) => {
         params: { api_key: TMDB_API_KEY },
       }
     );
-    const isMobile = window.innerWidth < 768;
     const credits = creditsRes.data;
     const cast = credits.cast.slice(0, 5).map((member) => ({
       name: member.name,
       character: member.character || "N/A",
       avatar: member.profile_path
-        ? `https://image.tmdb.org/t/p/original${member.profile_path}`
+        ? `https://image.tmdb.org/t/p/w500${member.profile_path}`
         : null,
     }));
+    const collection = details.belongs_to_collection
+      ? details.belongs_to_collection.name
+      : null;
     const genres = details.genres.map((g) => g.name);
     const newMovie = await Movie.create({
       tmdbId: movieId,
       title,
+      collection,
       description: details.overview,
       releaseYear: parseInt(details.release_date.split("-")[0]),
       runtime: `${details.runtime} min`,
       genres,
-      poster: `https://image.tmdb.org/t/p/${isMobile ? "w500" : "original"}${
-        details.poster_path
-      }`,
-      backdrop: `https://image.tmdb.org/t/p/${isMobile ? "w780" : "original"}${
-        details.backdrop_path
-      }`,
+      poster: `https://image.tmdb.org/t/p/original${details.poster_path}`,
+      backdrop: `https://image.tmdb.org/t/p/original${details.backdrop_path}`,
       embedUrl,
       cast,
       tmdbRatings: {
@@ -73,28 +73,22 @@ exports.createMovie = async (req, res) => {
 exports.getAllMovies = async (req, res) => {
   try {
     const queryObj = {};
-
     if (req.query.genre) {
       queryObj.genres = { $in: [req.query.genre] };
     }
-
     if (req.query.year) {
       queryObj.releaseYear = +req.query.year;
     }
-
     if (req.query.search) {
       queryObj.title = { $regex: req.query.search, $options: "i" };
     }
-
     let sortBy = "-createdAt";
     if (req.query.sort) {
       sortBy = req.query.sort.split(",").join(" ");
     }
-
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-
     const movies = await Movie.find(queryObj)
       .sort(sortBy)
       .skip(skip)
@@ -131,7 +125,6 @@ exports.deleteMovie = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
-
 exports.updateMovie = async (req, res) => {
   try {
     const updated = await Movie.findByIdAndUpdate(req.params.id, req.body, {
@@ -143,7 +136,6 @@ exports.updateMovie = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
-
 exports.getFeaturedMovie = async (req, res) => {
   try {
     const featured = await Movie.findOne().sort({ createdAt: 1 });
@@ -159,15 +151,14 @@ exports.getFeaturedMovie = async (req, res) => {
     });
   }
 };
-exports.getMovieByCollection = async (req, res) => {
+exports.getMoviesWithCollection = async (req, res) => {
   try {
-    const collectionName = req.params.collectionName.trim();
     const movies = await Movie.find({
-      collection: { $regex: new RegExp(`^${collectionName}$`, "i") },
+      collection: { $exists: true, $ne: "" },
     });
     res.json(movies);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch collection movies" });
+    res.status(500).json({ error: "Failed to fetch movies with collection" });
   }
 };

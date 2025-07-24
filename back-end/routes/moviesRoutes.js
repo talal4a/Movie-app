@@ -14,8 +14,8 @@ router
   .patch(authController.restrictTo("admin"), movieController.updateMovie)
   .delete(authController.restrictTo("admin"), movieController.deleteMovie);
 router.get(
-  authController.restrictTo("admin"),
   "/collection/:collectionName",
-  movieController.getMovieByCollection
+  authController.restrictTo("admin"),
+  movieController.getMoviesWithCollection
 );
 module.exports = router;
