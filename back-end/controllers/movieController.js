@@ -171,3 +171,27 @@ exports.getMoviesWithCollection = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch movies with collection" });
   }
 };
+exports.getGroupedMovies = async (req, res) => {
+  try {
+    const movies = await Movie.find({ collection: { $ne: null } });
+
+    const grouped = {};
+
+    movies.forEach((movie) => {
+      const collectionName = movie.collection;
+
+      if (!grouped[collectionName]) {
+        grouped[collectionName] = [];
+      }
+
+      if (!grouped[collectionName].some((m) => m._id.equals(movie._id))) {
+        grouped[collectionName].push(movie);
+      }
+    });
+
+    res.json(grouped);
+  } catch (err) {
+    console.error("Error grouping movies:", err);
+    res.status(500).json({ error: "Failed to fetch grouped movies" });
+  }
+};

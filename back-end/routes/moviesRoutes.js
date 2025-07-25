@@ -4,6 +4,16 @@ const movieController = require("../controllers/movieController");
 const authController = require("../controllers/authController");
 router.get("/featured", movieController.getFeaturedMovie);
 router.use(authController.protect);
+router.get(
+  "/collection/:collectionName",
+  authController.restrictTo("admin"),
+  movieController.getMoviesWithCollection
+);
+router.get(
+  "/grouped",
+  authController.restrictTo("admin"),
+  movieController.getGroupedMovies
+);
 router
   .route("/")
   .get(movieController.getAllMovies)
@@ -13,9 +23,4 @@ router
   .get(movieController.getMovieById)
   .patch(authController.restrictTo("admin"), movieController.updateMovie)
   .delete(authController.restrictTo("admin"), movieController.deleteMovie);
-router.get(
-  "/collection/:collectionName",
-  authController.restrictTo("admin"),
-  movieController.getMoviesWithCollection
-);
 module.exports = router;
