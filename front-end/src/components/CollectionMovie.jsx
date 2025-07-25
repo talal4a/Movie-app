@@ -1,10 +1,8 @@
 import axiosInstance from '@/api/axioInstance';
 import React, { useEffect, useState } from 'react';
 import MovieCard from './MovieCard';
-
 export default function GroupedMovieCollections() {
   const [groupedMovies, setGroupedMovies] = useState({});
-
   useEffect(() => {
     const fetchGroupedMovies = async () => {
       try {
@@ -14,10 +12,8 @@ export default function GroupedMovieCollections() {
         console.error('Error fetching grouped movies:', err);
       }
     };
-
     fetchGroupedMovies();
   }, []);
-
   return (
     <div className="space-y-10 px-10">
       {Object.keys(groupedMovies).map((collectionName) => (
