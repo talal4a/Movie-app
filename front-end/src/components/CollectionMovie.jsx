@@ -1,6 +1,7 @@
-import { useQueries } from '@tanstack/react-query';
 import { getMoviesByCollection } from '@/api/movies';
+import { useQueries } from '@tanstack/react-query';
 import MovieCard from './MovieCard';
+
 export default function MultiCollectionMovies({ collectionNames }) {
   const results = useQueries({
     queries: collectionNames.map((name) => ({
@@ -9,38 +10,30 @@ export default function MultiCollectionMovies({ collectionNames }) {
       enabled: !!name,
     })),
   });
-  const allMoviesWithCollection = results.flatMap((result, i) =>
-    result.isSuccess
-      ? result.data.map((movie) => ({
-          ...movie,
-          fromCollection: collectionNames[i],
-        }))
-      : []
-  );
-  const movieMap = new Map();
-  allMoviesWithCollection.forEach((movie) => {
-    if (!movieMap.has(movie._id)) {
-      movieMap.set(movie._id, {
-        ...movie,
-        collections: [movie.fromCollection],
-      });
-    } else {
-      movieMap.get(movie._id).collections.push(movie.fromCollection);
-    }
+
+  // Create one list per collection with deduplication inside each
+  const groupedMovies = collectionNames.map((name, idx) => {
+    const result = results[idx];
+    const movies = result.data || [];
+
+    // Deduplicate within this collection by _id
+    const uniqueMap = new Map();
+    movies.forEach((movie) => {
+      if (!uniqueMap.has(movie._id)) {
+        uniqueMap.set(movie._id, movie);
+      }
+    });
+
+    return {
+      name,
+      movies: Array.from(uniqueMap.values()),
+      result,
+    };
   });
-
-  const uniqueMovies = Array.from(movieMap.values());
-
-  const groupedMovies = collectionNames.map((name) => ({
-    name,
-    movies: uniqueMovies.filter((movie) => movie.collections.includes(name)),
-  }));
 
   return (
     <div className="space-y-12">
-      {results.map((result, idx) => {
-        const { name, movies: collectionMovies } = groupedMovies[idx];
-
+      {groupedMovies.map(({ name, movies, result }) => {
         if (result.isLoading) {
           return (
             <section key={name} className="py-10">
@@ -49,6 +42,7 @@ export default function MultiCollectionMovies({ collectionNames }) {
             </section>
           );
         }
+
         if (result.isError) {
           return (
             <section key={name} className="py-10">
@@ -57,14 +51,15 @@ export default function MultiCollectionMovies({ collectionNames }) {
             </section>
           );
         }
+
         return (
           <section key={name} className="py-10">
             <h2 className="text-xl font-bold text-white mb-4">{name}</h2>
-            {collectionMovies.length === 0 ? (
-              <p className="text-gray-400">No unique movies to show.</p>
+            {movies.length === 0 ? (
+              <p className="text-gray-400">No movies to show.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {collectionMovies.map((movie, index) => (
+                {movies.map((movie, index) => (
                   <MovieCard
                     key={`${movie._id}-${name}`}
                     movie={movie}
