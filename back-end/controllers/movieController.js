@@ -174,9 +174,7 @@ exports.getMoviesWithCollection = async (req, res) => {
 exports.getGroupedMovies = async (req, res) => {
   try {
     const movies = await Movie.find({ collection: { $ne: null } });
-
     const grouped = {};
-
     movies.forEach((movie) => {
       const collectionName = movie.collection;
 
@@ -193,5 +191,29 @@ exports.getGroupedMovies = async (req, res) => {
   } catch (err) {
     console.error("Error grouping movies:", err);
     res.status(500).json({ error: "Failed to fetch grouped movies" });
+  }
+};
+
+exports.getMoviesOfSameCollection = async (req, res) => {
+  try {
+    const movieId = req.params.id;
+
+    const movie = await Movie.findById(movieId);
+
+    if (!movie || !movie.collection) {
+      return res
+        .status(404)
+        .json({ message: "Collection not found for this movie" });
+    }
+
+    const relatedMovies = await Movie.find({
+      collection: movie.collection,
+      _id: { $ne: movie._id },
+    });
+
+    res.status(200).json(relatedMovies);
+  } catch (error) {
+    console.error("Error fetching related movies:", error);
+    res.status(500).json({ error: "Failed to fetch related movies" });
   }
 };

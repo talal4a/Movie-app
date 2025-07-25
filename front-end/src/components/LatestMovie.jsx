@@ -9,7 +9,6 @@ export default function LatestMovies() {
     keepPreviousData: true,
     staleTime: 1000,
   });
-
   if (isLoading) {
     return <Spinner />;
   }

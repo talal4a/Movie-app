@@ -1,4 +1,4 @@
-import GroupedMovieCollections from '@/components/CollectionMovie';
+import GroupedMovieCollections from "@/components/GroupedMovieCollections";
 export default function MoviesPage() {
   return (
     <main className="p-10 ">

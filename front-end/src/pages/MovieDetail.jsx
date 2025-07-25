@@ -10,6 +10,7 @@ import VideoPlayer from '@/components/VideoPlayer';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
+import RelatedMovies from '@/components/RelatedMovies';
 export default function MovieDetail() {
   const { id } = useParams();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -58,7 +59,6 @@ export default function MovieDetail() {
       setImageLoaded(true);
     };
   }, [movie?.backdrop]);
-
   if (isLoading || !movie) return <Spinner />;
   return (
     <div className="bg-black text-white min-h-screen">
@@ -126,6 +126,7 @@ export default function MovieDetail() {
           </div>
         </div>
       </div>
+      <RelatedMovies id={id} />
       <div className="px-4 md:px-16 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">

@@ -18,6 +18,11 @@ router
   .route("/")
   .get(movieController.getAllMovies)
   .post(authController.restrictTo("admin"), movieController.createMovie);
+router.get(
+  "/related/:id",
+  authController.restrictTo("admin"),
+  movieController.getMoviesOfSameCollection
+);
 router
   .route("/:id")
   .get(movieController.getMovieById)
