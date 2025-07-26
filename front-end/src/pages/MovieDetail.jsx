@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import RelatedMovies from '@/components/RelatedMovies';
+import RecommendedMovies from '@/components/RecommendationMovie';
 export default function MovieDetail() {
   const { id } = useParams();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -213,7 +214,9 @@ export default function MovieDetail() {
             </div>
           </div>
         </div>
+        <RecommendedMovies genre={movie.genres} id={id} />
       </div>
+
       {showPlayer && (
         <VideoPlayer
           embedUrl={movie.embedUrl}

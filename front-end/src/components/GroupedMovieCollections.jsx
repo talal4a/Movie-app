@@ -2,7 +2,6 @@ import axiosInstance from '@/api/axioInstance';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import MovieCollection from './CollectionMovie';
-
 export default function GroupedMovieCollections() {
   const {
     data: collectionNames = [],
@@ -15,10 +14,8 @@ export default function GroupedMovieCollections() {
       return Object.keys(res.data);
     },
   });
-
   if (isLoading) return <p>Loading collections...</p>;
   if (isError) return <p className="text-red-500">Error loading collections</p>;
-
   return (
     <div className="space-y-10 px-10">
       {collectionNames.map((name) => (

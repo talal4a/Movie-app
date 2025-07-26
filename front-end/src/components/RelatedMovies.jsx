@@ -30,7 +30,7 @@ export default function RelatedMovies({ id }) {
       </h2>
       {isSlider ? (
         <>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 w-full px-2 ">
             <button
               className="bg-white/10 text-white px-3 py-1 rounded hover:bg-white/20 disabled:opacity-40"
               onClick={handlePrev}
