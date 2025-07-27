@@ -11,7 +11,7 @@ router.get(
 );
 router.get(
   "/grouped",
-  authController.restrictTo("admin"),
+  authController.protect,
   movieController.getGroupedMovies
 );
 router
@@ -23,7 +23,11 @@ router.get(
   authController.restrictTo("admin"),
   movieController.getMoviesOfSameCollection
 );
-router.post("/upload-trailer", movieController.uploadTrailerToCloudinary);
+router.post(
+  "/upload-trailer",
+  authController.restrictTo("admin"),
+  movieController.uploadTrailerToCloudinary
+);
 router
   .route("/:id")
   .get(movieController.getMovieById)
