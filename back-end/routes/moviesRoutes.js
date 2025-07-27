@@ -23,6 +23,7 @@ router.get(
   authController.restrictTo("admin"),
   movieController.getMoviesOfSameCollection
 );
+router.post("/upload-trailer", movieController.uploadTrailerToCloudinary);
 router
   .route("/:id")
   .get(movieController.getMovieById)

@@ -127,7 +127,7 @@ export default function MovieDetail() {
           </div>
         </div>
       </div>
-      <RelatedMovies id={id} />
+      <RelatedMovies id={movie._id} />
       <div className="px-4 md:px-16 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -216,7 +216,6 @@ export default function MovieDetail() {
         </div>
         <RecommendedMovies genre={movie.genres} id={id} />
       </div>
-
       {showPlayer && (
         <VideoPlayer
           embedUrl={movie.embedUrl}

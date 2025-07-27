@@ -1,5 +1,10 @@
 const axios = require("axios");
 const Movie = require("../models/movieModel");
+const cloudinary = require("../config/cloudnary");
+const ytdl = require("@distube/ytdl-core");
+const ffmpeg = require("fluent-ffmpeg");
+const tmp = require("tmp");
+const fs = require("fs");
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 exports.createMovie = async (req, res) => {
   try {
@@ -177,43 +182,115 @@ exports.getGroupedMovies = async (req, res) => {
     const grouped = {};
     movies.forEach((movie) => {
       const collectionName = movie.collection;
-
       if (!grouped[collectionName]) {
         grouped[collectionName] = [];
       }
-
       if (!grouped[collectionName].some((m) => m._id.equals(movie._id))) {
         grouped[collectionName].push(movie);
       }
     });
-
     res.json(grouped);
   } catch (err) {
     console.error("Error grouping movies:", err);
     res.status(500).json({ error: "Failed to fetch grouped movies" });
   }
 };
-
 exports.getMoviesOfSameCollection = async (req, res) => {
   try {
     const movieId = req.params.id;
-
     const movie = await Movie.findById(movieId);
-
-    if (!movie || !movie.collection) {
-      return res
-        .status(404)
-        .json({ message: "Collection not found for this movie" });
+    if (!movie.collection) {
+      return res.status(200).json({ data: [] });
     }
-
     const relatedMovies = await Movie.find({
       collection: movie.collection,
       _id: { $ne: movie._id },
     });
-
     res.status(200).json(relatedMovies);
   } catch (error) {
     console.error("Error fetching related movies:", error);
     res.status(500).json({ error: "Failed to fetch related movies" });
+  }
+};
+exports.uploadTrailerToCloudinary = async (req, res) => {
+  try {
+    const { movieId } = req.body;
+    if (!movieId) return res.status(400).json({ error: "movieId is required" });
+
+    const movie = await Movie.findById(movieId);
+    if (!movie || !movie.tmdbId)
+      return res
+        .status(404)
+        .json({ error: "Movie not found or missing tmdbId" });
+    const tmdbUrl = `https://api.themoviedb.org/3/movie/${movie.tmdbId}/videos?api_key=${process.env.TMDB_API_KEY}`;
+    const response = await axios.get(tmdbUrl);
+    const trailer = response.data.results.find(
+      (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+    );
+
+    if (!trailer)
+      return res.status(404).json({ error: "Trailer not found on TMDb" });
+
+    const youtubeUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
+
+    const tmpInput = tmp.tmpNameSync({ postfix: ".mp4" });
+    const tmpOutput = tmp.tmpNameSync({ postfix: ".mp4" });
+
+    const videoStream = ytdl(youtubeUrl, {
+      quality: "highest",
+      filter: "audioandvideo",
+    });
+    const writeStream = fs.createWriteStream(tmpInput);
+    await new Promise((resolve, reject) => {
+      videoStream.pipe(writeStream);
+      videoStream.on("end", resolve);
+      videoStream.on("error", reject);
+    });
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(tmpInput)
+        .setStartTime(3)
+        .setDuration(13)
+        .outputOptions([
+          "-crf 23",
+          "-preset slow",
+          "-c:v libx264",
+          "-c:a aac",
+          "-b:a 96k",
+          "-movflags +faststart",
+        ])
+        .on("end", resolve)
+        .on("error", reject)
+        .run();
+    });
+
+    const cloudinaryUpload = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        tmpOutput,
+        {
+          resource_type: "video",
+          folder: "trailers",
+          public_id: trailer.key,
+        },
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    movie.previewTrailer = cloudinaryUpload.secure_url;
+    await movie.save();
+
+    fs.unlinkSync(tmpInput);
+    fs.unlinkSync(tmpOutput);
+
+    res.status(200).json({
+      message: "✅ Trailer uploaded with audio and saved",
+      previewTrailer: cloudinaryUpload.secure_url,
+    });
+  } catch (err) {
+    console.error("❌ uploadTrailerToCloudinary Error:", err.message);
+    res.status(500).json({ error: "Something went wrong uploading trailer" });
   }
 };

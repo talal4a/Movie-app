@@ -4,12 +4,9 @@ import { fetchMoviesByGenre } from '../api/auth';
 import MovieCard from './MovieCard';
 import Spinner from './Spinner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 export default function RecommendedMovies({ genre, id: currentMovieId }) {
   const [chunkIndex, setChunkIndex] = useState(0);
-
   const genreList = Array.isArray(genre) ? genre : [genre];
-
   const { data: movies = [], isLoading } = useQuery({
     queryKey: ['recommended', genreList],
     queryFn: async () => {
@@ -23,7 +20,6 @@ export default function RecommendedMovies({ genre, id: currentMovieId }) {
     },
     staleTime: 1000 * 60 * 10,
   });
-
   const filteredMovies = movies.filter((movie) => movie._id !== currentMovieId);
   const chunkSize = 5;
   const totalChunks = Math.ceil(filteredMovies.length / chunkSize);
@@ -41,7 +37,7 @@ export default function RecommendedMovies({ genre, id: currentMovieId }) {
   return (
     <section className="mt-12 relative">
       <h2 className="text-2xl font-bold mb-4 text-white">
-        Related Movies in Collection
+        Recommended Movies in Collection
       </h2>
       {filteredMovies.length > chunkSize ? (
         <div className="flex justify-between items-center mb-4">
@@ -63,7 +59,7 @@ export default function RecommendedMovies({ genre, id: currentMovieId }) {
       ) : (
         <div className="mb-4">
           <h2 className="text-2xl font-semibold text-white">
-            Recommended Movies
+            Recommended Movies in Collection
           </h2>
         </div>
       )}
