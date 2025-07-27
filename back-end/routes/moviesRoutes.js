@@ -6,7 +6,7 @@ router.get("/featured", movieController.getFeaturedMovie);
 router.use(authController.protect);
 router.get(
   "/collection/:collectionName",
-  authController.restrictTo("admin"),
+  authController.protect,
   movieController.getMoviesWithCollection
 );
 router.get(
@@ -20,7 +20,7 @@ router
   .post(authController.restrictTo("admin"), movieController.createMovie);
 router.get(
   "/related/:id",
-  authController.restrictTo("admin"),
+  authController.protect,
   movieController.getMoviesOfSameCollection
 );
 router.post(

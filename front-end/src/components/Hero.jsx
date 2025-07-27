@@ -8,8 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
 import { useInView } from 'react-intersection-observer';
-
-export default function Hero() {
+export default function Hero({ movie: movieProp }) {
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
   const [hasPlayed, setHasPlayed] = useState(false);
@@ -23,24 +22,21 @@ export default function Hero() {
   const [isPaused, setIsPaused] = useState(false);
   const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
   const [autoShowTooltip, setAutoShowTooltip] = useState(false);
-
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
-
-  const { isLoading, data: movie } = useQuery({
+  const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
+    enabled: !movieProp,
     keepPreviousData: true,
     staleTime: 1000,
   });
-
+  const movie = movieProp || movies;
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
-
   const handlePlay = () => setIsPlaying(true);
-
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -80,16 +76,13 @@ export default function Hero() {
       setPreviewStarted(true);
       setIsPaused(false);
 
-      // Hide description immediately when video starts
       setShowDescription(false);
 
-      // Auto show tooltip when preview starts
       setAutoShowTooltip(true);
       setTimeout(() => {
         setAutoShowTooltip(false);
-      }, 3000); // Hide after 3 seconds
+      }, 3000);
     } else if (!inView && videoRef.current && previewStarted && !videoEnded) {
-      // Pause video when out of view and show backdrop
       videoRef.current.pause();
       setIsPaused(true);
       setPreviewStarted(false);
@@ -102,19 +95,21 @@ export default function Hero() {
       isPaused &&
       !videoEnded
     ) {
-      // Resume video when back in view
-      videoRef.current.play().catch((e) => {
-        console.warn('Resume failed:', e);
-      });
-      setIsPaused(false);
-      setPreviewStarted(true);
-      setShowDescription(false);
-
-      // Auto show tooltip when resuming
-      setAutoShowTooltip(true);
       setTimeout(() => {
-        setAutoShowTooltip(false);
-      }, 3000);
+        if (videoRef.current && inView) {
+          videoRef.current.play().catch((e) => {
+            console.warn('Resume failed:', e);
+          });
+          setIsPaused(false);
+          setPreviewStarted(true);
+          setShowDescription(false);
+
+          setAutoShowTooltip(true);
+          setTimeout(() => {
+            setAutoShowTooltip(false);
+          }, 3000);
+        }
+      }, 800);
     }
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused]);
 
@@ -127,7 +122,6 @@ export default function Hero() {
       ref={ref}
       className="relative w-full h-screen text-white overflow-hidden"
     >
-      {/* Video Background */}
       <div className="absolute inset-0 w-full h-full">
         <video
           ref={videoRef}
@@ -147,13 +141,12 @@ export default function Hero() {
             setPreviewStarted(false);
             setAutoShowTooltip(false);
 
-            // Smooth transition to backdrop
             setTimeout(() => {
               setShowDescription(true);
-            }, 500); // Increased delay for smoother transition
+            }, 500);
           }}
         />
-        {(videoEnded || isPaused || !previewStarted) && (
+        {(videoEnded || isPaused || !previewStarted) && movie?.backdrop && (
           <>
             <img
               src={movie.backdrop}
@@ -170,7 +163,6 @@ export default function Hero() {
         )}
       </div>
 
-      {/* Volume Button - Top Right - Only visible during preview */}
       <div
         className={`absolute top-16 right-4 sm:top-20 sm:right-6 lg:top-24 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
           previewStarted && !videoEnded
@@ -179,7 +171,6 @@ export default function Hero() {
         }`}
       >
         <div className="relative">
-          {/* Netflix-style Tooltip */}
           <div
             className={`absolute bottom-full right-0 mb-2 px-3 py-2 bg-white text-black text-sm font-medium rounded shadow-lg whitespace-nowrap transition-all duration-300 ease-in-out ${
               showVolumeTooltip || autoShowTooltip
@@ -188,7 +179,7 @@ export default function Hero() {
             }`}
           >
             {isMuted ? 'Unmute this video' : 'Mute this video'}
-            {/* Tooltip Arrow */}
+
             <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
           </div>
 
@@ -204,9 +195,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 max-w-none">
-        {/* Title - Responsive Typography */}
         <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black mb-4 sm:mb-6 tracking-tight leading-[0.85] sm:leading-[0.9] max-w-4xl">
           <span className="block">{movie.title?.split(' ')[0]}</span>
           <span className="block">
@@ -214,7 +203,6 @@ export default function Hero() {
           </span>
         </h1>
 
-        {/* Movie Info - Responsive Layout */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-6 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
           <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-green-400 font-bold text-base sm:text-lg lg:text-xl">
@@ -229,7 +217,6 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Description - Responsive Text with Animation */}
         <div
           className={`transition-all duration-1000 ease-in-out overflow-hidden ${
             showDescription
@@ -242,7 +229,6 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* Action Buttons Row */}
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={handlePlay}
@@ -271,7 +257,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Video Player Modal */}
       {isPlaying && (
         <VideoPlayer
           embedUrl={movie.embedUrl}
