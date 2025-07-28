@@ -22,6 +22,7 @@ export default function Hero({ movie: movieProp }) {
   const [isPaused, setIsPaused] = useState(false);
   const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
   const [autoShowTooltip, setAutoShowTooltip] = useState(false);
+  const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
@@ -36,7 +37,9 @@ export default function Hero({ movie: movieProp }) {
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
+
   const handlePlay = () => setIsPlaying(true);
+
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -68,6 +71,32 @@ export default function Hero({ movie: movieProp }) {
   };
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (videoRef.current && previewStarted && !videoEnded) {
+        if (document.hidden) {
+          if (!videoRef.current.paused) {
+            videoRef.current.pause();
+            setWasPlayingBeforeHidden(true);
+          }
+        } else {
+          if (wasPlayingBeforeHidden && inView) {
+            videoRef.current.play().catch((e) => {
+              console.warn('Resume after tab switch failed:', e);
+            });
+            setWasPlayingBeforeHidden(false);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView]);
+
+  useEffect(() => {
     if (inView && !hasPlayed && videoRef.current) {
       videoRef.current.play().catch((e) => {
         console.warn('Autoplay failed:', e);
@@ -88,6 +117,7 @@ export default function Hero({ movie: movieProp }) {
       setPreviewStarted(false);
       setShowDescription(true);
       setAutoShowTooltip(false);
+      setWasPlayingBeforeHidden(false);
     } else if (
       inView &&
       hasPlayed &&
@@ -96,7 +126,7 @@ export default function Hero({ movie: movieProp }) {
       !videoEnded
     ) {
       setTimeout(() => {
-        if (videoRef.current && inView) {
+        if (videoRef.current && inView && !document.hidden) {
           videoRef.current.play().catch((e) => {
             console.warn('Resume failed:', e);
           });
@@ -140,6 +170,7 @@ export default function Hero({ movie: movieProp }) {
             setVideoEnded(true);
             setPreviewStarted(false);
             setAutoShowTooltip(false);
+            setWasPlayingBeforeHidden(false);
 
             setTimeout(() => {
               setShowDescription(true);
@@ -216,7 +247,6 @@ export default function Hero({ movie: movieProp }) {
             {movie.ratings?.voteAverage?.toFixed(1)}
           </div>
         </div>
-
         <div
           className={`transition-all duration-1000 ease-in-out overflow-hidden ${
             showDescription
@@ -228,7 +258,6 @@ export default function Hero({ movie: movieProp }) {
             {movie.description}
           </p>
         </div>
-
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={handlePlay}
@@ -237,7 +266,6 @@ export default function Hero({ movie: movieProp }) {
             <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
             <span>Play</span>
           </button>
-
           <button
             onClick={toggleWatchlist}
             disabled={buttonDisabled}
@@ -256,7 +284,6 @@ export default function Hero({ movie: movieProp }) {
           </button>
         </div>
       </div>
-
       {isPlaying && (
         <VideoPlayer
           embedUrl={movie.embedUrl}

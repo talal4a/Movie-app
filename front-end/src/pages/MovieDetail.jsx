@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Play, Plus, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getMovieById } from '../api/auth';
 import Spinner from '../components/Spinner';
@@ -12,8 +11,19 @@ import RecommendedMovies from '@/components/RecommendationMovie';
 import Hero from '@/components/Hero';
 export default function MovieDetail() {
   const { id } = useParams();
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
+  useEffect(() => {
+    if (showPlayer) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showPlayer]);
+
   const {
     data: movie,
     isLoading,
@@ -22,17 +32,6 @@ export default function MovieDetail() {
     queryKey: ['movie', id],
     queryFn: () => getMovieById(id),
   });
-  useEffect(() => {
-    document.body.style.overflow = showPlayer ? 'hidden' : '';
-  }, [showPlayer]);
-  useEffect(() => {
-    if (!movie?.backdrop) return;
-    const img = new Image();
-    img.src = movie.backdrop;
-    img.onload = () => {
-      setImageLoaded(true);
-    };
-  }, [movie?.backdrop]);
   if (isLoading || !movie) return <Spinner />;
   return (
     <div className="bg-black text-white min-h-screen">
