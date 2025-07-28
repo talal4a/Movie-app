@@ -208,18 +208,14 @@ exports.getMoviesOfSameCollection = async (req, res) => {
 exports.uploadTrailerToCloudinary = async (req, res) => {
   try {
     const { movieIds } = req.body;
-
     if (!Array.isArray(movieIds) || movieIds.length === 0) {
       return res.status(400).json({ error: "No movie IDs provided" });
     }
-
     const uploaded = [];
-
     for (const id of movieIds) {
       try {
         const movie = await Movie.findById(id);
         if (!movie || movie.previewTrailer) continue;
-
         const tmdbUrl = `https://api.themoviedb.org/3/movie/${movie.tmdbId}/videos?api_key=${process.env.TMDB_API_KEY}`;
         const response = await axios.get(tmdbUrl);
         const trailer = response.data.results.find(
@@ -241,8 +237,8 @@ exports.uploadTrailerToCloudinary = async (req, res) => {
         });
         await new Promise((resolve, reject) => {
           ffmpeg(tmpInput)
-            .setStartTime(3)
-            .setDuration(13)
+            .setStartTime(9)
+            .setDuration(19)
             .videoCodec("libx264")
             .audioCodec("aac")
             .outputOptions([

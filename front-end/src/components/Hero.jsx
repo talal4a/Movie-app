@@ -37,9 +37,7 @@ export default function Hero({ movie: movieProp }) {
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
-
   const handlePlay = () => setIsPlaying(true);
-
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -88,14 +86,11 @@ export default function Hero({ movie: movieProp }) {
         }
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView]);
-
   useEffect(() => {
     if (inView && !hasPlayed && videoRef.current) {
       videoRef.current.play().catch((e) => {
@@ -104,9 +99,7 @@ export default function Hero({ movie: movieProp }) {
       setHasPlayed(true);
       setPreviewStarted(true);
       setIsPaused(false);
-
       setShowDescription(false);
-
       setAutoShowTooltip(true);
       setTimeout(() => {
         setAutoShowTooltip(false);
@@ -171,7 +164,6 @@ export default function Hero({ movie: movieProp }) {
             setPreviewStarted(false);
             setAutoShowTooltip(false);
             setWasPlayingBeforeHidden(false);
-
             setTimeout(() => {
               setShowDescription(true);
             }, 500);
