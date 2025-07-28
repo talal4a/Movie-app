@@ -237,8 +237,8 @@ exports.uploadTrailerToCloudinary = async (req, res) => {
         });
         await new Promise((resolve, reject) => {
           ffmpeg(tmpInput)
-            .setStartTime(9)
-            .setDuration(19)
+            .setStartTime(3)
+            .setDuration(17)
             .videoCodec("libx264")
             .audioCodec("aac")
             .outputOptions([

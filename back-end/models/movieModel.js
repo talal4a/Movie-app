@@ -9,7 +9,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: [true, "Movie title is required"],
   },
-  collection: String,
+  // collection: String,
   description: {
     type: String,
     required: [true, "Movie description is required"],
