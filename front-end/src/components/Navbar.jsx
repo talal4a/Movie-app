@@ -5,6 +5,9 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '@/slice/userSlice';
 import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
+import ModalTrigger from './Modals/ModalTrigger';
+import ModalContent from './Modals/ModalContent';
+import Modal from './Modals/Modal';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -74,7 +77,6 @@ export default function NavBar() {
               className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
             />
           </button>
-
           {showProfile && (
             <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl z-50">
               <div className="p-4 border-b border-gray-700">
@@ -86,7 +88,6 @@ export default function NavBar() {
                   </div>
                 </div>
               </div>
-
               <div className="py-2">
                 <NavLink
                   to="/account"
@@ -103,15 +104,19 @@ export default function NavBar() {
                   <span className="text-sm">Help Center</span>
                 </NavLink>
               </div>
-
               <div className="border-t border-gray-700 py-2">
-                <button
-                  className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left"
-                  onClick={handleLogout}
-                >
-                  <LogOut size={16} />
-                  <span className="text-sm">Sign out</span>
-                </button>
+                <Modal>
+                  <ModalTrigger>
+                    <button className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left">
+                      <LogOut size={16} />
+                      <span className="text-sm">Sign out</span>
+                    </button>
+                  </ModalTrigger>
+                  <ModalContent
+                    title="Are you sure you want to log out?"
+                    onConfirm={handleLogout}
+                  />
+                </Modal>
               </div>
             </div>
           )}

@@ -75,10 +75,8 @@ export default function Hero({ movie: movieProp }) {
         }
       }, 300);
     }
-
     setWasPlayingBeforeVideoPlayer(false);
   };
-
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -95,7 +93,6 @@ export default function Hero({ movie: movieProp }) {
       }, 2000);
     }
   };
-
   const toggleMute = () => {
     if (videoRef.current) {
       if (isMuted) {
@@ -108,7 +105,6 @@ export default function Hero({ movie: movieProp }) {
       }
     }
   };
-
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (videoRef.current && previewStarted && !videoEnded && !isPlaying) {
@@ -132,7 +128,6 @@ export default function Hero({ movie: movieProp }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
-
   useEffect(() => {
     if (isPlaying) return;
 
@@ -170,7 +165,6 @@ export default function Hero({ movie: movieProp }) {
           setIsPaused(false);
           setPreviewStarted(true);
           setShowDescription(false);
-
           setAutoShowTooltip(true);
           setTimeout(() => {
             setAutoShowTooltip(false);
@@ -179,11 +173,9 @@ export default function Hero({ movie: movieProp }) {
       }, 800);
     }
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
-
   if (isLoading || !movie) {
     return <Spinner />;
   }
-
   return (
     <section
       ref={ref}
@@ -230,7 +222,6 @@ export default function Hero({ movie: movieProp }) {
             </>
           )}
       </div>
-
       <div
         className={`absolute top-16 right-4 sm:top-20 sm:right-6 lg:top-24 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
           previewStarted && !videoEnded && !isPlaying
@@ -247,10 +238,8 @@ export default function Hero({ movie: movieProp }) {
             }`}
           >
             {isMuted ? 'Unmute this video' : 'Mute this video'}
-
             <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
           </div>
-
           <button
             onClick={toggleMute}
             onMouseEnter={() => setShowVolumeTooltip(true)}
@@ -262,7 +251,6 @@ export default function Hero({ movie: movieProp }) {
           </button>
         </div>
       </div>
-
       <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 max-w-none">
         <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black mb-4 sm:mb-6 tracking-tight leading-[0.85] sm:leading-[0.9] max-w-4xl">
           <span className="block">{movie.title?.split(' ')[0]}</span>
@@ -270,7 +258,6 @@ export default function Hero({ movie: movieProp }) {
             {movie.title?.split(' ').slice(1).join(' ')}
           </span>
         </h1>
-
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-6 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
           <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-green-400 font-bold text-base sm:text-lg lg:text-xl">
