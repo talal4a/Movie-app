@@ -23,6 +23,8 @@ export default function Hero({ movie: movieProp }) {
   const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
   const [autoShowTooltip, setAutoShowTooltip] = useState(false);
   const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
+  const [wasPlayingBeforeVideoPlayer, setWasPlayingBeforeVideoPlayer] =
+    useState(false);
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
@@ -37,7 +39,46 @@ export default function Hero({ movie: movieProp }) {
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
-  const handlePlay = () => setIsPlaying(true);
+  const handlePlay = () => {
+    if (videoRef.current && !videoRef.current.paused) {
+      videoRef.current.pause();
+      setWasPlayingBeforeVideoPlayer(true);
+    } else {
+      setWasPlayingBeforeVideoPlayer(false);
+    }
+    setPreviewStarted(false);
+    setIsPaused(true);
+    setShowDescription(true);
+    setAutoShowTooltip(false);
+    setIsPlaying(true);
+  };
+  const handleVideoPlayerClose = () => {
+    setIsPlaying(false);
+    if (
+      wasPlayingBeforeVideoPlayer &&
+      inView &&
+      videoRef.current &&
+      !videoEnded
+    ) {
+      setTimeout(() => {
+        if (videoRef.current && inView && !document.hidden) {
+          videoRef.current.play().catch((e) => {
+            console.warn('Resume after video player close failed:', e);
+          });
+          setIsPaused(false);
+          setPreviewStarted(true);
+          setShowDescription(false);
+          setAutoShowTooltip(true);
+          setTimeout(() => {
+            setAutoShowTooltip(false);
+          }, 3000);
+        }
+      }, 300);
+    }
+
+    setWasPlayingBeforeVideoPlayer(false);
+  };
+
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -70,7 +111,7 @@ export default function Hero({ movie: movieProp }) {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (videoRef.current && previewStarted && !videoEnded) {
+      if (videoRef.current && previewStarted && !videoEnded && !isPlaying) {
         if (document.hidden) {
           if (!videoRef.current.paused) {
             videoRef.current.pause();
@@ -90,8 +131,11 @@ export default function Hero({ movie: movieProp }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView]);
+  }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
+
   useEffect(() => {
+    if (isPlaying) return;
+
     if (inView && !hasPlayed && videoRef.current) {
       videoRef.current.play().catch((e) => {
         console.warn('Autoplay failed:', e);
@@ -134,7 +178,7 @@ export default function Hero({ movie: movieProp }) {
         }
       }, 800);
     }
-  }, [inView, hasPlayed, previewStarted, videoEnded, isPaused]);
+  }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
 
   if (isLoading || !movie) {
     return <Spinner />;
@@ -150,7 +194,7 @@ export default function Hero({ movie: movieProp }) {
           ref={videoRef}
           src={movie.previewTrailer}
           className={`w-full h-full object-cover object-center transition-all duration-1000 ease-out ${
-            videoEnded || isPaused || !previewStarted
+            videoEnded || isPaused || !previewStarted || isPlaying
               ? 'opacity-0 scale-105'
               : 'opacity-100 scale-100'
           }`}
@@ -169,26 +213,27 @@ export default function Hero({ movie: movieProp }) {
             }, 500);
           }}
         />
-        {(videoEnded || isPaused || !previewStarted) && movie?.backdrop && (
-          <>
-            <img
-              src={movie.backdrop}
-              alt="Backdrop"
-              className={`absolute inset-0 w-full h-full object-cover object-top transition-all duration-1000 ease-out ${
-                videoEnded || isPaused || !previewStarted
-                  ? 'opacity-100 scale-100'
-                  : 'opacity-0 scale-95'
-              }`}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none transition-opacity duration-1000" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent pointer-events-none transition-opacity duration-1000" />
-          </>
-        )}
+        {(videoEnded || isPaused || !previewStarted || isPlaying) &&
+          movie?.backdrop && (
+            <>
+              <img
+                src={movie.backdrop}
+                alt="Backdrop"
+                className={`absolute inset-0 w-full h-full object-cover object-top transition-all duration-1000 ease-out ${
+                  videoEnded || isPaused || !previewStarted || isPlaying
+                    ? 'opacity-100 scale-100'
+                    : 'opacity-0 scale-95'
+                }`}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none transition-opacity duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent pointer-events-none transition-opacity duration-1000" />
+            </>
+          )}
       </div>
 
       <div
         className={`absolute top-16 right-4 sm:top-20 sm:right-6 lg:top-24 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
-          previewStarted && !videoEnded
+          previewStarted && !videoEnded && !isPlaying
             ? 'opacity-100 transform translate-y-0'
             : 'opacity-0 transform -translate-y-4 pointer-events-none'
         }`}
@@ -210,7 +255,7 @@ export default function Hero({ movie: movieProp }) {
             onClick={toggleMute}
             onMouseEnter={() => setShowVolumeTooltip(true)}
             onMouseLeave={() => setShowVolumeTooltip(false)}
-            disabled={!previewStarted || videoEnded}
+            disabled={!previewStarted || videoEnded || isPlaying}
             className="bg-black/60 text-white px-3 py-2 rounded-full hover:bg-black/80 transition z-10 disabled:opacity-50 border border-gray-600"
           >
             {isMuted ? '🔊' : '🔇'}
@@ -279,7 +324,7 @@ export default function Hero({ movie: movieProp }) {
       {isPlaying && (
         <VideoPlayer
           embedUrl={movie.embedUrl}
-          onClose={() => setIsPlaying(false)}
+          onClose={handleVideoPlayerClose}
         />
       )}
     </section>

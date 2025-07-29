@@ -11,7 +11,6 @@ export const getMoviesByCollection = async (collectionName) => {
     return [];
   }
 };
-
 export const getRelatedMovies = async (id) => {
   try {
     const res = await axiosInstance.get(`movies/related/${id}`);

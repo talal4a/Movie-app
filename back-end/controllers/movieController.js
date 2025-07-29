@@ -5,6 +5,7 @@ const ytdl = require("@distube/ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
 const tmp = require("tmp");
 const fs = require("fs");
+const mongoose = require("mongoose");
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 exports.createMovie = async (req, res) => {
   try {
@@ -188,23 +189,38 @@ exports.getGroupedMovies = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch grouped movies" });
   }
 };
+
 exports.getMoviesOfSameCollection = async (req, res) => {
   try {
     const movieId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(movieId)) {
+      console.log("Invalid ObjectId");
+      return res.status(400).json({ error: "Invalid movie ID" });
+    }
+
     const movie = await Movie.findById(movieId);
+
+    if (!movie) {
+      return res.status(404).json({ error: "Movie not found" });
+    }
+
     if (!movie.collection) {
+      console.log("Movie has no collection");
       return res.status(200).json({ data: [] });
     }
+
     const relatedMovies = await Movie.find({
       collection: movie.collection,
       _id: { $ne: movie._id },
     });
+
     res.status(200).json(relatedMovies);
   } catch (error) {
     console.error("Error fetching related movies:", error);
     res.status(500).json({ error: "Failed to fetch related movies" });
   }
 };
+
 exports.uploadTrailerToCloudinary = async (req, res) => {
   try {
     const { movieIds } = req.body;
@@ -237,8 +253,8 @@ exports.uploadTrailerToCloudinary = async (req, res) => {
         });
         await new Promise((resolve, reject) => {
           ffmpeg(tmpInput)
-            .setStartTime(3)
-            .setDuration(17)
+            .setStartTime(10)
+            .setDuration(18)
             .videoCodec("libx264")
             .audioCodec("aac")
             .outputOptions([
