@@ -114,7 +114,11 @@ export default function NavBar() {
                   </button>
                 </Modal.Open>
                 <Modal.Window name="logout-modal">
-                  <LogoutConfirm />
+                  <LogoutConfirm
+                    message={
+                      " You'll need to sign in again to access your account and continue watching."
+                    }
+                  />
                 </Modal.Window>
               </div>
             </div>
