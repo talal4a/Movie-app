@@ -5,8 +5,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '@/slice/userSlice';
 import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
-import ModalTrigger from './Modals/ModalTrigger';
-import ModalContent from './Modals/ModalContent';
+import LogoutConfirm from './LogoutConfirm';
 import Modal from './Modals/Modal';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -105,18 +104,18 @@ export default function NavBar() {
                 </NavLink>
               </div>
               <div className="border-t border-gray-700 py-2">
-                <Modal>
-                  <ModalTrigger>
-                    <button className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left">
-                      <LogOut size={16} />
-                      <span className="text-sm">Sign out</span>
-                    </button>
-                  </ModalTrigger>
-                  <ModalContent
-                    title="Are you sure you want to log out?"
-                    onConfirm={handleLogout}
-                  />
-                </Modal>
+                <Modal.Open opens="logout-modal">
+                  <button
+                    className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={16} />
+                    <span className="text-sm">Sign out</span>
+                  </button>
+                </Modal.Open>
+                <Modal.Window name="logout-modal">
+                  <LogoutConfirm />
+                </Modal.Window>
               </div>
             </div>
           )}

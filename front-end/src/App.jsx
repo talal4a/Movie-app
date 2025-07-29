@@ -17,6 +17,7 @@ import ResetPassword from './pages/ResetPassword';
 import NotFound from './components/NotFound';
 import { fetchWatchlist } from './slice/watchListSlice';
 import MoviePage from './pages/MoviePage';
+import Modal from './components/Modals/Modal';
 function App() {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
@@ -32,109 +33,111 @@ function App() {
     }
   }, [user, dispatch]);
   return (
-    <main className="min-h-screen bg-black text-white">
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/movie/:id"
-            element={
-              <PrivateRoute>
-                <MovieDetail />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/my-list"
-            element={
-              <PrivateRoute>
-                <WatchListPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/account"
-            element={
-              <PrivateRoute>
-                <Account />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/movies"
-            element={
-              <PrivateRoute>
-                <MoviePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <PrivateRoute>
-                <SearchPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <PrivateRoute>
-                <NotFound />
-              </PrivateRoute>
-            }
-          />
-        </Route>
+    <Modal>
+      <main className="min-h-screen bg-black text-white">
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/movie/:id"
+              element={
+                <PrivateRoute>
+                  <MovieDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-list"
+              element={
+                <PrivateRoute>
+                  <WatchListPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute>
+                  <Account />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/movies"
+              element={
+                <PrivateRoute>
+                  <MoviePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <SearchPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <PrivateRoute>
+                  <NotFound />
+                </PrivateRoute>
+              }
+            />
+          </Route>
 
-        <Route
-          path="/auth/login"
-          element={
-            <GuestRoute>
-              <Login />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/auth/signup"
-          element={
-            <GuestRoute>
-              <Signup />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <GuestRoute>
-              <ForgotPassword />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/reset-password/:token"
-          element={
-            <GuestRoute>
-              <ResetPassword />
-            </GuestRoute>
-          }
-        />
-      </Routes>
-    </main>
+          <Route
+            path="/auth/login"
+            element={
+              <GuestRoute>
+                <Login />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/auth/signup"
+            element={
+              <GuestRoute>
+                <Signup />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <GuestRoute>
+                <ForgotPassword />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <GuestRoute>
+                <ResetPassword />
+              </GuestRoute>
+            }
+          />
+        </Routes>
+      </main>
+    </Modal>
   );
 }
 export default App;
