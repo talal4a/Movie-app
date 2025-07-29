@@ -1,13 +1,12 @@
-export default function LogoutConfirm({ onCloseModal,message}) {
+export default function LogoutConfirm({ onCloseModal,message,heading}) {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-3xl font-bold text-white">Sign Out?</h2>
+        <h2 className="text-3xl font-bold text-white">{heading}</h2>
         <p className="text-gray-300 text-lg leading-relaxed">
         {message}
         </p>
       </div>
-
       <div className="flex justify-end gap-4 pt-4 border-t border-gray-600/30">
         <button
           onClick={onCloseModal}

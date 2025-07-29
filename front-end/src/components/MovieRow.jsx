@@ -1,8 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MovieCard from './MovieCard';
 import { getAllMovies } from '../api/auth';
 import Spinner from './Spinner';
 export default function MovieRow({ title }) {
+  const queryClient = useQueryClient();
+  queryClient.prefetchQuery({
+    queryKey: ['allMovies'],
+    queryFn: getAllMovies,
+  });
   const { data: movies, isLoading } = useQuery({
     queryKey: ['allMovies'],
     queryFn: getAllMovies,

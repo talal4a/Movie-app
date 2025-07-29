@@ -7,9 +7,11 @@ import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from './LogoutConfirm';
 import Modal from './Modals/Modal';
+import useOutsideClick from '@/hooks/useOutsideClick';
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const ref = useOutsideClick({ handler: () => setShowProfile(false) });
   const { showToast } = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -79,11 +81,11 @@ export default function NavBar() {
           {showProfile && (
             <div className="absolute right-0 top-12 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl z-50">
               <div className="p-4 border-b border-gray-700">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3" ref={ref}>
                   <UserAvatar user={user} size={40} />
                   <div>
                     <p className="font-semibold">{user?.name || 'User'}</p>
-                    <p className="text-sm text-gray-400">Premium Member</p>
+                    <p className="text-sm text-gray-400">{user?.role}</p>
                   </div>
                 </div>
               </div>
@@ -118,6 +120,7 @@ export default function NavBar() {
                     message={
                       " You'll need to sign in again to access your account and continue watching."
                     }
+                    heading={'SignOut?'}
                   />
                 </Modal.Window>
               </div>

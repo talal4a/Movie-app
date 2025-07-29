@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { getMovieById } from '../api/auth';
 import Spinner from '../components/Spinner';
@@ -10,6 +10,7 @@ import RelatedMovies from '@/components/RelatedMovies';
 import RecommendedMovies from '@/components/RecommendationMovie';
 import Hero from '@/components/Hero';
 export default function MovieDetail() {
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const [showPlayer, setShowPlayer] = useState(false);
   useEffect(() => {
@@ -23,7 +24,10 @@ export default function MovieDetail() {
       document.body.style.overflow = '';
     };
   }, [showPlayer]);
-
+  queryClient.prefetchQuery({
+    queryKey: ['movie', id],
+    queryFn: () => getMovieById(id),
+  });
   const {
     data: movie,
     isLoading,

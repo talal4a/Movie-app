@@ -1,8 +1,16 @@
 import axiosInstance from '@/api/axioInstance';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MovieCollection from './CollectionMovie';
 export default function GroupedMovieCollections() {
+  const queryClient = useQueryClient();
+  queryClient.prefetchQuery({
+    queryKey: ['collection-names'],
+    queryFn: async () => {
+      const res = await axiosInstance.get('movies/grouped');
+      return Object.keys(res.data);
+    },
+  });
   const {
     data: collectionNames = [],
     isLoading,
