@@ -149,7 +149,6 @@ export default function ReviewList({ id }) {
                       <Modal.Open opens="logout-modal">
                         <button
                           onClick={() => {
-                            handleDelete(review._id);
                             showToast({
                               message: 'Review is deleted sucessfully',
                               type: 'success',
@@ -165,6 +164,8 @@ export default function ReviewList({ id }) {
                           message={' Are you sure to delete this review.'}
                           heading={'Delete?'}
                           button={'Delete'}
+                          onConfirm={() => handleDelete(review._id)}
+                          onCloseModal={() => handleDelete(review._id)}
                         />
                       </Modal.Window>
                     </div>

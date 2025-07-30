@@ -1,4 +1,10 @@
-export default function LogoutConfirm({ onCloseModal, message, heading,button }) {
+export default function LogoutConfirm({
+  onCloseModal,
+  onConfirm,
+  message,
+  heading,
+  button,
+}) {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -14,6 +20,7 @@ export default function LogoutConfirm({ onCloseModal, message, heading,button })
         </button>
         <button
           onClick={() => {
+            onConfirm();
             onCloseModal();
           }}
           className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-all duration-200 font-semibold text-base shadow-xl hover:shadow-red-500/25"
