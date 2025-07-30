@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PrivateRoute from './components/PrivateRoute';
@@ -19,14 +19,8 @@ import { fetchWatchlist } from './slice/watchListSlice';
 import MoviePage from './pages/MoviePage';
 import Modal from './components/Modals/Modal';
 function App() {
-  const { pathname } = useLocation();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user?.user);
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    });
-  }, [pathname]);
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());

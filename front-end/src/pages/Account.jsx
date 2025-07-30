@@ -59,8 +59,14 @@ export default function Account() {
       showToast({ message: 'Profile is not updated', type: 'error' });
     }
   };
-
   const handleSavePassword = async () => {
+    const { currentPassword, newPassword, confirmPassword } = passwordData;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return showToast({
+        message: 'Please fill out all password fields',
+        type: 'warning',
+      });
+    }
     try {
       const updatedUser = await updatePassword(passwordData);
       dispatch(setCredentials({ user: updatedUser, token }));
@@ -100,6 +106,7 @@ export default function Account() {
     mutationFn: () => updateProfile(profileData),
     onSuccess: (updatedUser) => {
       dispatch(setCredentials({ user: updatedUser, token }));
+
       showToast({
         message: 'Profile is updated successfully',
         type: 'success',

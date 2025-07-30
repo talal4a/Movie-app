@@ -121,6 +121,7 @@ export default function NavBar() {
                       " You'll need to sign in again to access your account and continue watching."
                     }
                     heading={'SignOut?'}
+                    button={"Sign Out"}
                   />
                 </Modal.Window>
               </div>

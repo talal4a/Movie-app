@@ -4,6 +4,8 @@ import UserAvatar from './UserAvatar';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
+import Modal from './Modals/Modal';
+import LogoutConfirm from './LogoutConfirm';
 export default function ReviewList({ id }) {
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(5);
@@ -11,13 +13,11 @@ export default function ReviewList({ id }) {
   const { showToast } = useToast();
   const user = useSelector((state) => state.user?.user);
   const queryClient = useQueryClient();
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reviews', id],
     queryFn: () => getReviewsByMovieId(id),
     retry: false,
   });
-
   const handleDelete = async () => {
     try {
       await deleteReview(id);
@@ -26,13 +26,11 @@ export default function ReviewList({ id }) {
       console.error('Failed to delete review:', err);
     }
   };
-
   const handleEdit = (review) => {
     setEditingReviewId(review._id);
     setEditText(review.review);
     setEditRating(review.rating);
   };
-
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -46,12 +44,9 @@ export default function ReviewList({ id }) {
       console.error('Failed to update review:', err);
     }
   };
-
   const reviews = Array.isArray(data?.data) ? data.data : [];
-
   if (isLoading) return <p className="text-gray-400">Loading reviews...</p>;
   if (isError) return <p className="text-red-400">Failed to load reviews.</p>;
-
   return (
     <div className="mt-6">
       <h3 className="text-xl font-semibold text-white mb-4">Reviews</h3>
@@ -151,18 +146,27 @@ export default function ReviewList({ id }) {
                       >
                         Edit
                       </button>
-                      <button
-                        onClick={() => {
-                          handleDelete(review._id);
-                          showToast({
-                            message: 'Review is deleted sucessfully',
-                            type: 'success',
-                          });
-                        }}
-                        className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
+                      <Modal.Open opens="logout-modal">
+                        <button
+                          onClick={() => {
+                            handleDelete(review._id);
+                            showToast({
+                              message: 'Review is deleted sucessfully',
+                              type: 'success',
+                            });
+                          }}
+                          className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </Modal.Open>
+                      <Modal.Window name="logout-modal">
+                        <LogoutConfirm
+                          message={' Are you sure to delete this review.'}
+                          heading={'Delete?'}
+                          button={'Delete'}
+                        />
+                      </Modal.Window>
                     </div>
                   )}
                 </>
