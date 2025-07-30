@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, X, AlertTriangle } from 'lucide-react';
-
 export const Toast = ({
   message,
   type = 'success',
@@ -10,7 +9,6 @@ export const Toast = ({
 }) => {
   const [isVisible, setIsVisible] = useState(show);
   const [isAnimating, setIsAnimating] = useState(false);
-
   useEffect(() => {
     if (show) {
       setIsVisible(true);
@@ -22,7 +20,6 @@ export const Toast = ({
       return () => clearTimeout(timer);
     }
   }, [show, duration]);
-
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -30,9 +27,7 @@ export const Toast = ({
       onClose && onClose();
     }, 300);
   };
-
   if (!isVisible) return null;
-
   const getToastStyles = () => {
     const baseStyles =
       'flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl backdrop-blur-md border transition-all duration-300 ease-out transform';
@@ -44,7 +39,6 @@ export const Toast = ({
       return `${baseStyles} bg-red-900/90 border-red-500/30 text-red-100`;
     }
   };
-
   const getIcon = () => {
     if (type === 'success') {
       return <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />;
@@ -56,11 +50,9 @@ export const Toast = ({
       return <XCircle className="w-6 h-6 text-red-400 flex-shrink-0" />;
     }
   };
-
   const getCloseButtonStyles = () => {
     return 'text-white/60 hover:text-white/90 transition-colors duration-200 flex-shrink-0';
   };
-
   return (
     <div
       className={`
