@@ -24,7 +24,6 @@ export default function NavBar() {
   const [query, setQuery] = useState('');
   const user = useSelector((state) => state.user?.user);
 
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -39,7 +38,6 @@ export default function NavBar() {
         document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showSearch]);
-
 
   useEffect(() => {
     if (showSearch && searchInputRef.current) {
@@ -57,7 +55,6 @@ export default function NavBar() {
   const handleSearchInput = (e) => {
     const value = e.target.value;
     setQuery(value);
-
 
     if (value.length >= 3) {
       navigate(`/search?q=${encodeURIComponent(value)}`);
