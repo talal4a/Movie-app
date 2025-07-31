@@ -39,6 +39,9 @@ export default function Hero({ movie: movieProp }) {
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
+  const fullTitle = movie?.title;
+  const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
+  const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
   const handlePlay = () => {
     if (videoRef.current && !videoRef.current.paused) {
       videoRef.current.pause();
@@ -130,7 +133,6 @@ export default function Hero({ movie: movieProp }) {
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
   useEffect(() => {
     if (isPlaying) return;
-
     if (inView && !hasPlayed && videoRef.current) {
       videoRef.current.play().catch((e) => {
         console.warn('Autoplay failed:', e);
@@ -253,10 +255,12 @@ export default function Hero({ movie: movieProp }) {
       </div>
       <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 max-w-none">
         <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black mb-4 sm:mb-6 tracking-tight leading-[0.85] sm:leading-[0.9] max-w-4xl">
-          <span className="block">{movie.title?.split(' ')[0]}</span>
-          <span className="block">
-            {movie.title?.split(' ').slice(1).join(' ')}
-          </span>
+          <span className="block">{mainTitle}</span>
+          {subtitle && (
+            <span className="block text-gray-400  font-bold uppercase tracking-widest text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mt-5 max-w-3xl leading-tight break-words ">
+              {subtitle}
+            </span>
+          )}
         </h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-6 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
           <div className="flex items-center gap-1 sm:gap-2">

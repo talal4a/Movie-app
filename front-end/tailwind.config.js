@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import animate from 'tailwindcss-animate';
-
+import lineClamp from '@tailwindcss/line-clamp';
 export default {
   darkMode: ['class'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -61,5 +61,5 @@ export default {
       },
     },
   },
-  plugins: [animate],
+  plugins: [animate, lineClamp],
 };

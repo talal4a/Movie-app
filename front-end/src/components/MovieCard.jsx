@@ -1,35 +1,34 @@
-import { Plus, Play, Check } from 'lucide-react';
+import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useToast } from '@/context/ToastContext';
 import { useLazyImage } from '@/hooks/useLazyImage';
+
 export default function MovieCard({ movie, index }) {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
   const watchlist = useSelector((state) => state.watchList.items);
   const { imgRef, isVisible, src } = useLazyImage(movie.poster, index < 4);
+
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie._id);
-  const [justAdded, setJustAdded] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const toggleWatchlist = () => {
-    if (isSaved) {
-      dispatch(removeFromWatchlist(movie._id));
-      setJustAdded(false);
-    } else {
+
+  const handleAddToWatchlist = (e) => {
+    e.preventDefault();
+
+    if (!isSaved) {
       dispatch(addToWatchlist(movie._id));
-      setJustAdded(true);
-      setButtonDisabled(true);
-      setTimeout(() => {
-        setJustAdded(false);
-        setButtonDisabled(false);
-      }, 2000);
+      showToast({ message: 'Added to Watchlist', type: 'success' });
+    } else {
+      // Optionally show a message
+      showToast({ message: 'Already in Watchlist', type: 'info' });
     }
   };
+
   return (
     <Link to={`/movie/${movie._id}`} className="block">
       <div className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300 w-45">
@@ -49,39 +48,9 @@ export default function MovieCard({ movie, index }) {
               <Play className="w-6 h-6 fill-current" />
             </button>
           </div>
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 mt-[90px]">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                if (!buttonDisabled) toggleWatchlist();
-                showToast({
-                  message: 'Add to List  successfully',
-                  type: 'success',
-                });
-              }}
-              disabled={buttonDisabled}
-              className={`rounded-full p-3 shadow-lg transition-all duration-300 ${
-                isSaved || justAdded
-                  ? 'bg-gray-500 text-white cursor-not-allowed'
-                  : 'bg-white text-black hover:scale-110'
-              }`}
-              title={isSaved ? 'Already in Watchlist' : 'Add to Watchlist'}
-            >
-              <span
-                className={`transition-all duration-300 ease-in-out ${
-                  justAdded ? 'animate-ping-once' : ''
-                }`}
-              >
-                {isSaved || justAdded ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  <Plus className="w-5 h-5" />
-                )}
-              </span>
-            </button>
-          </div>
         </div>
-        <div className="p-3 text-white space-y-1">
+
+        <div className="p-3 text-white space-y-1 relative">
           <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
           <p className="text-xs text-gray-400">{movie.releaseYear}</p>
           <p className="text-xs text-gray-400">{movie.runtime}</p>
@@ -89,8 +58,9 @@ export default function MovieCard({ movie, index }) {
             {movie.genres?.slice(0, 2).map((genre, index) => (
               <span
                 key={index}
-                className={`text-[10px] bg-gray-700 px-2 py-0.5 rounded-full
-        ${index === 1 ? 'hidden md:inline' : ''}`}
+                className={`text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ${
+                  index === 1 ? 'hidden md:inline' : ''
+                }`}
               >
                 {genre}
               </span>
@@ -100,6 +70,22 @@ export default function MovieCard({ movie, index }) {
             <span className="text-yellow-400 text-xs font-medium">
               ⭐ {movie.tmdbRatings.average?.toFixed(1) || 'N/A'}
             </span>
+          </div>
+
+          <div className="absolute bottom-3 right-3">
+            <button
+              onClick={handleAddToWatchlist}
+              disabled={isSaved}
+              title={isSaved ? 'Already in Watchlist' : 'Add to Watchlist'}
+              className={`transition-all duration-300 ease-in-out 
+    ${isSaved ? 'text-gray-500 opacity-60 cursor-not-allowed' : 'text-white hover:scale-110 hover:-translate-y-1'}`}
+            >
+              {isSaved ? (
+                <BookmarkCheck className="w-7 h-7" />
+              ) : (
+                <Bookmark className="w-7 h-7" />
+              )}
+            </button>
           </div>
         </div>
       </div>

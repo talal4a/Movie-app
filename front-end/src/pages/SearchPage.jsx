@@ -9,6 +9,10 @@ export default function SearchPage() {
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const debouncedSearch = debounce((value) => {
     if (value.length >= 3) {
       setSearchParams({ q: value });
@@ -41,10 +45,10 @@ export default function SearchPage() {
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(255,0,0,0.1),transparent_50%),radial-gradient(circle_at_80%_20%,rgba(255,0,0,0.1),transparent_50%)]"></div>
       </div>
-      <div className="relative z-10">
+      <div className="relative z-10 ">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-transparent"></div>
-          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-12">
             <div className="max-w-3xl mx-auto">
               <div className="text-center mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-4">
@@ -217,7 +221,7 @@ export default function SearchPage() {
                   <span className="text-red-500 font-semibold">{query}</span>"
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
                 {movies.map((movie, index) => (
                   <div
                     key={movie._id}
@@ -236,7 +240,7 @@ export default function SearchPage() {
             <div className="text-center py-20 animate-in fade-in duration-500">
               <div className="relative">
                 <div className="w-32 h-32 mx-auto mb-8 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 rounded-full "></div>
                   <svg
                     className="w-full h-full text-gray-600 relative z-10"
                     fill="none"
@@ -252,7 +256,7 @@ export default function SearchPage() {
                   </svg>
                 </div>
                 <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  Find your next favorite
+                  Find your next favorite movie
                 </h3>
                 <p className="text-gray-400 text-lg max-w-md mx-auto">
                   Search through our vast collection of movies.

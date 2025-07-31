@@ -14,6 +14,9 @@ export default function MovieDetail() {
   const { id } = useParams();
   const [showPlayer, setShowPlayer] = useState(false);
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  useEffect(() => {
     if (showPlayer) {
       document.body.style.overflow = 'hidden';
     } else {
