@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from './LogoutConfirm';
 import Modal from './Modals/Modal';
 import useOutsideClick from '@/hooks/useOutsideClick';
-export default function NavBar() {
+function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const location = useLocation();
@@ -149,3 +149,4 @@ export default function NavBar() {
     </>
   );
 }
+export default React.memo(NavBar);

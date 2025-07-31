@@ -42,15 +42,12 @@ export default function Account() {
   const handleProfileChange = (field, value) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
   };
-
   const handlePasswordChange = (field, value) => {
     setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
-
   const togglePasswordVisibility = (field) => {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
-
   const handleSaveProfile = async () => {
     try {
       await updateProfileMutation.mutateAsync(profileData);

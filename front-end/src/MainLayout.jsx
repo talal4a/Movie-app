@@ -12,21 +12,23 @@ const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
       {isMobile ? <MobileNavbar /> : <NavBar />}
-
       <AnimatePresence mode="wait">
-        <motion.main
-          key={location.pathname}
-          className="flex-1"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-        >
-          <Outlet />
-        </motion.main>
+        <div className="relative flex-1 overflow-hidden">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            className="flex flex-col min-h-screen"
+          >
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <NetflixFooter />
+          </motion.div>
+        </div>
       </AnimatePresence>
-
-      <NetflixFooter />
     </div>
   );
 };

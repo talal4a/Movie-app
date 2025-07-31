@@ -6,7 +6,6 @@ import GenreSection from '../components/GenreSection';
 import { useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/axioInstance';
 import { motion } from 'framer-motion';
-
 const pageVariants = {
   initial: { opacity: 0, y: 50 },
   animate: { opacity: 1, y: 0 },
