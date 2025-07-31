@@ -1,11 +1,68 @@
+// Your existing MovieCard with Redux watchlist integration
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
-import { useRef, useState } from 'react';
-const MovieCard = ({ movie, handleAddToWatchlist, isSaved }) => {
+import { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useToast } from '@/context/ToastContext';
+import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
+
+
+const MovieCard = ({ movie, index }) => {
+  const dispatch = useDispatch();
+  const { showToast } = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const imgRef = useRef(null);
+
+  // Get watchlist status from Redux store with correct key name
+  const watchlistItems = useSelector((state) => state.watchList?.items || []);
+  const isSaved = watchlistItems.some((item) => item._id === movie._id);
+
   const src = movie.poster || movie.backdrop || '/fallback.jpg';
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.3 }
+    );
+    if (imgRef.current) observer.observe(imgRef.current);
+    return () => {
+      if (imgRef.current) observer.unobserve(imgRef.current);
+    };
+  }, []);
+
+  const handleAddToWatchlist = async (movieId) => {
+    try {
+      if (isSaved) {
+        await dispatch(removeFromWatchlist(movieId));
+        showToast({
+          message: 'Movie removed from watchlist',
+          type: 'success',
+        });
+      } else {
+        await dispatch(addToWatchlist(movieId));
+        showToast({
+          message: 'Movie added to watchlist',
+          type: 'success',
+        });
+      }
+    } catch (error) {
+      showToast({
+        message: 'Something went wrong',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleWatchlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleAddToWatchlist(movie._id);
+  };
+
   return (
     <Link to={`/movie/${movie._id}`} className="block">
       <motion.div
@@ -17,12 +74,12 @@ const MovieCard = ({ movie, handleAddToWatchlist, isSaved }) => {
           <img
             ref={imgRef}
             src={src}
-            loading="auto"
+            loading={index < 4 ? 'eager' : 'lazy'}
             alt={movie.title}
             onLoad={() => setIsLoaded(true)}
             className={`w-full h-full object-cover object-top transition-all duration-700 ease-in-out ${
               isLoaded ? 'blur-0 scale-100' : 'blur-md scale-105'
-            } opacity-100`}
+            } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
@@ -50,19 +107,14 @@ const MovieCard = ({ movie, handleAddToWatchlist, isSaved }) => {
             <span className="text-yellow-400 text-xs font-medium">
               ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
             </span>
-          </div>
-          <div className="absolute bottom-3 right-3">
+
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                handleAddToWatchlist(movie._id);
-              }}
-              disabled={isSaved}
-              title={isSaved ? 'Already in Watchlist' : 'Add to Watchlist'}
-              className={`transition-all duration-300 ease-in-out ${
+              onClick={handleWatchlistClick}
+              title={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
+              className={`p-1.5 rounded-full transition-all duration-300 ease-in-out z-10 relative ${
                 isSaved
-                  ? 'text-gray-500 opacity-60 cursor-not-allowed'
-                  : 'text-white hover:scale-110 hover:-translate-y-1'
+                  ? 'text-blue-400 bg-blue-400/15 hover:bg-blue-400/25'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-110'
               }`}
             >
               {isSaved ? (

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
 import { useInView } from 'react-intersection-observer';
+
 export default function Hero({ movie: movieProp }) {
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
@@ -29,6 +30,7 @@ export default function Hero({ movie: movieProp }) {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
+
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
@@ -36,13 +38,49 @@ export default function Hero({ movie: movieProp }) {
     keepPreviousData: true,
     staleTime: 1000,
   });
+
   const movie = movieProp || movies;
   const isSaved =
     Array.isArray(watchlist) &&
     watchlist.some((item) => item && item._id === movie?._id);
+
   const fullTitle = movie?.title;
   const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
   const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
+
+  // Function to generate consistent match percentage based on movie properties
+  const getConsistentMatch = (movie) => {
+    if (!movie?._id) return 85;
+
+    // Create a hash from movie ID for consistency
+    let hash = 0;
+    for (let i = 0; i < movie._id.length; i++) {
+      hash = (hash << 5) - hash + movie._id.charCodeAt(i);
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // Add variation based on other movie properties
+    if (movie.title) {
+      for (let i = 0; i < movie.title.length; i++) {
+        hash += movie.title.charCodeAt(i);
+      }
+    }
+
+    // Add some variation based on release year
+    if (movie.releaseYear) {
+      hash += movie.releaseYear;
+    }
+
+    // Convert hash to percentage between 70-99
+    const percentage = 70 + (Math.abs(hash) % 30);
+
+    return percentage;
+  };
+
+  // Get match percentage from movie data or calculate it
+  const matchPercentage =
+    movie?.matchPercentage || movie?.match || getConsistentMatch(movie);
+
   const handlePlay = () => {
     if (videoRef.current && !videoRef.current.paused) {
       videoRef.current.pause();
@@ -56,6 +94,7 @@ export default function Hero({ movie: movieProp }) {
     setAutoShowTooltip(false);
     setIsPlaying(true);
   };
+
   const handleVideoPlayerClose = () => {
     setIsPlaying(false);
     if (
@@ -83,6 +122,7 @@ export default function Hero({ movie: movieProp }) {
     }
     setWasPlayingBeforeVideoPlayer(false);
   };
+
   const toggleWatchlist = () => {
     if (!movie) return;
     if (isSaved) {
@@ -99,6 +139,7 @@ export default function Hero({ movie: movieProp }) {
       }, 2000);
     }
   };
+
   const toggleMute = () => {
     if (videoRef.current) {
       if (isMuted) {
@@ -111,6 +152,7 @@ export default function Hero({ movie: movieProp }) {
       }
     }
   };
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (videoRef.current && previewStarted && !videoEnded && !isPlaying) {
@@ -134,6 +176,7 @@ export default function Hero({ movie: movieProp }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
+
   useEffect(() => {
     if (isPlaying) return;
     let delayTimeout;
@@ -193,6 +236,7 @@ export default function Hero({ movie: movieProp }) {
   if (isLoading || !movie) {
     return <Spinner />;
   }
+
   return (
     <section
       ref={ref}
@@ -240,7 +284,7 @@ export default function Hero({ movie: movieProp }) {
           )}
       </div>
       <div
-        className={`absolute top-16 right-4 sm:top-20 sm:right-6 lg:top-24 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
+        className={`absolute top-24 right-4 sm:top-28 sm:right-6 lg:top-32 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
           previewStarted && !videoEnded && !isPlaying
             ? 'opacity-100 transform translate-y-0'
             : 'opacity-0 transform -translate-y-4 pointer-events-none'
@@ -280,15 +324,11 @@ export default function Hero({ movie: movieProp }) {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-6 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
           <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-green-400 font-bold text-base sm:text-lg lg:text-xl">
-              98% Match
+              {matchPercentage}% Match
             </span>
             <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
           </div>
           <div className="text-gray-300">{movie.releaseYear}</div>
-          <div className="text-gray-300 hidden xs:block">{movie.runtime}</div>
-          <div className="bg-gray-800 px-2 py-1 text-xs sm:text-sm rounded text-white flex items-center">
-            {movie.ratings?.voteAverage?.toFixed(1)}
-          </div>
         </div>
         <div
           className={`transition-all duration-1000 ease-in-out overflow-hidden ${

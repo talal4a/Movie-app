@@ -1,13 +1,12 @@
 import axiosInstance from '@/api/axioInstance';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-// Fetch full movie watchlist
 export const fetchWatchlist = createAsyncThunk(
   'watchlist/fetch',
   async (_, thunkAPI) => {
     try {
       const res = await axiosInstance.get('/watchlist');
-      return res.data.data; // Should return array of full movie objects
+      return res.data.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || 'Error fetching watchlist'
@@ -16,13 +15,12 @@ export const fetchWatchlist = createAsyncThunk(
   }
 );
 
-// Add a movie to watchlist by ID
 export const addToWatchlist = createAsyncThunk(
   'watchlist/add',
   async (movieId, thunkAPI) => {
     try {
       const res = await axiosInstance.post(`/watchlist/${movieId}`);
-      return res.data.movie; // Should return full movie object
+      return res.data.movie;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || 'Error adding movie'
@@ -31,7 +29,6 @@ export const addToWatchlist = createAsyncThunk(
   }
 );
 
-// Remove a movie from watchlist by ID
 export const removeFromWatchlist = createAsyncThunk(
   'watchlist/remove',
   async (movieId, thunkAPI) => {
@@ -46,7 +43,6 @@ export const removeFromWatchlist = createAsyncThunk(
   }
 );
 
-// Slice definition
 const watchlistSlice = createSlice({
   name: 'watchlist',
   initialState: {
@@ -57,7 +53,6 @@ const watchlistSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch Watchlist
       .addCase(fetchWatchlist.pending, (state) => {
         state.loading = true;
         state.error = null;

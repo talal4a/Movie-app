@@ -50,7 +50,6 @@ export const fetchLatestMovies = async () => {
   );
   return res.data.data;
 };
-
 export const fetchMoviesByGenre = async (genre) => {
   const res = await axiosInstance.get(`/movies?genre=${genre}&limit=6`);
   return res.data.data;
