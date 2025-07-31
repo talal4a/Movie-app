@@ -11,12 +11,10 @@ import {
   X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 export default function MobileNavbar() {
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -24,11 +22,9 @@ export default function MobileNavbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   useEffect(() => {
     document.body.style.overflow = open || showProfile ? 'hidden' : 'auto';
   }, [open, showProfile]);
-
   return (
     <>
       <nav
@@ -41,18 +37,15 @@ export default function MobileNavbar() {
         <button onClick={() => setOpen(true)}>
           <Menu size={28} />
         </button>
-
         <div className="flex-grow text-center">
           <span className="text-red-600 font-black text-2xl tracking-tight cursor-pointer hover:text-red-500 transition-colors">
             CINEVERSE
           </span>
         </div>
-
         <div className="flex items-center gap-2 relative">
           <button className="hover:text-gray-300 p-2 hover:bg-gray-800 rounded-full">
             <Search size={20} />
           </button>
-
           <button
             onClick={() => setShowProfile(!showProfile)}
             className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors duration-200"
@@ -66,7 +59,6 @@ export default function MobileNavbar() {
               className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
             />
           </button>
-
           {showProfile && (
             <div className="absolute right-0 top-14 bg-black bg-opacity-95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl z-50">
               <div className="p-4 border-b border-gray-700">
@@ -80,7 +72,6 @@ export default function MobileNavbar() {
                   </div>
                 </div>
               </div>
-
               <div className="py-2">
                 <Link
                   to="/account"
@@ -90,25 +81,13 @@ export default function MobileNavbar() {
                   <span className="text-sm">Account</span>
                 </Link>
                 <Link
-                  to="/settings"
-                  className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800"
-                >
-                  <Settings size={16} />
-                  <span className="text-sm">Settings</span>
-                </Link>
-                <Link
                   to="/help"
                   className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800"
                 >
                   <HelpCircle size={16} />
                   <span className="text-sm">Help Center</span>
                 </Link>
-                <div className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 cursor-pointer">
-                  <Gift size={16} />
-                  <span className="text-sm">Gift Cards</span>
-                </div>
               </div>
-
               <div className="border-t border-gray-700 py-2">
                 <button className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 w-full text-left">
                   <LogOut size={16} />
@@ -131,7 +110,6 @@ export default function MobileNavbar() {
             <X size={24} />
           </button>
         </div>
-
         <div className="flex flex-col px-6 py-4 space-y-4 text-lg">
           <Link to="/" onClick={() => setOpen(false)}>
             Home
@@ -139,15 +117,8 @@ export default function MobileNavbar() {
           <Link to="/mylist" onClick={() => setOpen(false)}>
             My List
           </Link>
-          <Link to="/profile" onClick={() => setOpen(false)}>
-            Profile
-          </Link>
-          <Link to="/auth/logout" onClick={() => setOpen(false)}>
-            Logout
-          </Link>
         </div>
       </div>
-
       {(open || showProfile) && (
         <div
           className="fixed inset-0 bg-black/50 z-40"

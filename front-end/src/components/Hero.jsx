@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
 import { useInView } from 'react-intersection-observer';
-
 export default function Hero({ movie: movieProp }) {
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
@@ -26,6 +25,7 @@ export default function Hero({ movie: movieProp }) {
   const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
   const [wasPlayingBeforeVideoPlayer, setWasPlayingBeforeVideoPlayer] =
     useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
@@ -71,7 +71,6 @@ export default function Hero({ movie: movieProp }) {
           });
           setIsPaused(false);
           setPreviewStarted(true);
-          // Add delay before hiding description
           setTimeout(() => {
             setShowDescription(false);
           }, 1000);
@@ -146,7 +145,6 @@ export default function Hero({ movie: movieProp }) {
         setHasPlayed(true);
         setPreviewStarted(true);
         setIsPaused(false);
-        // Add delay before hiding description
         setTimeout(() => {
           setShowDescription(false);
         }, 1000);

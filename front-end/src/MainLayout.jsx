@@ -4,11 +4,9 @@ import MobileNavbar from './components/MobileNavBar';
 import NetflixFooter from './components/Footer';
 import useIsMobile from './hooks/useIsMobile';
 import { AnimatePresence, motion } from 'framer-motion';
-
 const MainLayout = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
-
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
       {isMobile ? <MobileNavbar /> : <NavBar />}
@@ -32,5 +30,4 @@ const MainLayout = () => {
     </div>
   );
 };
-
 export default MainLayout;
