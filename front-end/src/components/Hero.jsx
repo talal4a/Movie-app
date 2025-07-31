@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
 import { useInView } from 'react-intersection-observer';
+
 export default function Hero({ movie: movieProp }) {
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
@@ -70,7 +71,10 @@ export default function Hero({ movie: movieProp }) {
           });
           setIsPaused(false);
           setPreviewStarted(true);
-          setShowDescription(false);
+          // Add delay before hiding description
+          setTimeout(() => {
+            setShowDescription(false);
+          }, 1000);
           setAutoShowTooltip(true);
           setTimeout(() => {
             setAutoShowTooltip(false);
@@ -133,18 +137,24 @@ export default function Hero({ movie: movieProp }) {
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
   useEffect(() => {
     if (isPlaying) return;
+    let delayTimeout;
     if (inView && !hasPlayed && videoRef.current) {
-      videoRef.current.play().catch((e) => {
-        console.warn('Autoplay failed:', e);
-      });
-      setHasPlayed(true);
-      setPreviewStarted(true);
-      setIsPaused(false);
-      setShowDescription(false);
-      setAutoShowTooltip(true);
-      setTimeout(() => {
-        setAutoShowTooltip(false);
-      }, 3000);
+      delayTimeout = setTimeout(() => {
+        videoRef.current.play().catch((e) => {
+          console.warn('Autoplay failed:', e);
+        });
+        setHasPlayed(true);
+        setPreviewStarted(true);
+        setIsPaused(false);
+        // Add delay before hiding description
+        setTimeout(() => {
+          setShowDescription(false);
+        }, 1000);
+        setAutoShowTooltip(true);
+        setTimeout(() => {
+          setAutoShowTooltip(false);
+        }, 3000);
+      }, 1300);
     } else if (!inView && videoRef.current && previewStarted && !videoEnded) {
       videoRef.current.pause();
       setIsPaused(true);
@@ -159,14 +169,16 @@ export default function Hero({ movie: movieProp }) {
       isPaused &&
       !videoEnded
     ) {
-      setTimeout(() => {
+      delayTimeout = setTimeout(() => {
         if (videoRef.current && inView && !document.hidden) {
           videoRef.current.play().catch((e) => {
             console.warn('Resume failed:', e);
           });
           setIsPaused(false);
           setPreviewStarted(true);
-          setShowDescription(false);
+          setTimeout(() => {
+            setShowDescription(false);
+          }, 1000);
           setAutoShowTooltip(true);
           setTimeout(() => {
             setAutoShowTooltip(false);
@@ -174,7 +186,12 @@ export default function Hero({ movie: movieProp }) {
         }
       }, 800);
     }
+
+    return () => {
+      if (delayTimeout) clearTimeout(delayTimeout);
+    };
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
+
   if (isLoading || !movie) {
     return <Spinner />;
   }
@@ -282,7 +299,7 @@ export default function Hero({ movie: movieProp }) {
               : 'max-h-0 opacity-0 transform -translate-y-4'
           }`}
         >
-          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-200 max-w-lg lg:max-w-xl xl:max-w-2xl mb-6 sm:mb-8 leading-relaxed line-clamp-3 sm:line-clamp-none">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-200 max-w-lg lg:max-w-xl xl:max-w-2xl mb-6 sm:mb-8 leading-relaxed line-clamp-3">
             {movie.description}
           </p>
         </div>
