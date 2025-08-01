@@ -8,7 +8,6 @@ try {
 } catch (err) {
   storedUser = null;
 }
-
 const initialState = {
   user: storedUser,
   token: storedToken || null,
@@ -26,10 +25,10 @@ const authSlice = createSlice({
       localStorage.setItem('token', token);
     },
     logout: (state) => {
-      state.user = null;
-      state.token = null;
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      state.user = null;
+      state.token = null;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;

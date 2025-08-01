@@ -19,10 +19,7 @@ export default function LogoutConfirm({
           Cancel
         </button>
         <button
-          onClick={() => {
-            onConfirm();
-            onCloseModal();
-          }}
+          onClick={onConfirm}
           className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-all duration-200 font-semibold text-base shadow-xl hover:shadow-red-500/25"
         >
           {button}

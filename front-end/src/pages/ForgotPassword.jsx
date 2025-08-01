@@ -1,6 +1,5 @@
 import ForgotPasswordForm from '@/components/Password/ForgotPasswordForm';
 import { Card, CardHeader, CardTitle } from '../components/ui/card';
-
 export default function ForgotPasswordPage() {
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-black text-white font-sans">

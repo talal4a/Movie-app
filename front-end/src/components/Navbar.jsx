@@ -2,48 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { logout } from '@/slice/userSlice';
 import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from './LogoutConfirm';
 import Modal from './Modals/Modal';
 import useOutsideClick from '@/hooks/useOutsideClick';
+import { logout } from '@/slice/userSlice';
 function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const location = useLocation();
   const isSearchPage = location.pathname === '/search';
-
   const profileRef = useOutsideClick({ handler: () => setShowProfile(false) });
   const { showToast } = useToast();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user?.user);
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth/login');
+    }
+  }, [user, navigate]);
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logout());
+    showToast({ message: 'Signed out successfully', type: 'success' });
     navigate('/auth/login');
-    showToast({ message: 'Logout successfully', type: 'success' });
   };
-
   const activeClass = (isActive) =>
     isActive
       ? 'text-white font-semibold relative after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-red-600'
       : 'text-gray-300 hover:text-white transition-colors duration-200';
-
   const NavItem = ({ to, children }) => (
     <NavLink to={to} className={({ isActive }) => activeClass(isActive)}>
       {children}
     </NavLink>
   );
-
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    setShowProfile(false);
+  };
+  const handleConfirmLogout = () => {
+    handleLogout();
+  };
   return (
-    <>
+    <Modal>
       <nav
         className={`fixed z-50 flex items-center px-6 py-3 text-white w-full transition-all duration-300 ${
           isScrolled
@@ -122,31 +129,31 @@ function NavBar() {
                   </NavLink>
                 </div>
                 <div className="border-t border-gray-700 py-2">
-                  <Modal.Open opens="logout-modal">
-                    <button className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left">
+                  <Modal.Open opens="logout">
+                    <button
+                      onClick={handleLogoutClick}
+                      className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left"
+                    >
                       <LogOut size={16} />
                       <span className="text-sm">Sign out</span>
                     </button>
                   </Modal.Open>
-                  <Modal.Window name="logout-modal">
-                    <LogoutConfirm
-                      message="You'll need to sign in again to access your account and continue watching."
-                      heading="Sign Out?"
-                      button="Sign Out"
-                      onConfirm={() => {
-                        handleLogout();
-                        setShowProfile(false);
-                      }}
-                      onCloseModal={() => setShowProfile(false)}
-                    />
-                  </Modal.Window>
                 </div>
               </div>
             )}
           </div>
         </div>
       </nav>
-    </>
+      <Modal.Window name="logout">
+        <LogoutConfirm
+          message="You'll need to sign in again to access your account and continue watching."
+          heading="Sign Out?"
+          button="Sign Out"
+          onConfirm={handleConfirmLogout}
+          onCloseModal={() => {}}
+        />
+      </Modal.Window>
+    </Modal>
   );
 }
 export default React.memo(NavBar);
