@@ -10,7 +10,7 @@ const signToken = (id) => {
 exports.signup = async (req, res) => {
   try {
     const { name, password, email, confirmPassword, role } = req.body;
-    //1-Check if email is exist
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(200).json({
@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
         message: "Email already exists",
       });
     }
-    //2.if user is not exist create user
+
     const newUser = await User.create({
       email,
       password,
@@ -26,7 +26,7 @@ exports.signup = async (req, res) => {
       confirmPassword,
       role,
     });
-    //3.create token
+
     const token = signToken(newUser._id);
     res.status(201).json({
       status: "success",
@@ -118,7 +118,6 @@ exports.restrictTo = (...roles) => {
 exports.forgotPassword = async (req, res) => {
   let user;
   try {
-    // 1. Get user by email
     user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(200).json({
@@ -128,11 +127,9 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    // 2. Generate reset token and save to DB
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    // 3. Create reset URL
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     const message = `
@@ -149,7 +146,6 @@ exports.forgotPassword = async (req, res) => {
 `;
 
     try {
-      // 5. Try to send the email
       await sendEmail({
         email: user.email,
         subject: "Reset your password (valid for 10 minutes)",
@@ -163,14 +159,12 @@ exports.forgotPassword = async (req, res) => {
     } catch (emailError) {
       console.error("Email sending error:", emailError);
 
-      // Return success but log the error (for security, don't expose SMTP errors to client)
       res.status(200).json({
         status: "success",
         message:
           "If an account with that email exists, a password reset link has been sent.",
       });
 
-      // Still clear the reset token since we couldn't send the email
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
       await user.save({ validateBeforeSave: false });

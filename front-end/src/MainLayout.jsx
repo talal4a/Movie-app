@@ -4,11 +4,15 @@ import MobileNavbar from './components/MobileNavBar';
 import NetflixFooter from './components/Footer';
 import useIsMobile from './hooks/useIsMobile';
 import { AnimatePresence, motion } from 'framer-motion';
+import AuthWatcher from './components/AuthWatcher';
+
 const MainLayout = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
+
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+      <AuthWatcher />
       {isMobile ? <MobileNavbar /> : <NavBar />}
       <AnimatePresence mode="wait">
         <div className="relative flex-1 overflow-hidden">
@@ -30,4 +34,5 @@ const MainLayout = () => {
     </div>
   );
 };
+
 export default MainLayout;

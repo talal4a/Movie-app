@@ -1,6 +1,5 @@
 const User = require("../models/userModel");
 
-// 1. Get All Users
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -14,7 +13,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// 2. Get Single User
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
