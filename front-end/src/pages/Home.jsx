@@ -27,7 +27,6 @@ export default function Home() {
       },
     });
   }, []);
-
   return (
     <motion.div
       className="flex flex-col gap-10"

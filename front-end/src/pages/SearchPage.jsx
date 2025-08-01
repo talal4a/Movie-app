@@ -3,14 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { searchMovies } from '@/api/auth';
-
 import SearchInput from '@/components/Search/SearchInput';
 import SearchResults from '@/components/Search/SearchResults';
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
-
   const debouncedSearch = debounce((value) => {
     if (value.length >= 3) {
       setSearchParams({ q: value });
@@ -20,11 +18,9 @@ export default function SearchPage() {
       setQuery('');
     }
   }, 500);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   useEffect(() => {
     debouncedSearch(searchInput);
     return () => debouncedSearch.cancel();
