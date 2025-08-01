@@ -47,15 +47,15 @@ export default function RelatedMovies({ id }) {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {chunks[currentSlide].map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+            {chunks[currentSlide].map((movie,index) => (
+              <MovieCard key={movie._id} movie={movie} index={index}/>
             ))}
           </div>
         </>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {relatedData.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+          {relatedData.map((movie,index) => (
+            <MovieCard key={movie._id} movie={movie} index={index}/>
           ))}
         </div>
       )}

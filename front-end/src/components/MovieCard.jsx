@@ -1,39 +1,30 @@
-// Your existing MovieCard with Redux watchlist integration
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
-
+import { ProgressiveImage } from './ProgressiveImage';
 
 const MovieCard = ({ movie, index }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  const imgRef = useRef(null);
-
-  // Get watchlist status from Redux store with correct key name
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
   const isSaved = watchlistItems.some((item) => item._id === movie._id);
 
-  const src = movie.poster || movie.backdrop || '/fallback.jpg';
+  const getOptimizedUrl = (url) => {
+    if (!url) return '/fallback.jpg';
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.3 }
-    );
-    if (imgRef.current) observer.observe(imgRef.current);
-    return () => {
-      if (imgRef.current) observer.unobserve(imgRef.current);
-    };
-  }, []);
+    if (url.includes('image.tmdb.org')) {
+      const width = window.innerWidth;
+      if (width < 640) return url.replace('/original/', '/w185/');
+      if (width < 1024) return url.replace('/original/', '/w342/');
+      return url.replace('/original/', '/w500/');
+    }
+    return url;
+  };
 
+  const src = getOptimizedUrl(movie.poster || movie.backdrop);
   const handleAddToWatchlist = async (movieId) => {
     try {
       if (isSaved) {
@@ -71,22 +62,20 @@ const MovieCard = ({ movie, index }) => {
         className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg w-45"
       >
         <div className="w-full h-60 overflow-hidden relative">
-          <img
-            ref={imgRef}
+          <ProgressiveImage
             src={src}
-            loading={index < 4 ? 'eager' : 'lazy'}
             alt={movie.title}
-            onLoad={() => setIsLoaded(true)}
-            className={`w-full h-full object-cover object-top transition-all duration-700 ease-in-out ${
-              isLoaded ? 'blur-0 scale-100' : 'blur-md scale-105'
-            } ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            className="w-full h-full"
+            priority={index < 12 ? 10 - index : 0}
           />
+
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
               <Play className="w-6 h-6 fill-current" />
             </button>
           </div>
         </div>
+
         <div className="p-3 text-white space-y-1 relative">
           <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
           <p className="text-xs text-gray-400">{movie.releaseYear}</p>

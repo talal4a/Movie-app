@@ -25,6 +25,10 @@ export default function Home() {
         const res = await axiosInstance.get('movies/grouped');
         return res.data['Trending'] || [];
       },
+      staleTime: 10 * 60 * 1000,
+      cacheTime: 1000 * 60 * 60,
+      refetchOnWindowFocus: false,
+      retry: 2,
     });
   }, []);
   return (
