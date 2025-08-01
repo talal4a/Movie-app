@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axioInstance';
-import { fetchMovies } from '@/api/auth';
+import { fetchMovies } from '@/api/movies';
 
 export const fetchGroupedMovies = async () => {
   const res = await axiosInstance.get('movies/grouped');
