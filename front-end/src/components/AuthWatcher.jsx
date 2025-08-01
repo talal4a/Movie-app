@@ -3,28 +3,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/slice/userSlice';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '@/api/axioInstance';
 export default function AuthWatcher() {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   useEffect(() => {
+    if (!user) return;
     const checkUserExistence = async () => {
-      if (!user) return;
       try {
-        const response = await axios.get(`/api/user/${user._id}`);
-        if (!response.data.exists) {
+        const response = await axiosInstance.get(`/user/${user._id}`);
+        if (!response.data || Object.keys(response.data).length === 0) {
           dispatch(logout());
           navigate('/auth/signup');
         }
       } catch (error) {
-        console.error('Error checking user:', error);
-        dispatch(logout());
-        navigate('/auth/signup');
+        console.error('Error while checking user existence:', error.message);
+        if (error.response?.status === 404) {
+          dispatch(logout());
+          navigate('/auth/signup');
+        }
       }
     };
     const interval = setInterval(checkUserExistence, 10000);
     return () => clearInterval(interval);
   }, [user, dispatch, navigate]);
-
   return null;
 }

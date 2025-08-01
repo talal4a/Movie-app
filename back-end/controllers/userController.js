@@ -27,7 +27,6 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// 3. Update User Role
 exports.updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
