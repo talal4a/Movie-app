@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { getMovieById } from '../api/auth';
+import { getMovieById } from '../api/movies';
 import Spinner from '../components/Spinner';
 import VideoPlayer from '@/components/VideoPlayer';
 import MovieDetailLayout from '@/components/MovieDetail/MovieDetailLayout';

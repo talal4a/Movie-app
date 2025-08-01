@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchLatestMovies } from '../api/auth';
+import { fetchLatestMovies } from '../api/movies';
 import MovieCard from './MovieCard';
 import Spinner from './Spinner';
 export default function LatestMovies() {

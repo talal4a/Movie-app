@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play, Plus, ThumbsUp, Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMovies } from '../api/auth';
+import { fetchMovies } from '../api/movies';
 import Spinner from './Spinner';
 import VideoPlayer from './VideoPlayer';
 import { useDispatch, useSelector } from 'react-redux';

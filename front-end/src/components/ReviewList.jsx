@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getReviewsByMovieId, deleteReview, upsertReviews } from '../api/auth';
+import { getReviewsByMovieId, deleteReview, upsertReviews } from '../api/reviews';
+import { getReviewsByMovieId as getMovieReviews } from '../api/movies';
 import UserAvatar from './UserAvatar';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -15,7 +16,7 @@ export default function ReviewList({ id }) {
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reviews', id],
-    queryFn: () => getReviewsByMovieId(id),
+    queryFn: () => getMovieReviews(id),
     retry: false,
   });
   const handleDelete = async () => {

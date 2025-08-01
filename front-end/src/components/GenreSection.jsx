@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchMoviesByGenre } from '../api/auth';
+import { fetchMoviesByGenre } from '../api/movies';
 import MovieCard from './MovieCard';
 import Spinner from './Spinner';
 export default function GenreSection({ genre }) {
