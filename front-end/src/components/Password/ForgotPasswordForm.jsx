@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-
 import { forgotPassword } from '@/api/auth';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '@radix-ui/react-label';
-
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
