@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Play, Plus, ThumbsUp, Check } from 'lucide-react';
 import { fetchMovies } from '@/api/movies';
 import Spinner from '../Spinner';
 import VideoPlayer from '../VideoPlayer';
