@@ -1,5 +1,5 @@
 import MovieRow from '../components/MovieRow';
-import Hero from '../components/Hero';
+import Hero from '../components/Hero/Hero';
 import React, { useEffect } from 'react';
 import LatestMovies from '../components/LatestMovie';
 import GenreSection from '../components/GenreSection';
@@ -15,7 +15,12 @@ const transition = {
   duration: 0.5,
   ease: 'easeInOut',
 };
+
 export default function Home() {
+  useEffect(() => {
+    console.log('MoviePage mounted');
+    return () => console.log('MoviePage unmounted');
+  }, []);
   const genres = ['Action', 'Comedy', 'Drama', 'Horror', 'Thriller'];
   const queryClient = useQueryClient();
   useEffect(() => {

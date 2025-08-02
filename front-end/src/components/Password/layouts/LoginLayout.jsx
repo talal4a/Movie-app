@@ -1,6 +1,6 @@
 import { login } from '@/api/auth';
 import { useToast } from '@/context/ToastContext';
-import { setCredentials } from '@/slice/userSlice';
+import { setCredentials } from '@/redux/slice/userSlice';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';

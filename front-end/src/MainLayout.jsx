@@ -1,5 +1,5 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import NavBar from './components/Navbar';
+import { Outlet } from 'react-router-dom';
+import NavBar from './components/NavBar';
 import MobileNavbar from './components/MobileNavBar';
 import NetflixFooter from './components/Footer';
 import useIsMobile from './hooks/useIsMobile';
@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import AuthWatcher from './components/AuthWatcher';
 const MainLayout = () => {
   const isMobile = useIsMobile();
-  const location = useLocation();
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
       <AuthWatcher />
@@ -15,7 +14,7 @@ const MainLayout = () => {
       <AnimatePresence mode="wait">
         <div className="relative flex-1 overflow-hidden">
           <motion.div
-            key={location.pathname}
+            layout
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}

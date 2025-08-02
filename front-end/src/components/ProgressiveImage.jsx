@@ -66,7 +66,7 @@ export const ProgressiveImage = ({
         className="w-full h-full object-cover"
         loading="lazy"
         decoding="async"
-        fetchpriority={priority > 5 ? 'high' : 'low'}
+        fetchPriority={priority > 5 ? 'high' : 'low'}
       />
     </div>
   );

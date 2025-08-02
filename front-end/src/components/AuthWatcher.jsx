@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '@/slice/userSlice';
+import { logout } from '@/redux/slice/userSlice';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/api/axioInstance';
 export default function AuthWatcher() {

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-
 const GuestRoute = ({ children }) => {
   const [isGuest, setIsGuest] = useState(null);
-
   useEffect(() => {
     const checkToken = () => {
       const token = localStorage.getItem('token');

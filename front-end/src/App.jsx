@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import PrivateRoute from './components/PrivateRoute';
 import GuestRoute from './components/GuestRoute';
 import MainLayout from './MainLayout';
-import { fetchWatchlist } from './slice/watchListSlice';
+import { fetchWatchlist } from './redux/slice/watchListSlice';
 import Modal from './components/Modals/Modal';
 import { AnimatePresence } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
@@ -131,7 +131,6 @@ export default function App() {
                   }
                 />
               </Route>
-
               <Route
                 path="/auth/login"
                 element={

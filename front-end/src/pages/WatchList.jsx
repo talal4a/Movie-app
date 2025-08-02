@@ -1,5 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromWatchlist, fetchWatchlist } from '@/slice/watchListSlice';
+import {
+  removeFromWatchlist,
+  fetchWatchlist,
+} from '@/redux/slice/watchListSlice';
 import MovieCard from '@/components/MovieCard';
 import { useToast } from '@/context/ToastContext';
 import { useEffect } from 'react';

@@ -7,7 +7,7 @@ import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from './LogoutConfirm';
 import Modal from './Modals/Modal';
 import useOutsideClick from '@/hooks/useOutsideClick';
-import { logout } from '../slice/userSlice';
+import { logout } from '../redux/slice/userSlice';
 function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);

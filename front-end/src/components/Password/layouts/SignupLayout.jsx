@@ -3,10 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from './../api/auth';
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '@/slice/userSlice';
+import { setCredentials } from '@/redux/slice/userSlice';
 import { useToast } from '@/context/ToastContext';
 export default function SignupLayout() {
- const { showToast } = useToast();
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: '',

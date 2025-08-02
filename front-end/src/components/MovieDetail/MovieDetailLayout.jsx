@@ -1,14 +1,10 @@
-import Hero from '../Hero';
+import Hero from '../Hero/Hero';
 import RecommendedMovies from '../RecommendationMovie';
 import RelatedMovies from '../RelatedMovies';
 import CastList from './CastList';
 import MovieMeta from './MovieMeta';
 import MovieReviews from './MovieReviews';
-export default function MovieDetailLayout({
-  movie,
-  refetchMovie,
-  id,
-}) {
+export default function MovieDetailLayout({ movie, refetchMovie, id }) {
   return (
     <>
       <Hero movie={movie} />

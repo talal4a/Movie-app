@@ -5,7 +5,7 @@ import ProfileInfo from '@/components/Accounts/ProfileInfo';
 import Spinner from '@/components/Spinner';
 import { useMutation } from '@tanstack/react-query';
 import { updatePassword, updateProfile } from '@/api/auth';
-import { setCredentials } from '@/slice/userSlice';
+import { setCredentials } from '@/redux/slice/userSlice';
 import { useToast } from '@/context/ToastContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';

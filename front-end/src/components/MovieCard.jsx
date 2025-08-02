@@ -3,7 +3,10 @@ import { motion } from 'framer-motion';
 import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
-import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
+import {
+  addToWatchlist,
+  removeFromWatchlist,
+} from '@/redux/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
 const MovieCard = ({ movie, index }) => {
   const dispatch = useDispatch();

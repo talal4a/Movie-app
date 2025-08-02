@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '@/slice/userSlice';
+import { logout } from '@/redux/slice/userSlice';
 import UserAvatar from './UserAvatar';
 import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from './LogoutConfirm';
