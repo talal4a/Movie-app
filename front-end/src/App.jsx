@@ -30,6 +30,20 @@ export default function App() {
   const queryClient = useQueryClient();
   const user = useSelector((state) => state.user?.user);
   const location = useLocation();
+
+  // In App.jsx
+  useEffect(() => {
+    // This will show on real page loads only
+    console.log('Performance navigation type:', performance.navigation.type);
+    console.log('0 = normal navigation, 1 = reload, 2 = back/forward');
+
+    // Add visual indicator
+    if (performance.navigation.type === 1) {
+      console.log('🚨 ACTUAL PAGE RELOAD DETECTED!');
+    } else {
+      console.log('✅ Client-side navigation (no reload)');
+    }
+  }, []);
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());
@@ -62,110 +76,108 @@ export default function App() {
   return (
     <Modal>
       <main className="min-h-screen bg-black text-white">
-        <AnimatePresence mode="wait">
-          <Suspense fallback={<Spinner />}>
-            <Routes location={location} key={location.pathname}>
-              <Route element={<MainLayout />}>
-                <Route
-                  path="/"
-                  element={
-                    <PrivateRoute>
-                      <Home />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/movie/:id"
-                  element={
-                    <PrivateRoute>
-                      <MovieDetail />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/my-list"
-                  element={
-                    <PrivateRoute>
-                      <WatchListPage />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/account"
-                  element={
-                    <PrivateRoute>
-                      <Account />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <PrivateRoute>
-                      <AdminDashboard />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/movies"
-                  element={
-                    <PrivateRoute>
-                      <MoviePage />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/search"
-                  element={
-                    <PrivateRoute>
-                      <SearchPage />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="*"
-                  element={
-                    <PrivateRoute>
-                      <NotFound />
-                    </PrivateRoute>
-                  }
-                />
-              </Route>
+        <Suspense fallback={<Spinner />}>
+          <Routes location={location} key={location.pathname}>
+            <Route element={<MainLayout />}>
               <Route
-                path="/auth/login"
+                path="/"
                 element={
-                  <GuestRoute>
-                    <Login />
-                  </GuestRoute>
+                  <PrivateRoute>
+                    <Home />
+                  </PrivateRoute>
                 }
               />
               <Route
-                path="/auth/signup"
+                path="/movie/:id"
                 element={
-                  <GuestRoute>
-                    <Signup />
-                  </GuestRoute>
+                  <PrivateRoute>
+                    <MovieDetail />
+                  </PrivateRoute>
                 }
               />
               <Route
-                path="/forgot-password"
+                path="/my-list"
                 element={
-                  <GuestRoute>
-                    <ForgotPassword />
-                  </GuestRoute>
+                  <PrivateRoute>
+                    <WatchListPage />
+                  </PrivateRoute>
                 }
               />
               <Route
-                path="/reset-password/:token"
+                path="/account"
                 element={
-                  <GuestRoute>
-                    <ResetPassword />
-                  </GuestRoute>
+                  <PrivateRoute>
+                    <Account />
+                  </PrivateRoute>
                 }
               />
-            </Routes>
-          </Suspense>
-        </AnimatePresence>
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute>
+                    <AdminDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/movies"
+                element={
+                  <PrivateRoute>
+                    <MoviePage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <PrivateRoute>
+                    <SearchPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  <PrivateRoute>
+                    <NotFound />
+                  </PrivateRoute>
+                }
+              />
+            </Route>
+            <Route
+              path="/auth/login"
+              element={
+                <GuestRoute>
+                  <Login />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/auth/signup"
+              element={
+                <GuestRoute>
+                  <Signup />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <GuestRoute>
+                  <ForgotPassword />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/reset-password/:token"
+              element={
+                <GuestRoute>
+                  <ResetPassword />
+                </GuestRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
       </main>
     </Modal>
   );

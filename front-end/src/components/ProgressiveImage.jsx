@@ -44,29 +44,60 @@ export const ProgressiveImage = ({
   src,
   alt,
   className = '',
-  priority = 0,
+  priority = 'high',
+  loading = 'eager',
   placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQ4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQ4MCIgZmlsbD0iIzM3NDE1MSIvPjwvc3ZnPg==',
 }) => {
-  const [loaded, setLoaded] = useState(loadedImages.has(src));
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    rootMargin: '50px',
-  });
+  const [loaded, setLoaded] = useState(false);
 
+  // Load image immediately for all priorities
   useEffect(() => {
-    if (inView && !loaded) {
-      imageLoader.add(src, priority).then(() => setLoaded(true));
+    if (!src) return;
+    
+    // Add to loaded images cache
+    if (loadedImages.has(src)) {
+      setLoaded(true);
+      return;
     }
-  }, [inView, src, priority, loaded]);
+    
+    // Create and load image
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      loadedImages.add(src);
+      setLoaded(true);
+    };
+    
+    // Cleanup
+    return () => {
+      img.onload = null;
+    };
+  }, [src]);
+  
+  // Show loading state
+  if (!loaded) {
+    return (
+      <div className={`${className} bg-gray-800 animate-pulse`}>
+        <img
+          src={placeholder}
+          alt=""
+          className="opacity-0 w-full h-full"
+          aria-hidden="true"
+        />
+      </div>
+    );
+  }
+  
+  // Show actual image
   return (
-    <div ref={ref} className={`${className} relative overflow-hidden`}>
+    <div className={`${className} relative overflow-hidden`}>
       <img
-        src={loaded ? src : placeholder}
+        src={src}
         alt={alt}
-        className="w-full h-full object-cover"
-        loading="lazy"
+        className="w-full h-full object-contain"
+        loading={loading}
         decoding="async"
-        fetchPriority={priority > 5 ? 'high' : 'low'}
+        fetchPriority="high"
       />
     </div>
   );

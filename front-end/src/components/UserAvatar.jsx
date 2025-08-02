@@ -1,20 +1,22 @@
 import { useState } from 'react';
-
 export default function UserAvatar({ user, size = 32 }) {
   const [imageError, setImageError] = useState(false);
-  const avatarUrl = user?.avatar ? `http://localhost:8000/img/users/${user.avatar}` : null;
+  const hasRealAvatar = user?.avatar && user.avatar !== 'default.jpg';
+  const avatarUrl = hasRealAvatar
+    ? `http://localhost:8000/img/users/${user.avatar}`
+    : null;
+
   const fallbackLetter = user?.name?.charAt(0)?.toUpperCase() || 'U';
-  
+
   const avatarStyle = {
     width: `${size}px`,
     height: `${size}px`,
-    minWidth: `${size}px`, // Ensure consistent sizing
+    minWidth: `${size}px`,
   };
 
-  // If no avatar URL is provided or there was an error loading the image
   if (!avatarUrl || imageError) {
-    const fontSize = Math.max(12, size * 0.4); // Scale font size based on avatar size
-    
+    const fontSize = Math.max(12, size * 0.4);
+
     return (
       <div
         style={{
@@ -29,7 +31,6 @@ export default function UserAvatar({ user, size = 32 }) {
     );
   }
 
-  // If we have a valid avatar URL
   return (
     <div style={avatarStyle} className="relative">
       <img

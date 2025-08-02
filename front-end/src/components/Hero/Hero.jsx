@@ -33,7 +33,6 @@ const Hero = ({ movie: movieProp }) => {
   const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
   const [wasPlayingBeforeVideoPlayer, setWasPlayingBeforeVideoPlayer] =
     useState(false);
-
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
@@ -71,7 +70,6 @@ const Hero = ({ movie: movieProp }) => {
   };
   const matchPercentage =
     movie?.matchPercentage || movie?.match || getConsistentMatch(movie);
-    
   const handleVideoEnded = useCallback(() => {
     setVideoEnded(true);
     setPreviewStarted(false);
@@ -81,7 +79,6 @@ const Hero = ({ movie: movieProp }) => {
       setShowDescription(true);
     }, 500);
   }, []);
-  
   const handlePlay = useCallback(() => {
     if (videoRef.current && !videoRef.current.paused) {
       videoRef.current.pause();
@@ -122,10 +119,8 @@ const Hero = ({ movie: movieProp }) => {
     }
     setWasPlayingBeforeVideoPlayer(false);
   };
-
   const handleToggleWatchlist = useCallback(() => {
     if (!movie?._id) return;
-
     if (isSaved) {
       dispatch(removeFromWatchlist(movie._id));
       showToast('Removed from My List');
@@ -145,7 +140,6 @@ const Hero = ({ movie: movieProp }) => {
       setIsMuted((prev) => !prev);
     }
   }, [isMuted]);
-
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (videoRef.current && previewStarted && !videoEnded && !isPlaying) {
@@ -169,7 +163,6 @@ const Hero = ({ movie: movieProp }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
-
   useEffect(() => {
     if (isPlaying) return;
     let delayTimeout;
@@ -224,7 +217,6 @@ const Hero = ({ movie: movieProp }) => {
       if (delayTimeout) clearTimeout(delayTimeout);
     };
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
-
   if (isLoading || !movie) {
     return (
       <div className="relative h-screen w-full bg-black flex items-center justify-center">
@@ -232,7 +224,6 @@ const Hero = ({ movie: movieProp }) => {
       </div>
     );
   }
-
   return (
     <section
       ref={ref}
@@ -247,7 +238,6 @@ const Hero = ({ movie: movieProp }) => {
         isPlaying={isPlaying}
         onEnded={handleVideoEnded}
       />
-
       <div
         className={`absolute top-24 right-4 sm:top-28 sm:right-6 lg:top-32 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
           previewStarted && !videoEnded && !isPlaying
@@ -265,20 +255,16 @@ const Hero = ({ movie: movieProp }) => {
           disabled={!previewStarted || videoEnded || isPlaying}
         />
       </div>
-
       <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 max-w-none">
         <HeroTitle mainTitle={mainTitle} subtitle={subtitle} />
-
         <HeroStats
           matchPercentage={matchPercentage}
           releaseYear={movie.releaseYear}
         />
-
         <HeroDescription
           showDescription={showDescription}
           description={movie.overview || movie.description}
         />
-
         <div className="flex items-center gap-3 sm:gap-4">
           <HeroButton
             isSaved={isSaved}
@@ -289,7 +275,6 @@ const Hero = ({ movie: movieProp }) => {
           />
         </div>
       </div>
-
       {isPlaying && movie?.trailer && (
         <VideoPlayer
           videoUrl={movie.trailer}
@@ -300,5 +285,4 @@ const Hero = ({ movie: movieProp }) => {
     </section>
   );
 };
-
 export default Hero;

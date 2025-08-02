@@ -8,7 +8,7 @@ import {
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
-const MovieCard = ({ movie, index }) => {
+const MovieCard = ({ movie }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
@@ -64,7 +64,8 @@ const MovieCard = ({ movie, index }) => {
               src={src}
               alt={movie.title}
               className="max-w-full max-h-full object-contain"
-              priority={index < 12 ? 10 - index : 0}
+              priority="high"
+              loading="eager"
             />
           </div>
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

@@ -25,11 +25,8 @@ const ProfileMenu = ({ user }) => {
     navigate('/auth/login');
   };
 
-  const handleNavClick = (e) => {
-    e.preventDefault();
-    const target = e.currentTarget.getAttribute('href');
+  const handleNavClick = () => {
     setShowProfile(false);
-    navigate(target);
   };
 
   return (
@@ -61,22 +58,22 @@ const ProfileMenu = ({ user }) => {
             </div>
           </div>
           <div className="py-2">
-            <a
-              href="/account"
+            <NavLink
+              to="/account"
               onClick={handleNavClick}
-              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors block"
+              className={({ isActive }) => `flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors block ${isActive ? 'bg-gray-800' : ''}`}
             >
               <User size={16} />
               <span className="text-sm">Account</span>
-            </a>
-            <a
-              href="/help"
+            </NavLink>
+            <NavLink
+              to="/help"
               onClick={handleNavClick}
-              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors block"
+              className={({ isActive }) => `flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors block ${isActive ? 'bg-gray-800' : ''}`}
             >
               <HelpCircle size={16} />
               <span className="text-sm">Help Center</span>
-            </a>
+            </NavLink>
           </div>
           <div className="border-t border-gray-700 py-2">
             <button
