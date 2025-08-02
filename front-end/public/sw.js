@@ -1,5 +1,5 @@
 const CACHE_NAME = 'movie-images-v1';
-const IMAGE_CACHE_SIZE = 200; // Cache 200 images
+const IMAGE_CACHE_SIZE = 200;
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -12,7 +12,6 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Only cache images
   if (
     event.request.destination === 'image' ||
     url.pathname.includes('.jpg') ||
@@ -29,11 +28,9 @@ self.addEventListener('fetch', (event) => {
 
         const networkResponse = await fetch(event.request);
 
-        // Cache successful responses
         if (networkResponse.ok) {
           cache.put(event.request, networkResponse.clone());
 
-          // Limit cache size
           const keys = await cache.keys();
           if (keys.length > IMAGE_CACHE_SIZE) {
             cache.delete(keys[0]);
