@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import NavbarHeader from './NavbarHeader';
+import MobileSidebar from './MobileSidebar';
 import Logo from './Logo';
 import Navigation from './Navigation';
 import SearchButton from './SearchButton';
 import ProfileMenu from './ProfileMenu';
 
-const NavBar = () => {
+const MobileNavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,4 +47,4 @@ const NavBar = () => {
   );
 };
 
-export default React.memo(NavBar);
+export default React.memo(MobileNavBar);

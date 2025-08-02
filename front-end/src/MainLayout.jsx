@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import NavBar from './components/NavBar';
-import MobileNavbar from './components/MobileNavBar';
+
 import NetflixFooter from './components/Footer';
 import useIsMobile from './hooks/useIsMobile';
 import { AnimatePresence, motion } from 'framer-motion';
