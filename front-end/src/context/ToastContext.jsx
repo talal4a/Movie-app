@@ -1,4 +1,4 @@
-import { Toast } from '@/components/Toast';
+import { Toast } from '@/components/ui/Toast';
 import { createContext, useCallback, useContext, useState } from 'react';
 const ToastContext = createContext();
 export const ToastProvider = ({ children }) => {

@@ -14,7 +14,9 @@ export const upsertReviews = async (movieId, reviewData) => {
   );
   return res.data;
 };
-export const deleteReview = async (movieId) => {
-  const res = await axiosInstance.delete(`/movies/${movieId}/reviews`);
+export const deleteReview = async (reviewId, movieId) => {
+  const res = await axiosInstance.delete(`/movies/${movieId}/reviews`, {
+    data: { reviewId }
+  });
   return res.data;
 };

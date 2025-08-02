@@ -25,17 +25,13 @@ export default function Review({ id, refetchMovie }) {
     e.preventDefault();
     try {
       await postReviews(id, { review: text, rating });
-
       if (refetchMovie) refetchMovie();
-
       queryClient.invalidateQueries(['reviews', id]);
-
       setText('');
     } catch (err) {
       console.error('Failed to post review:', err);
     }
   };
-
   return (
     <div className="mt-8 px-4 sm:px-6 md:px-8">
       <h3 className="text-lg font-semibold text-white mb-4 text-center sm:text-left">
