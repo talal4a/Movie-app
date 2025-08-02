@@ -1,5 +1,5 @@
-import { postReviews } from '../api/reviews';
-import { getReviewsByMovieId } from '../api/movies';
+import { postReviews } from '../../api/reviews';
+import { getReviewsByMovieId } from '../../api/movies';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';

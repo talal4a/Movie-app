@@ -1,8 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, Suspense, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import PrivateRoute from './components/PrivateRoute';
-import GuestRoute from './components/GuestRoute';
+import PrivateRoute from './components/Routes/PrivateRoute';
+import GuestRoute from './components/Routes/GuestRoute';
 import MainLayout from './MainLayout';
 import { fetchWatchlist } from './redux/slice/watchListSlice';
 import Modal from './components/Modals/Modal';
@@ -12,7 +12,7 @@ import {
   prefetchGroupedMovies,
   prefetchHeroMovie,
 } from './utils/prefecthUtils';
-import Spinner from './components/Spinner';
+import Spinner from './components/ui/Spinner';
 const Home = lazy(() => import('./pages/Home'));
 const MovieDetail = lazy(() => import('./pages/MovieDetail'));
 const WatchListPage = lazy(() => import('./pages/WatchList'));
@@ -24,7 +24,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const NotFound = lazy(() => import('./components/NotFound'));
+const NotFound = lazy(() => import('./components/ui/NotFound'));
 export default function App() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();

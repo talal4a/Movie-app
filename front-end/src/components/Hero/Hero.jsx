@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMovies } from '@/api/movies';
-import Spinner from '../Spinner';
-import VideoPlayer from '../VideoPlayer';
+import Spinner from '../ui/Spinner';
+import VideoPlayer from '../ui/VideoPlayer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addToWatchlist,

@@ -2,8 +2,8 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { getMovieById } from '../api/movies';
-import Spinner from '../components/Spinner';
-import VideoPlayer from '@/components/VideoPlayer';
+import Spinner from '../components/ui/Spinner';
+import VideoPlayer from '@/components/ui/VideoPlayer';
 import MovieDetailLayout from '@/components/MovieDetail/MovieDetailLayout';
 export default function MovieDetail() {
   const queryClient = useQueryClient();

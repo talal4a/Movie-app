@@ -1,19 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import UserAvatar from './UserAvatar';
+import UserAvatar from '../ui/UserAvatar';
 import { useToast } from '@/context/ToastContext';
-import LogoutConfirm from './LogoutConfirm';
-import Modal from './Modals/Modal';
-import useOutsideClick from '@/hooks/useOutsideClick';
-import { logout } from '../redux/slice/userSlice';
+import LogoutConfirm from '../Password/LogoutConfirm';
+import Modal from '../Modals/Modal';
+import { logout } from '../../redux/slice/userSlice';
 function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const location = useLocation();
   const isSearchPage = location.pathname === '/search';
-  const profileRef = useOutsideClick({ handler: () => setShowProfile(false) });
+  const profileRef = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const profileButton = document.querySelector('[data-profile-button]');
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target) &&
+        !profileButton?.contains(event.target)
+      ) {
+        setShowProfile(false);
+      }
+    }
+    if (showProfile) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfile]);
   const { showToast } = useToast();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user?.user);
@@ -42,6 +59,12 @@ function NavBar() {
       {children}
     </NavLink>
   );
+  const handleProfileClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowProfile((prev) => !prev);
+  };
+
   const handleLogoutClick = (e) => {
     e.preventDefault();
     setShowProfile(false);
@@ -86,8 +109,11 @@ function NavBar() {
           )}
           <div className="relative">
             <button
-              onClick={() => setShowProfile(!showProfile)}
+              onClick={handleProfileClick}
               className="flex items-center space-x-2 hover:bg-gray-800 rounded-lg p-2 transition-colors duration-200"
+              aria-expanded={showProfile}
+              aria-haspopup="true"
+              data-profile-button
             >
               <UserAvatar user={user} size={40} />
               <span className="font-semibold">{user?.name || 'User'}</span>

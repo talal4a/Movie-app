@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router-dom';
-import NavBar from './components/NavBar';
-import NetflixFooter from './components/Footer';
+import NavBar from './components/NavBar/Navbar';
+import NetflixFooter from './components/Footer/Footer';
 import useIsMobile from './hooks/useIsMobile';
 import { AnimatePresence, motion } from 'framer-motion';
-import AuthWatcher from './components/AuthWatcher';
-import MobileNavbar from './components/MobileNavBar/MobileNavBar';
+import AuthWatcher from './components/ui/AuthWatcher';
+import MobileNavbar from './components/NavBar/MobileNavBar/MobileNavBar';
 const MainLayout = () => {
   const isMobile = useIsMobile();
   return (

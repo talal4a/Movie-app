@@ -1,6 +1,6 @@
 import { Menu, Search, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import UserAvatar from '../UserAvatar';
+import UserAvatar from '../../ui/UserAvatar';
 const NavbarHeader = ({
   isScrolled,
   onMenuClick,

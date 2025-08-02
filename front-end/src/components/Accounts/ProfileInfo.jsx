@@ -1,5 +1,5 @@
 import { Camera, User, ShieldCheck } from 'lucide-react';
-import UserAvatar from '@/components/UserAvatar';
+import UserAvatar from '@/components/ui/UserAvatar';
 export default function ProfileInfo({
   user,
   isEditing,

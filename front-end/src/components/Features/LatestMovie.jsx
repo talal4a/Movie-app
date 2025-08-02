@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchLatestMovies } from '../api/movies';
-import MovieCard from './MovieCard';
-import Spinner from './Spinner';
+import { fetchLatestMovies } from '../../api/movies';
+import MovieCard from '../ui/MovieCard';
+import Spinner from '../ui/Spinner';
 export default function LatestMovies() {
   const { data: movies, isLoading } = useQuery({
     queryKey: ['latestMovies'],

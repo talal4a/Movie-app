@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MovieCard from './MovieCard';
-import { getAllMovies } from '../api/movies';
+import { getAllMovies } from '../../api/movies';
 import Spinner from './Spinner';
 export default function MovieRow({ title }) {
   const queryClient = useQueryClient();

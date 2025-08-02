@@ -3,7 +3,7 @@ import {
   removeFromWatchlist,
   fetchWatchlist,
 } from '@/redux/slice/watchListSlice';
-import MovieCard from '@/components/MovieCard';
+import MovieCard from '@/components/ui/MovieCard';
 import { useToast } from '@/context/ToastContext';
 import { useEffect } from 'react';
 export default function WatchListPage() {

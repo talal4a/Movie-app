@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteReview, upsertReviews } from '../api/reviews';
-import { getReviewsByMovieId } from '../api/movies';
-import UserAvatar from './UserAvatar';
+import { deleteReview, upsertReviews } from '../../api/reviews';
+import { getReviewsByMovieId } from '../../api/movies';
+import UserAvatar from '../ui/UserAvatar';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
-import Modal from './Modals/Modal';
-import LogoutConfirm from './LogoutConfirm';
+import Modal from "../Modals/Modal";
+import LogoutConfirm from '../Password/LogoutConfirm';
 export default function ReviewList({ id }) {
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(5);
@@ -21,19 +21,17 @@ export default function ReviewList({ id }) {
   });
   const handleDelete = async (reviewId) => {
     try {
-      await deleteReview(reviewId, id); // Pass both reviewId and movieId (id)
-      // Reset the editing state
+      await deleteReview(reviewId, id);
       setEditingReviewId(null);
       setEditText('');
       setEditRating(5);
-      // Invalidate and refetch the reviews
       await queryClient.invalidateQueries(['reviews', id]);
       showToast({ message: 'Review deleted successfully', type: 'success' });
     } catch (err) {
       console.error('Failed to delete review:', err);
-      showToast({ 
-        message: err.response?.data?.message || 'Failed to delete review', 
-        type: 'error' 
+      showToast({
+        message: err.response?.data?.message || 'Failed to delete review',
+        type: 'error',
       });
     }
   };
@@ -161,15 +159,15 @@ export default function ReviewList({ id }) {
                           Edit
                         </button>
                         <Modal.Open opens={`delete-review-${review._id}`}>
-                          <button
-                            className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-sm"
-                          >
+                          <button className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded text-sm">
                             Delete
                           </button>
                         </Modal.Open>
                         <Modal.Window name={`delete-review-${review._id}`}>
                           <LogoutConfirm
-                            message={'Are you sure you want to delete this review?'}
+                            message={
+                              'Are you sure you want to delete this review?'
+                            }
                             heading={'Delete Review'}
                             button={'Delete'}
                             onConfirm={async () => {

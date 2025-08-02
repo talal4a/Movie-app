@@ -1,8 +1,8 @@
-import MovieRow from '../components/MovieRow';
+import MovieRow from '../components/ui/MovieRow';
 import Hero from '../components/Hero/Hero';
 import React, { useEffect } from 'react';
-import LatestMovies from '../components/LatestMovie';
-import GenreSection from '../components/GenreSection';
+import LatestMovies from '../components/Features/LatestMovie';
+import GenreSection from '../components/Features/GenreSection';
 import { useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/axioInstance';
 import { motion } from 'framer-motion';

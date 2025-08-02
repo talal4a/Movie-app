@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMoviesByGenre } from '../api/movies';
-import MovieCard from './MovieCard';
-import Spinner from './Spinner';
+import { fetchMoviesByGenre } from '../../api/movies';
+import MovieCard from '../ui/MovieCard';
+import Spinner from '../ui/Spinner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 export default function RecommendedMovies({ genre, id: currentMovieId }) {
   const [chunkIndex, setChunkIndex] = useState(0);

@@ -1,4 +1,4 @@
-import MovieCard from '../MovieCard';
+import MovieCard from '../ui/MovieCard';
 export default function SearchResults({ query, movies }) {
   return (
     <div className="animate-in fade-in duration-700 ">

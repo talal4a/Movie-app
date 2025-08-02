@@ -1,5 +1,5 @@
-import MovieCard from './MovieCard';
-import Spinner from './Spinner';
+import MovieCard from '../ui/MovieCard';
+import Spinner from '../ui/Spinner';
 export default function MovieCollection({
   collectionName,
   initialMovies: data,

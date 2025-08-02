@@ -1,5 +1,5 @@
-import Review from '../Review';
-import ReviewsList from '../ReviewList';
+import Review from '../Features/Review';
+import ReviewsList from '../Features/ReviewList';
 export default function MovieReviews({ id, refetchMovie }) {
   return (
     <>

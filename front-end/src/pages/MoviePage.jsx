@@ -1,4 +1,4 @@
-import GroupedMovieCollections from '@/components/GroupedMovieCollections';
+import GroupedMovieCollections from '@/components/Features/GroupedMovieCollections';
 import { motion } from 'framer-motion';
 export default function MoviesPage() {
   const pageVariants = {

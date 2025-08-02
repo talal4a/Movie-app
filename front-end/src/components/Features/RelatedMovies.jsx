@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getRelatedMovies } from '@/api/movies';
 import { useQuery } from '@tanstack/react-query';
-import MovieCard from './MovieCard';
+import MovieCard from '../ui/MovieCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 export default function RelatedMovies({ id }) {
   const { data: relatedData, isLoading } = useQuery({
