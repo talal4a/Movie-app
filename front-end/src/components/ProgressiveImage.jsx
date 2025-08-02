@@ -1,30 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
-
-// Global loaded images set
 const loadedImages = new Set();
-
-// Image loading queue with priority
 class ImageLoader {
   constructor() {
     this.queue = [];
     this.loading = 0;
     this.maxConcurrent = 6;
   }
-
   add(src, priority = 0) {
     return new Promise((resolve) => {
       if (loadedImages.has(src)) {
         resolve();
         return;
       }
-
       this.queue.push({ src, priority, resolve });
       this.queue.sort((a, b) => b.priority - a.priority);
       this.processQueue();
     });
   }
-
   async processQueue() {
     while (this.loading < this.maxConcurrent && this.queue.length > 0) {
       const { src, resolve } = this.queue.shift();
@@ -46,9 +39,7 @@ class ImageLoader {
     }
   }
 }
-
 const imageLoader = new ImageLoader();
-
 export const ProgressiveImage = ({
   src,
   alt,
@@ -67,7 +58,6 @@ export const ProgressiveImage = ({
       imageLoader.add(src, priority).then(() => setLoaded(true));
     }
   }, [inView, src, priority, loaded]);
-
   return (
     <div ref={ref} className={`${className} relative overflow-hidden`}>
       <img
@@ -82,7 +72,6 @@ export const ProgressiveImage = ({
   );
 };
 
-// Preload function for critical images
 export const preloadCriticalImages = (images) => {
   images.forEach((src, index) => {
     imageLoader.add(src, 10 - index);

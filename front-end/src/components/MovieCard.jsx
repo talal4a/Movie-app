@@ -5,16 +5,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
 import { addToWatchlist, removeFromWatchlist } from '@/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
-
 const MovieCard = ({ movie, index }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
   const isSaved = watchlistItems.some((item) => item._id === movie._id);
-
   const getOptimizedUrl = (url) => {
     if (!url) return '/fallback.jpg';
-
     if (url.includes('image.tmdb.org')) {
       const width = window.innerWidth;
       if (width < 640) return url.replace('/original/', '/w185/');
@@ -23,7 +20,6 @@ const MovieCard = ({ movie, index }) => {
     }
     return url;
   };
-
   const src = getOptimizedUrl(movie.poster || movie.backdrop);
   const handleAddToWatchlist = async (movieId) => {
     try {
@@ -47,13 +43,11 @@ const MovieCard = ({ movie, index }) => {
       });
     }
   };
-
   const handleWatchlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     handleAddToWatchlist(movie._id);
   };
-
   return (
     <Link to={`/movie/${movie._id}`} className="block">
       <motion.div
@@ -62,20 +56,20 @@ const MovieCard = ({ movie, index }) => {
         className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg w-45"
       >
         <div className="w-full h-60 overflow-hidden relative">
-          <ProgressiveImage
-            src={src}
-            alt={movie.title}
-            className="w-full h-full"
-            priority={index < 12 ? 10 - index : 0}
-          />
-
+          <div className="w-full h-full flex items-center justify-center">
+            <ProgressiveImage
+              src={src}
+              alt={movie.title}
+              className="max-w-full max-h-full object-contain"
+              priority={index < 12 ? 10 - index : 0}
+            />
+          </div>
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
               <Play className="w-6 h-6 fill-current" />
             </button>
           </div>
         </div>
-
         <div className="p-3 text-white space-y-1 relative">
           <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
           <p className="text-xs text-gray-400">{movie.releaseYear}</p>
@@ -96,7 +90,6 @@ const MovieCard = ({ movie, index }) => {
             <span className="text-yellow-400 text-xs font-medium">
               ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
             </span>
-
             <button
               onClick={handleWatchlistClick}
               title={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
