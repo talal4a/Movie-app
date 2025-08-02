@@ -59,7 +59,7 @@ const MovieCard = ({ movie }) => {
         className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg w-45"
       >
         <div className="w-full h-60 overflow-hidden relative">
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-auto flex items-center justify-center">
             <ProgressiveImage
               src={src}
               alt={movie.title}

@@ -1,11 +1,13 @@
 import { X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+
 const MobileSidebar = ({ isOpen, onClose }) => {
   const navItems = [
     { to: "/", label: "Home" },
     { to: "/movies", label: "Movies" },
     { to: "/my-list", label: "My List" },
   ];
+
   return (
     <>
       <div
@@ -15,7 +17,7 @@ const MobileSidebar = ({ isOpen, onClose }) => {
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
           <span className="text-xl font-bold text-red-600">Menu</span>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close menu">
             <X size={24} />
           </button>
         </div>
