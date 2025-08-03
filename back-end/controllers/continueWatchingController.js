@@ -17,3 +17,17 @@ exports.getContinueWatching = async (req, res) => {
     .sort({ lastWatchedAt: -1 });
   res.status(200).json({ list });
 };
+exports.removeFromContinueWatching = async (req, res) => {
+  const { movieId } = req.params;
+
+  if (!movieId) {
+    return res.status(400).json({ message: "Movie ID is required." });
+  }
+
+  await ContinueWatching.findOneAndDelete({
+    user: req.user.id,
+    movie: movieId,
+  });
+
+  res.status(200).json({ message: "Removed from Continue Watching" });
+};
