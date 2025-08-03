@@ -6,6 +6,15 @@ export const getContinueWatching = () => {
   return axiosInstance.get('/continue-watching').then((res) => res.data.list);
 };
 export const removeFromContinueWatching = async (movieId) => {
-  const res = await axiosInstance.delete(`/continue-watching/${movieId}`);
-  return res.data;
+  try {
+    const res = await axiosInstance.delete(`/continue-watching/${movieId}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error removing from continue watching:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
 };

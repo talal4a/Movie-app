@@ -3,12 +3,10 @@ import React, { useEffect, useState } from 'react';
 const VideoPlayer = ({ embedUrl, onClose }) => {
   const [videoUrl, setVideoUrl] = useState('');
 
-  // Suppress vidsrc.in errors
   useEffect(() => {
     const originalConsoleError = console.error;
 
     console.error = (...args) => {
-      // Skip vidsrc.in related errors
       if (
         args[0] &&
         typeof args[0] === 'string' &&

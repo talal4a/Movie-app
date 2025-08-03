@@ -13,12 +13,9 @@ export default function MovieRow({ title, items, isContinueWatching = false, onR
     keepPreviousData: true,
     staleTime: 1000,
   });
-
   const finalItems = shouldFetch ? fetchedMovies : items;
   const movies = isContinueWatching ? finalItems.map(item => item.movie) : finalItems;
-
   if (!finalItems || isLoading) return <Spinner />;
-
   return (
     <section className="px-8 mt-8">
       <h2 className="text-2xl font-semibold text-white mb-4">{title}</h2>
