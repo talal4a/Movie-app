@@ -1,4 +1,4 @@
-const ContinueWatching = require("../models/ContinueWatching");
+const ContinueWatching = require("../models/ContinueWatchingModel");
 exports.markAsWatched = async (req, res) => {
   const { movieId } = req.body;
   if (!movieId) {
@@ -9,7 +9,6 @@ exports.markAsWatched = async (req, res) => {
     { lastWatchedAt: new Date() },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
-
   res.status(200).json({ message: "Marked as watched" });
 };
 exports.getContinueWatching = async (req, res) => {
