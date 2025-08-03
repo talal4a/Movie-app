@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Play, Bookmark, BookmarkCheck, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
 import {
@@ -8,7 +8,7 @@ import {
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
@@ -94,21 +94,38 @@ const MovieCard = ({ movie }) => {
             <span className="text-yellow-400 text-xs font-medium">
               ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
             </span>
-            <button
-              onClick={handleWatchlistClick}
-              title={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
-              className={`p-1.5 rounded-full transition-all duration-300 ease-in-out z-10 relative ${
-                isSaved
-                  ? 'text-blue-400 bg-blue-400/15 hover:bg-blue-400/25'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-110'
-              }`}
-            >
-              {isSaved ? (
-                <BookmarkCheck className="w-7 h-7" />
-              ) : (
-                <Bookmark className="w-7 h-7" />
+            <div className="absolute top-2 right-2 z-10 flex flex-col gap-2">
+              {isContinueWatching && onRemove && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onRemove();
+                  }}
+                  className="p-1.5 rounded-full bg-black/70 text-white hover:bg-red-600 transition-colors duration-200 z-20"
+                  aria-label="Remove from Continue Watching"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               )}
-            </button>
+              {!isContinueWatching && (
+                <button
+                  onClick={handleWatchlistClick}
+                  className={`p-1.5 rounded-full transition-all duration-300 ease-in-out z-10 ${
+                    isSaved
+                      ? 'text-blue-400 bg-blue-400/15 hover:bg-blue-400/25'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-110'
+                  }`}
+                  aria-label={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                >
+                  {isSaved ? (
+                    <BookmarkCheck className="w-7 h-7" />
+                  ) : (
+                    <Bookmark className="w-7 h-7" />
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
