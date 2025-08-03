@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchMovies } from '@/api/movies';
 import Spinner from '../ui/Spinner';
 import VideoPlayer from '../ui/VideoPlayer';
@@ -16,6 +16,8 @@ import HeroStats from './HeroStats';
 import HeroTitle from './HeroTitle';
 import HeroVideoBackground from './HeroVideoBackground';
 import VolumeButton from './VolumeButton';
+import { useNavigate } from 'react-router-dom';
+import { markAsWatched } from '@/api/continueWatching';
 const Hero = ({ movie: movieProp }) => {
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
@@ -33,6 +35,8 @@ const Hero = ({ movie: movieProp }) => {
   const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
   const [wasPlayingBeforeVideoPlayer, setWasPlayingBeforeVideoPlayer] =
     useState(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
@@ -42,6 +46,14 @@ const Hero = ({ movie: movieProp }) => {
     enabled: !movieProp,
     keepPreviousData: true,
     staleTime: 1000,
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: (id) => markAsWatched(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['continue-Watching']);
+      navigate(`/movie/${movie?._id}`);
+    },
   });
   const movie = movieProp || movies;
   const isSaved =
@@ -80,6 +92,24 @@ const Hero = ({ movie: movieProp }) => {
     }, 500);
   }, []);
   const handlePlay = useCallback(() => {
+    if (!movie?._id) {
+      console.error('No movie ID found');
+      return;
+    }
+
+    console.log('Movie data:', movie);
+    console.log('Movie embed URL:', movie.embedUrl);
+
+    if (!movie.embedUrl) {
+      console.warn('No movie URL available for this movie');
+      showToast({
+        message: 'Movie not available for playback',
+        type: 'error',
+      });
+      return;
+    }
+    mutate(movie._id);
+    setIsPlaying(true);
     if (videoRef.current && !videoRef.current.paused) {
       videoRef.current.pause();
       setWasPlayingBeforeVideoPlayer(true);
@@ -90,8 +120,7 @@ const Hero = ({ movie: movieProp }) => {
     setIsPaused(true);
     setShowDescription(true);
     setAutoShowTooltip(false);
-    setIsPlaying(true);
-  }, []);
+  }, [movie, mutate, showToast]);
   const handleVideoPlayerClose = () => {
     setIsPlaying(false);
     if (
@@ -275,11 +304,11 @@ const Hero = ({ movie: movieProp }) => {
           />
         </div>
       </div>
-      {isPlaying && movie?.trailer && (
+      {isPlaying && movie?.embedUrl && (
         <VideoPlayer
-          videoUrl={movie.trailer}
-          isOpen={isPlaying}
+          embedUrl={movie.embedUrl}
           onClose={handleVideoPlayerClose}
+          movieId={movie._id}
         />
       )}
     </section>

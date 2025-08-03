@@ -31,19 +31,6 @@ export default function App() {
   const user = useSelector((state) => state.user?.user);
   const location = useLocation();
 
-  // In App.jsx
-  useEffect(() => {
-    // This will show on real page loads only
-    console.log('Performance navigation type:', performance.navigation.type);
-    console.log('0 = normal navigation, 1 = reload, 2 = back/forward');
-
-    // Add visual indicator
-    if (performance.navigation.type === 1) {
-      console.log('🚨 ACTUAL PAGE RELOAD DETECTED!');
-    } else {
-      console.log('✅ Client-side navigation (no reload)');
-    }
-  }, []);
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());

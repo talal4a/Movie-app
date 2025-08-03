@@ -6,6 +6,7 @@ import GenreSection from '../components/Features/GenreSection';
 import { useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/api/axioInstance';
 import { motion } from 'framer-motion';
+import ContinueWatching from '@/components/Features/ContinueWatching';
 const pageVariants = {
   initial: { opacity: 0, y: 50 },
   animate: { opacity: 1, y: 0 },
@@ -46,6 +47,7 @@ export default function Home() {
     >
       <Hero />
       <MovieRow title="Trending Now" />
+      <ContinueWatching />
       <LatestMovies />
       {genres.map((genre) => (
         <GenreSection key={genre} genre={genre} />
