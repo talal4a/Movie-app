@@ -15,7 +15,6 @@ const transition = {
   duration: 0.5,
   ease: 'easeInOut',
 };
-
 export default function Home() {
   useEffect(() => {
     console.log('MoviePage mounted');
