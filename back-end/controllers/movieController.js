@@ -112,17 +112,42 @@ exports.getAllMovies = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
+// Helper function to check if a string is a valid MongoDB ObjectId
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id) && (String)(new mongoose.Types.ObjectId(id)) === id;
+};
+
 exports.getMovieById = async (req, res) => {
   try {
-    const movie = await Movie.findById(req.params.id);
-    if (!movie) {
-      return res
-        .status(404)
-        .json({ status: "fail", message: "Movie not found" });
+    const { id } = req.params;
+    let movie;
+
+    // Check if the ID is a valid MongoDB ObjectId
+    if (isValidObjectId(id)) {
+      movie = await Movie.findById(id);
+    } 
+    // If not a valid ObjectId, try to find by slug
+    else {
+      movie = await Movie.findOne({ slug: id });
     }
-    res.status(200).json({ status: "success", data: movie });
+
+    if (!movie) {
+      return res.status(404).json({ 
+        status: "fail", 
+        message: "Movie not found" 
+      });
+    }
+    
+    res.status(200).json({ 
+      status: "success", 
+      data: movie 
+    });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    console.error('Error fetching movie:', err);
+    res.status(500).json({ 
+      status: "error", 
+      message: err.message 
+    });
   }
 };
 exports.deleteMovie = async (req, res) => {
@@ -146,7 +171,7 @@ exports.updateMovie = async (req, res) => {
 };
 exports.getFeaturedMovie = async (req, res) => {
   try {
-    const featured = await Movie.findOne().sort({ createdAt: 1 });
+    const featured = await Movie.findOne().sort({ createdAt: -1 });
     res.status(200).json({
       status: "success",
       data: featured,
@@ -295,4 +320,14 @@ exports.uploadTrailerToCloudinary = async (req, res) => {
     console.error("❌ uploadSelectedTrailersToCloudinary Error:", err.message);
     res.status(500).json({ error: "Bulk trailer upload failed" });
   }
+};
+exports.generateSlugsForAllMovies = async (req, res) => {
+  const movies = await Movie.find();
+  for (const movie of movies) {
+    if (!movie.slug && movie.title) {
+      movie.slug = slugify(movie.title, { lower: true });
+      await movie.save();
+    }
+  }
+  res.status(200).json({ message: "Slugs generated for all movies" });
 };

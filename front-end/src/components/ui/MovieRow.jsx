@@ -2,10 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import MovieCard from './MovieCard';
 import { getAllMovies } from '../../api/movies';
 import Spinner from './Spinner';
-
 export default function MovieRow({ title, items, isContinueWatching = false, onRemove }) {
   const shouldFetch = !items;
-
   const { data: fetchedMovies, isLoading } = useQuery({
     queryKey: ['allMovies'],
     queryFn: getAllMovies,

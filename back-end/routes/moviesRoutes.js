@@ -2,8 +2,13 @@ const express = require("express");
 const router = express.Router();
 const movieController = require("../controllers/movieController");
 const authController = require("../controllers/authController");
-router.get("/featured", movieController.getFeaturedMovie);
 router.use(authController.protect);
+router.get("/featured", movieController.getFeaturedMovie);
+router.get(
+  "/generate-slugs",
+  authController.restrictTo("admin"),
+  movieController.generateSlugsForAllMovies
+);
 router.get(
   "/collection/:collectionName",
   authController.protect,

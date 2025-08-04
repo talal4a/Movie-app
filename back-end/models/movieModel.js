@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 const movieSchema = new mongoose.Schema({
   tmdbId: {
     type: Number,
@@ -42,6 +43,11 @@ const movieSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  slug: {
+    type: String,
+    unique: true,
+    lowercase: true,
+  },
   cast: [
     {
       name: { type: String, required: true },
@@ -63,5 +69,48 @@ const movieSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+movieSchema.pre("save", function (next) {
+  if (this.isModified("title") || !this.slug) {
+    this.slug = slugify(this.title, {
+      lower: true,
+      strict: true,
+      trim: true,
+    });
+  }
+  next();
+});
+
+movieSchema.statics.updateAllSlugs = async function () {
+  try {
+    const movies = await this.find({});
+    let updatedCount = 0;
+
+    for (const movie of movies) {
+      const newSlug = slugify(movie.title, {
+        lower: true,
+        strict: true,
+        trim: true,
+      });
+
+      if (movie.slug !== newSlug) {
+        movie.slug = newSlug;
+        await movie.save();
+        updatedCount++;
+        console.log(`Updated slug for: ${movie.title} -> ${newSlug}`);
+      }
+    }
+
+    return {
+      totalMovies: movies.length,
+      updated: updatedCount,
+      message: `Successfully updated ${updatedCount} out of ${movies.length} movies`,
+    };
+  } catch (error) {
+    console.error("Error updating movie slugs:", error);
+    throw error;
+  }
+};
+
 const Movie = mongoose.model("Movie", movieSchema);
 module.exports = Movie;
