@@ -1,6 +1,5 @@
 import axiosInstance from '@/api/axioInstance';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
 export const fetchWatchlist = createAsyncThunk(
   'watchlist/fetch',
   async (_, thunkAPI) => {
@@ -14,7 +13,6 @@ export const fetchWatchlist = createAsyncThunk(
     }
   }
 );
-
 export const addToWatchlist = createAsyncThunk(
   'watchlist/add',
   async (movieId, thunkAPI) => {
@@ -28,7 +26,6 @@ export const addToWatchlist = createAsyncThunk(
     }
   }
 );
-
 export const removeFromWatchlist = createAsyncThunk(
   'watchlist/remove',
   async (movieId, thunkAPI) => {
@@ -42,7 +39,6 @@ export const removeFromWatchlist = createAsyncThunk(
     }
   }
 );
-
 const watchlistSlice = createSlice({
   name: 'watchlist',
   initialState: {
@@ -77,5 +73,4 @@ const watchlistSlice = createSlice({
       );
   },
 });
-
 export default watchlistSlice.reducer;

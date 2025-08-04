@@ -19,7 +19,6 @@ exports.addToWatchlist = async (req, res) => {
     user.watchlist.push(movieId);
     await user.save();
 
-    // Return the full movie object so the frontend can update immediately
     res.status(200).json({ message: "Movie added to watchlist", movie });
   } catch (error) {
     console.error(error);
@@ -46,7 +45,6 @@ exports.removeFromWatchlist = async (req, res) => {
   }
 };
 
-// Get user’s full watchlist with movie details
 exports.getWatchlist = async (req, res) => {
   try {
     const userId = req.user.id;
