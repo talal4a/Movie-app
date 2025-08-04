@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import PrivateRoute from './components/Routes/PrivateRoute';
 import GuestRoute from './components/Routes/GuestRoute';
 import MainLayout from './MainLayout';
+import SearchLayout from './components/Layouts/SearchLayout';
 import { fetchWatchlist } from './redux/slice/watchListSlice';
 import Modal from './components/Modals/Modal';
 import { AnimatePresence } from 'framer-motion';
@@ -114,14 +115,7 @@ export default function App() {
                   </PrivateRoute>
                 }
               />
-              <Route
-                path="/search"
-                element={
-                  <PrivateRoute>
-                    <SearchPage />
-                  </PrivateRoute>
-                }
-              />
+              
               <Route
                 path="*"
                 element={
@@ -161,6 +155,14 @@ export default function App() {
                 <GuestRoute>
                   <ResetPassword />
                 </GuestRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <SearchPage />
+                </PrivateRoute>
               }
             />
           </Routes>

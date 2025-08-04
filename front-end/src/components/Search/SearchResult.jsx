@@ -1,7 +1,8 @@
 import { Play, Info } from 'lucide-react';
 import { useState } from 'react';
 export default function SearchResult({ query, movies, onPlay }) {
-  const [setImageErrors] = useState({});
+  const [imageErrors, setImageErrors] = useState({});
+
   function handlePlay(movie) {
     if (onPlay) {
       onPlay(movie);
@@ -10,11 +11,11 @@ export default function SearchResult({ query, movies, onPlay }) {
     }
   }
   function handleImageError(movieId) {
-    setImageErrors((prev) => ({ ...prev, [movieId]: true }));
+    setImageErrors(prev => ({ ...prev, [movieId]: true }));
   }
   return (
     <div className="min-h-screen bg-black text-white pb-20">
-      <div className="sticky top-0 z-10 bg-gradient-to-b from-black via-black/95 to-transparent px-4 pt-4 pb-6">
+      <div className="sticky top-0 z-10 bg-gradient-to-b from-black via-black/95 to-transparent px-6 pt-4 pb-6">
         <p className="text-gray-400 text-sm">
           {movies.length} {movies.length === 1 ? 'result' : 'results'} for "
           <span className="text-white font-medium">{query}</span>"
@@ -53,22 +54,19 @@ export default function SearchResult({ query, movies, onPlay }) {
                 </div>
                 <div>
                   <h3 className="text-white font-medium text-base line-clamp-2 mb-1">
-                    {movie.title}
+                    {movie?.title}
                   </h3>
-                  {movie.year && (
-                    <p className="text-gray-400 text-sm">{movie.year}</p>
+                  {movie?.releaseYear && (
+                    <p className="text-gray-400 text-sm">{movie?.releaseYear}</p>
                   )}
-                  {movie.rating && (
-                    <p className="text-gray-400 text-sm">
-                      Rating: {movie.rating}
-                    </p>
-                  )}
-                  {movie.duration && (
-                    <p className="text-gray-400 text-sm">{movie.duration}</p>
+                  {movie?.tmdbRatings?.average && (
+                    <span className="text-yellow-400 text-xs font-medium">
+                      ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
+                    </span>
                   )}
                 </div>
               </div>
-              <div className="flex-shrink-0 flex items-center space-x-2 ml-4">
+              <div className="flex-shrink-0">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
