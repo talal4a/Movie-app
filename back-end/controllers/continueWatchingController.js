@@ -21,7 +21,6 @@ exports.removeFromContinueWatching = async (req, res) => {
   try {
     const { movieId } = req.params;
     const userId = req.user.id;
-
     if (!movieId) {
       return res.status(400).json({ message: "Movie ID is required." });
     }

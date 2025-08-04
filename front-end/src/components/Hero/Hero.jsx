@@ -47,7 +47,6 @@ const Hero = ({ movie: movieProp }) => {
     keepPreviousData: true,
     staleTime: 1000,
   });
-
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
@@ -96,10 +95,6 @@ const Hero = ({ movie: movieProp }) => {
       console.error('No movie ID found');
       return;
     }
-
-    console.log('Movie data:', movie);
-    console.log('Movie embed URL:', movie.embedUrl);
-
     if (!movie.embedUrl) {
       console.warn('No movie URL available for this movie');
       showToast({
@@ -154,7 +149,7 @@ const Hero = ({ movie: movieProp }) => {
       dispatch(removeFromWatchlist(movie._id));
       showToast('Removed from My List');
     } else {
-      dispatch(addToWatchlist(movie));
+      dispatch(addToWatchlist(movie?._id));
       setJustAdded(true);
       showToast('Added to My List');
       setButtonDisabled(true);

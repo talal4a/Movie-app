@@ -44,6 +44,16 @@ function NavBar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    if (user && user._id && user._id !== storedUserId) {
+      dispatch(logout());
+      showToast({
+        message: 'Session conflict detected. Logged out.',
+        type: 'error',
+      });
+    }
+  }, [user]);
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logout());

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { signup } from './../api/auth';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '@/redux/slice/userSlice';
 import { useToast } from '@/context/ToastContext';
+import { signup } from '@/api/auth';
+import SignUpForm from '../forms/SignupForm';
 export default function SignupLayout() {
   const { showToast } = useToast();
   const dispatch = useDispatch();

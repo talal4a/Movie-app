@@ -1,8 +1,8 @@
 import { Label } from '@radix-ui/react-label';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
-import { Input } from '../ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 export default function SignUpForm({
   handleSubmit,
   formData,

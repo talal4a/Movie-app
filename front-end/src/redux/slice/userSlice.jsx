@@ -23,10 +23,14 @@ const authSlice = createSlice({
       state.token = token;
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
+      if (user?._id) {
+        localStorage.setItem('userId', user._id);
+      }
     },
     logout: (state) => {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('userId');
       state.user = null;
       state.token = null;
     },
@@ -36,6 +40,9 @@ const authSlice = createSlice({
     updateUser: (state, action) => {
       state.user = action.payload;
       localStorage.setItem('user', JSON.stringify(action.payload));
+      if (action.payload?._id) {
+        localStorage.setItem('userId', action.payload._id);
+      }
     },
   },
 });
