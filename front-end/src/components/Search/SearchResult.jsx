@@ -1,9 +1,7 @@
 import { Play, Info } from 'lucide-react';
 import { useState } from 'react';
-
 export default function SearchResult({ query, movies, onPlay }) {
   const [setImageErrors] = useState({});
-
   function handlePlay(movie) {
     if (onPlay) {
       onPlay(movie);
@@ -22,7 +20,6 @@ export default function SearchResult({ query, movies, onPlay }) {
           <span className="text-white font-medium">{query}</span>"
         </p>
       </div>
-
       {movies.length === 0 ? (
         <div className="flex flex-col items-center justify-between px-8 mt-20">
           <p className="text-zinc-400 text-center mb-2">
@@ -54,7 +51,6 @@ export default function SearchResult({ query, movies, onPlay }) {
                     <Play className="w-8 h-8 text-white fill-white" />
                   </div>
                 </div>
-
                 <div>
                   <h3 className="text-white font-medium text-base line-clamp-2 mb-1">
                     {movie.title}
@@ -72,7 +68,6 @@ export default function SearchResult({ query, movies, onPlay }) {
                   )}
                 </div>
               </div>
-
               <div className="flex-shrink-0 flex items-center space-x-2 ml-4">
                 <button
                   onClick={(e) => {
