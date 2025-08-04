@@ -7,7 +7,9 @@ import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from '../Password/LogoutConfirm';
 import Modal from '../Modals/Modal';
 import { logout } from '../../redux/slice/userSlice';
+import { useQueryClient } from '@tanstack/react-query';
 function NavBar() {
+  const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const location = useLocation();
@@ -58,6 +60,7 @@ function NavBar() {
   const handleLogout = () => {
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
+    queryClient.clear();
     navigate('/auth/login');
   };
   const activeClass = (isActive) =>

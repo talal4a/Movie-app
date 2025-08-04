@@ -1,5 +1,4 @@
 import { Play, Plus, Check } from 'lucide-react';
-
 export default function HeroButtons({
   isSaved,
   justAdded,

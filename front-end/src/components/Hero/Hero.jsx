@@ -16,9 +16,11 @@ import HeroStats from './HeroStats';
 import HeroTitle from './HeroTitle';
 import HeroVideoBackground from './HeroVideoBackground';
 import VolumeButton from './VolumeButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
 const Hero = ({ movie: movieProp }) => {
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const location = useLocation();
   const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
   const videoRef = useRef(null);
   const [hasPlayed, setHasPlayed] = useState(false);
@@ -187,25 +189,61 @@ const Hero = ({ movie: movieProp }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
+
+
+  useEffect(() => {
+    const navigationEntries = performance.getEntriesByType('navigation');
+    const navType =
+      navigationEntries.length > 0 ? navigationEntries[0].type : 'navigate';
+    setIsInitialLoad(navType === 'reload' || navType === 'navigate');
+  }, [location.key]);
+
   useEffect(() => {
     if (isPlaying) return;
+
     let delayTimeout;
+    let playAttemptTimeout;
+    let canPlayListener;
+
+    const attemptPlay = () => {
+      if (!videoRef.current) return;
+
+      if (!videoRef.current.paused) return;
+
+      const playPromise = videoRef.current.play().catch((e) => {
+        console.warn('Autoplay failed:', e);
+
+        if (playAttemptTimeout) clearTimeout(playAttemptTimeout);
+        playAttemptTimeout = setTimeout(attemptPlay, 1000);
+      });
+
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setHasPlayed(true);
+            setPreviewStarted(true);
+            setIsPaused(false);
+            setShowDescription(false);
+            setAutoShowTooltip(true);
+            setTimeout(() => setAutoShowTooltip(false), 3000);
+          })
+          .catch((e) => console.warn('Play promise failed:', e));
+      }
+    };
+
+    const handleCanPlay = () => {
+      delayTimeout = setTimeout(attemptPlay, 400);
+    };
+
     if (inView && !hasPlayed && videoRef.current) {
-      delayTimeout = setTimeout(() => {
-        videoRef.current.play().catch((e) => {
-          console.warn('Autoplay failed:', e);
-        });
-        setHasPlayed(true);
-        setPreviewStarted(true);
-        setIsPaused(false);
-        setTimeout(() => {
-          setShowDescription(false);
-        }, 1000);
-        setAutoShowTooltip(true);
-        setTimeout(() => {
-          setAutoShowTooltip(false);
-        }, 3000);
-      }, 1300);
+      canPlayListener = handleCanPlay;
+      videoRef.current.addEventListener('canplay', canPlayListener, {
+        once: true,
+      });
+
+      if (videoRef.current.readyState >= 3) {
+        attemptPlay();
+      }
     } else if (!inView && videoRef.current && previewStarted && !videoEnded) {
       videoRef.current.pause();
       setIsPaused(true);
@@ -222,23 +260,26 @@ const Hero = ({ movie: movieProp }) => {
     ) {
       delayTimeout = setTimeout(() => {
         if (videoRef.current && inView && !document.hidden) {
-          videoRef.current.play().catch((e) => {
-            console.warn('Resume failed:', e);
-          });
-          setIsPaused(false);
-          setPreviewStarted(true);
-          setTimeout(() => {
-            setShowDescription(false);
-          }, 1000);
-          setAutoShowTooltip(true);
-          setTimeout(() => {
-            setAutoShowTooltip(false);
-          }, 3000);
+          videoRef.current
+            .play()
+            .then(() => {
+              setIsPaused(false);
+              setPreviewStarted(true);
+              setShowDescription(false);
+              setAutoShowTooltip(true);
+              setTimeout(() => setAutoShowTooltip(false), 3000);
+            })
+            .catch((e) => console.warn('Resume failed:', e));
         }
-      }, 800);
+      }, 300);
     }
+
     return () => {
       if (delayTimeout) clearTimeout(delayTimeout);
+      if (playAttemptTimeout) clearTimeout(playAttemptTimeout);
+      if (videoRef.current && canPlayListener) {
+        videoRef.current.removeEventListener('canplay', canPlayListener);
+      }
     };
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
   if (isLoading || !movie) {
@@ -251,7 +292,9 @@ const Hero = ({ movie: movieProp }) => {
   return (
     <section
       ref={ref}
-      className="relative w-full h-screen text-white overflow-hidden"
+      className={`relative w-full h-screen text-white overflow-hidden ${
+        !isInitialLoad ? 'transition-opacity duration-500' : ''
+      }`}
     >
       <HeroVideoBackground
         videoRef={videoRef}

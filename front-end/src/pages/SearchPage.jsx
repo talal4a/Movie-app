@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 import SearchInput from '@/components/Search/SearchInput';
 import SearchResults from '@/components/Search/SearchResults';
 import { searchMovies } from '@/api/movies';
+import SearchResult from '@/components/Search/SearchResult';
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState('');
@@ -64,7 +65,7 @@ export default function SearchPage() {
       </div>
       {movies?.length > 0 && (
         <div className="mt-12">
-          <SearchResults query={query} movies={movies} />
+          <SearchResult query={query} movies={movies} />
         </div>
       )}
     </div>
