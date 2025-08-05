@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import PrivateRoute from './components/Routes/PrivateRoute';
 import GuestRoute from './components/Routes/GuestRoute';
 import MainLayout from './MainLayout';
-import SearchLayout from './components/Layouts/SearchLayout';
 import { fetchWatchlist } from './redux/slice/watchListSlice';
 import Modal from './components/Modals/Modal';
 import { AnimatePresence } from 'framer-motion';

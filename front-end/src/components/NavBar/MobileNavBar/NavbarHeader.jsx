@@ -1,5 +1,5 @@
 import { Menu, Search, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import UserAvatar from '../../ui/UserAvatar';
 const NavbarHeader = ({
   isScrolled,
@@ -33,15 +33,13 @@ const NavbarHeader = ({
         <div className="flex-1"></div>
 
         <div className="flex items-center gap-2">
-          {showSearchButton && (
-            <button
-              onClick={onSearchClick}
-              className="hover:text-gray-300 p-2 hover:bg-gray-800 rounded-full"
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
-          )}
+          <button
+            onClick={onSearchClick}
+            className="hover:text-gray-300 p-2 hover:bg-gray-800 rounded-full"
+            aria-label="Search"
+          >
+            <Search size={20} />
+          </button>
 
           <button
             onClick={onProfileClick}

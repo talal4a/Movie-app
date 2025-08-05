@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search,
   ChevronDown,
@@ -29,7 +23,6 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
 import { useDebounce } from '../../hooks/useDebounce';
 
-// Custom hook for handling clicks outside
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
     const listener = (event) => {
@@ -47,14 +40,12 @@ const useClickOutside = (ref, handler) => {
   }, [ref, handler]);
 };
 
-// Navigation items configuration
 const NAV_ITEMS = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/movies', label: 'Movies', icon: Film },
   { path: '/my-list', label: 'My List', icon: List },
 ];
 
-// Profile menu items configuration
 const PROFILE_MENU_ITEMS = [
   { path: '/account', label: 'Account', icon: User },
   { path: '/help', label: 'Help Center', icon: HelpCircle },
@@ -67,7 +58,8 @@ function NavBar() {
   const location = useLocation();
   const { showToast } = useToast();
 
-  // State management
+  const isAccountPage = location.pathname.startsWith('/account');
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -75,19 +67,15 @@ function NavBar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  // Refs
   const profileRef = useRef(null);
   const searchRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Selectors
   const user = useSelector((state) => state.user?.user);
   const isSearchPage = location.pathname === '/search';
 
-  // Debounce search query
   const debouncedQuery = useDebounce(query, 300);
 
-  // Search query
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', debouncedQuery],
     queryFn: () => searchMovies(debouncedQuery),
@@ -96,7 +84,6 @@ function NavBar() {
     cacheTime: 1000 * 60 * 10,
   });
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 10;
@@ -109,14 +96,12 @@ function NavBar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isScrolled]);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!user) {
       navigate('/auth/login');
     }
   }, [user, navigate]);
 
-  // Session conflict detection
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (user && user._id && user._id !== storedUserId) {
@@ -128,12 +113,10 @@ function NavBar() {
     }
   }, [user, dispatch, showToast]);
 
-  // Click outside handlers
   useClickOutside(profileRef, () => setShowProfile(false));
   useClickOutside(searchRef, () => setShowDropdown(false));
   useClickOutside(mobileMenuRef, () => setShowMobileMenu(false));
 
-  // Callbacks
   const handleLogout = useCallback(() => {
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
@@ -171,7 +154,6 @@ function NavBar() {
     setShowDropdown(false);
   }, []);
 
-  // Memoized values
   const activeClass = useCallback(
     (isActive) =>
       isActive
@@ -180,17 +162,42 @@ function NavBar() {
     []
   );
 
-  const navClasses = useMemo(
-    () =>
-      `fixed z-50 flex items-center px-4 md:px-6 py-3 text-white w-full transition-all duration-300 ${
-        isScrolled
-          ? 'bg-black/95 backdrop-blur-xl shadow-lg'
-          : 'bg-gradient-to-b from-black via-black/50 to-transparent'
-      }`,
-    [isScrolled]
-  );
+  if (isAccountPage) {
+    return (
+      <header className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md">
+        <div className="container mx-auto px-4 py-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-gray-300 hover:text-white transition-colors flex items-center"
+            aria-label="Go back"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span className="ml-2 text-sm font-medium">Back</span>
+          </button>
+        </div>
+      </header>
+    );
+  }
 
-  // Components
+  const navClasses = `fixed z-50 flex items-center px-4 md:px-6 py-3 text-white w-full transition-all duration-300 ${
+    isScrolled
+      ? 'bg-black/95 backdrop-blur-xl shadow-lg'
+      : 'bg-gradient-to-b from-black via-black/50 to-transparent'
+  }`;
+
   const NavItem = ({ to, children, icon: Icon, onClick }) => (
     <NavLink
       to={to}
@@ -249,7 +256,6 @@ function NavBar() {
         aria-label="Main navigation"
       >
         <div className="flex items-center justify-between w-full">
-          {/* Logo */}
           <div className="flex items-center">
             <Link
               to="/"
@@ -259,7 +265,6 @@ function NavBar() {
               CINEVERSE
             </Link>
 
-            {/* Mobile menu toggle */}
             <button
               className="md:hidden ml-4 p-2 hover:bg-gray-800 rounded-lg transition-colors"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -270,7 +275,6 @@ function NavBar() {
             </button>
           </div>
 
-          {/* Desktop Navigation */}
           <ul className="hidden md:flex space-x-8 mx-auto">
             {NAV_ITEMS.map(({ path, label }) => (
               <li key={path}>
@@ -279,9 +283,7 @@ function NavBar() {
             ))}
           </ul>
 
-          {/* Search and Profile */}
           <div className="flex items-center space-x-2 md:space-x-4">
-            {/* Search */}
             {!isSearchPage && (
               <div
                 ref={searchRef}
@@ -321,7 +323,6 @@ function NavBar() {
                   )}
                 </form>
 
-                {/* Search Results Dropdown */}
                 {showDropdown && query && (
                   <div
                     id="search-results"
@@ -349,20 +350,6 @@ function NavBar() {
                               />
                             ))}
                           </div>
-                          {searchResults.length > 8 && (
-                            <div className="p-3 text-center">
-                              <Link
-                                to={`/search?q=${encodeURIComponent(query)}`}
-                                className="text-sm text-red-500 hover:text-red-400 font-medium"
-                                onClick={() => {
-                                  setShowDropdown(false);
-                                  setQuery('');
-                                }}
-                              >
-                                View all {searchResults.length} results
-                              </Link>
-                            </div>
-                          )}
                         </div>
                       ) : (
                         <div className="p-6 text-center">
@@ -380,7 +367,6 @@ function NavBar() {
               </div>
             )}
 
-            {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
               <button
                 onClick={handleProfileClick}
@@ -458,7 +444,6 @@ function NavBar() {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {showMobileMenu && (
           <div
             ref={mobileMenuRef}
@@ -481,7 +466,6 @@ function NavBar() {
         )}
       </nav>
 
-      {/* Logout Modal */}
       <Modal.Window name="logout">
         <LogoutConfirm
           message="You'll need to sign in again to access your account and continue watching."

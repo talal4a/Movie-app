@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Search } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slice/userSlice';
@@ -62,10 +63,9 @@ const MobileNavbar = () => {
           onSearchClick={handleSearchClick}
           onProfileClick={toggleProfile}
           isProfileOpen={isProfileOpen}
-          showSearchButton={!isSearchPage}
           user={user}
         />
-
+        
         <MobileSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
