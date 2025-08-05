@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ChevronDown, User, LogOut, HelpCircle } from 'lucide-react';
+import {
+  Search,
+  ChevronDown,
+  User,
+  LogOut,
+  HelpCircle,
+  Play,
+} from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import UserAvatar from '../ui/UserAvatar';
@@ -7,11 +14,35 @@ import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from '../Password/LogoutConfirm';
 import Modal from '../Modals/Modal';
 import { logout } from '../../redux/slice/userSlice';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { searchMovies } from '../../api/movies';
+import SearchResult from '../Search/SearchResult';
+
 function NavBar() {
   const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [query, setQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [imageErrors, setImageErrors] = useState({});
+
+  const { data: searchResults = [], isLoading: isSearching } = useQuery({
+    queryKey: ['search', query],
+    queryFn: () => searchMovies(query),
+    enabled: query.length >= 2,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    keepPreviousData: true,
+  });
+
+  const handleImageError = (movieId) => {
+    setImageErrors((prev) => ({ ...prev, [movieId]: true }));
+  };
+
+  const handleSearchResultClick = (e) => {
+    e.stopPropagation();
+    setShowDropdown(false);
+    setQuery('');
+  };
   const location = useLocation();
   const isSearchPage = location.pathname === '/search';
   const profileRef = useRef(null);
@@ -113,12 +144,67 @@ function NavBar() {
         </ul>
         <div className="flex items-center space-x-4">
           {!isSearchPage && (
-            <button
-              onClick={() => navigate('/search')}
-              className="hover:text-gray-300 transition-colors duration-200 p-2 hover:bg-gray-800 rounded-full"
-            >
-              <Search size={20} />
-            </button>
+            <div className="relative flex-1 max-w-md mr-4">
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                  placeholder="Search for a movie..."
+                  className="w-full pl-10 pr-4 py-2 rounded-md bg-zinc-900 text-white placeholder-gray-400 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              {showDropdown && query && (
+                <div className="absolute z-50 mt-1 w-[120%] left-1/2 transform -translate-x-1/2 bg-black/95 backdrop-blur-xl border-2 border-gray-700 rounded-xl shadow-2xl overflow-hidden max-h-[600px] overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-6 text-center">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent border-red-500"></div>
+                      <p className="mt-2 text-gray-300 font-medium">
+                        Searching...
+                      </p>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="divide-y divide-gray-700">
+                      <SearchResult 
+                        query={query} 
+                        movies={searchResults.slice(0, 5)} 
+                        onPlay={(movie) => {
+                          setShowDropdown(false);
+                          setQuery('');
+                          navigate(`/movie/${movie.slug}`);
+                        }}
+                      />
+                      {searchResults.length > 5 && (
+                        <div className="p-3 text-center">
+                          <Link
+                            to={`/search?q=${encodeURIComponent(query)}`}
+                            onClick={() => setShowDropdown(false)}
+                            className="text-sm text-blue-400 hover:underline"
+                          >
+                            View all {searchResults.length} results
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p className="text-gray-300 text-lg font-medium">No results found for</p>
+                      <p className="text-white font-semibold">"{query}"</p>
+                      <p className="text-gray-400 text-sm mt-2">Try different keywords or check the spelling</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
           <div className="relative">
             <button

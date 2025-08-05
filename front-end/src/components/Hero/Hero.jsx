@@ -190,7 +190,6 @@ const Hero = ({ movie: movieProp }) => {
     };
   }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
 
-
   useEffect(() => {
     const navigationEntries = performance.getEntriesByType('navigation');
     const navType =
@@ -282,6 +281,7 @@ const Hero = ({ movie: movieProp }) => {
       }
     };
   }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
+
   if (isLoading || !movie) {
     return (
       <div className="relative h-screen w-full bg-black flex items-center justify-center">

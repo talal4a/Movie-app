@@ -2,7 +2,6 @@ import { Play, Info } from 'lucide-react';
 import { useState } from 'react';
 export default function SearchResult({ query, movies, onPlay }) {
   const [imageErrors, setImageErrors] = useState({});
-
   function handlePlay(movie) {
     if (onPlay) {
       onPlay(movie);
@@ -11,7 +10,7 @@ export default function SearchResult({ query, movies, onPlay }) {
     }
   }
   function handleImageError(movieId) {
-    setImageErrors(prev => ({ ...prev, [movieId]: true }));
+    setImageErrors((prev) => ({ ...prev, [movieId]: true }));
   }
   return (
     <div className="min-h-screen bg-black text-white pb-20">
@@ -48,16 +47,15 @@ export default function SearchResult({ query, movies, onPlay }) {
                     className="w-20 h-28 object-cover rounded"
                     onError={() => handleImageError(movie._id)}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded">
-                    <Play className="w-8 h-8 text-white fill-white" />
-                  </div>
                 </div>
                 <div>
                   <h3 className="text-white font-medium text-base line-clamp-2 mb-1">
                     {movie?.title}
                   </h3>
                   {movie?.releaseYear && (
-                    <p className="text-gray-400 text-sm">{movie?.releaseYear}</p>
+                    <p className="text-gray-400 text-sm">
+                      {movie?.releaseYear}
+                    </p>
                   )}
                   {movie?.tmdbRatings?.average && (
                     <span className="text-yellow-400 text-xs font-medium">
@@ -65,18 +63,6 @@ export default function SearchResult({ query, movies, onPlay }) {
                     </span>
                   )}
                 </div>
-              </div>
-              <div className="flex-shrink-0">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlay(movie);
-                  }}
-                  className="bg-white text-black px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-200 transition flex items-center space-x-1"
-                >
-                  <Play className="w-4 h-4 fill-black" />
-                  <span>Play</span>
-                </button>
               </div>
             </div>
           ))}
