@@ -22,17 +22,14 @@ import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
 import { useDebounce } from '../../hooks/useDebounce';
-
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
     const listener = (event) => {
       if (!ref.current || ref.current.contains(event.target)) return;
       handler(event);
     };
-
     document.addEventListener('mousedown', listener);
     document.addEventListener('touchstart', listener);
-
     return () => {
       document.removeEventListener('mousedown', listener);
       document.removeEventListener('touchstart', listener);
@@ -57,25 +54,19 @@ function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-
   const isAccountPage = location.pathname.startsWith('/account');
-
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [query, setQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
-
   const profileRef = useRef(null);
   const searchRef = useRef(null);
   const mobileMenuRef = useRef(null);
-
   const user = useSelector((state) => state.user?.user);
   const isSearchPage = location.pathname === '/search';
-
   const debouncedQuery = useDebounce(query, 300);
-
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', debouncedQuery],
     queryFn: () => searchMovies(debouncedQuery),
@@ -91,7 +82,6 @@ function NavBar() {
         setIsScrolled(scrolled);
       }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isScrolled]);
@@ -164,31 +154,57 @@ function NavBar() {
 
   if (isAccountPage) {
     return (
-      <header className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-gray-300 hover:text-white transition-colors flex items-center"
-            aria-label="Go back"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <>
+        <header className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md">
+          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+            <Link
+              to="/"
+              className="text-red-600 font-black text-2xl hover:text-red-500 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            <span className="ml-2 text-sm font-medium">Back</span>
-          </button>
-        </div>
-      </header>
+              CINEVERSE
+            </Link>
+
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/account"
+                className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
+              >
+                Sign Out
+              </Link>
+            </div>
+          </div>
+
+          {/* Back button below the navbar */}
+          <div className="border-t border-gray-800">
+            <div className="container mx-auto px-4 py-2">
+              <button
+                onClick={() => navigate(-1)}
+                className="text-gray-300 hover:text-white transition-colors flex items-center text-sm"
+                aria-label="Go back"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                <span className="ml-1">Back</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Add padding to account for fixed header */}
+        <div className="h-24"></div>
+      </>
     );
   }
 
@@ -274,7 +290,6 @@ function NavBar() {
               {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-
           <ul className="hidden md:flex space-x-8 mx-auto">
             {NAV_ITEMS.map(({ path, label }) => (
               <li key={path}>
@@ -282,7 +297,6 @@ function NavBar() {
               </li>
             ))}
           </ul>
-
           <div className="flex items-center space-x-2 md:space-x-4">
             {!isSearchPage && (
               <div
@@ -443,7 +457,6 @@ function NavBar() {
             </div>
           </div>
         </div>
-
         {showMobileMenu && (
           <div
             ref={mobileMenuRef}

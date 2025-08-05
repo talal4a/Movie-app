@@ -1,12 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { forgotPassword } from '@/api/auth';
 import { Input } from '../../ui/input';
 import { Button } from '../../ui/button';
 import { Label } from '@radix-ui/react-label';
+import ErrorMessage from '@/components/ui/ErrorMessage';
+import { validateEmail } from '@/utils/validations';
+
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState(false);
+
+  // Validate on email change
+  useEffect(() => {
+    if (touched) {
+      const newErrors = {};
+      
+      if (!email) {
+        newErrors.email = 'Email is required';
+      } else if (!validateEmail(email)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+      
+      setErrors(newErrors);
+    }
+  }, [email, touched]);
 
   const mutation = useMutation({
     mutationFn: forgotPassword,
@@ -21,15 +41,38 @@ export default function ForgotPasswordForm() {
     },
   });
 
+  const handleBlur = () => {
+    setTouched(true);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutation.mutate({ email });
+    
+    // Mark as touched to show errors
+    setTouched(true);
+    
+    // Validate before submitting
+    const newErrors = {};
+    
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    setErrors(newErrors);
+    
+    // Only submit if there are no errors
+    if (Object.keys(newErrors).length === 0) {
+      mutation.mutate({ email });
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
       className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
+      noValidate
     >
       <div className="space-y-5 p-6">
         <div className="space-y-1">
@@ -42,16 +85,24 @@ export default function ForgotPasswordForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400"
+            onBlur={handleBlur}
+            className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
+              errors.email ? 'border-red-500' : ''
+            }`}
             placeholder="Enter your email"
             required
           />
+          <ErrorMessage message={errors.email} />
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold"
-          disabled={mutation.isPending}
+          className={`w-full font-semibold ${
+            errors.email || !email
+              ? 'bg-gray-600 cursor-not-allowed'
+              : 'bg-red-600 hover:bg-red-700'
+          } text-white`}
+          disabled={mutation.isPending || Object.keys(errors).length > 0}
         >
           {mutation.isPending ? 'Sending...' : 'Send Reset Link'}
         </Button>

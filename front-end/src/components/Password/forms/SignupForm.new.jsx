@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Label } from '@radix-ui/react-label';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import ErrorMessage from '@/components/ui/ErrorMessage';
-import { validatePassword, getPasswordStrength } from '@/utils/validations';
+import { validateForm, getPasswordStrength } from '@/utils/validations';
 
-export default function ResetPasswordForm({
-  handleSubmit,
-  formData,
-  handleChange,
-  mutation,
-  message,
-}) {
+export default function SignUpForm({ handleSubmit, formData, handleChange, mutation }) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -24,28 +19,14 @@ export default function ResetPasswordForm({
     }
     
     if (Object.keys(touched).length > 0) {
+      const { errors: validationErrors } = validateForm(formData);
+      // Only update errors for fields that have been touched
       const newErrors = {};
-      
-      // Password validation
-      if (touched.password) {
-        if (!formData.password) {
-          newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-          newErrors.password = 'Password must be at least 8 characters';
-        } else if (!validatePassword(formData.password)) {
-          newErrors.password = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
+      Object.keys(validationErrors).forEach(key => {
+        if (touched[key]) {
+          newErrors[key] = validationErrors[key];
         }
-      }
-      
-      // Confirm password validation
-      if (touched.confirmPassword) {
-        if (!formData.confirmPassword) {
-          newErrors.confirmPassword = 'Please confirm your password';
-        } else if (formData.password !== formData.confirmPassword) {
-          newErrors.confirmPassword = 'Passwords do not match';
-        }
-      }
-      
+      });
       setErrors(newErrors);
     }
   }, [formData, touched]);
@@ -56,52 +37,81 @@ export default function ResetPasswordForm({
 
   const handleLocalSubmit = (e) => {
     e.preventDefault();
+    const { isValid, errors: validationErrors } = validateForm(formData);
+    setErrors(validationErrors);
     
     // Mark all fields as touched to show all errors
-    const allTouched = {
+    setTouched({
+      name: true,
+      email: true,
       password: true,
       confirmPassword: true,
-    };
-    setTouched(allTouched);
+    });
     
-    // Validate all fields
-    const newErrors = {};
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    } else if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
-    }
-    
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
-    setErrors(newErrors);
-    
-    // Only submit if there are no errors
-    if (Object.keys(newErrors).length === 0) {
+    if (isValid) {
       handleSubmit(e);
     }
   };
 
   return (
-    <form onSubmit={handleLocalSubmit} className="z-10 w-full max-w-md px-4">
+    <form
+      onSubmit={handleLocalSubmit}
+      className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
+      noValidate
+    >
       <Card className="bg-transparent text-white shadow-md border-none">
         <CardHeader>
           <CardTitle className="text-3xl text-center font-bold">
-            Reset Password
+            Sign Up
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          {/* New Password Field */}
+          {/* Name Field */}
+          <div className="space-y-1">
+            <Label htmlFor="name" className="text-sm text-gray-300">
+              Name
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+              onBlur={() => handleBlur('name')}
+              className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
+                errors.name ? 'border-red-500' : ''
+              }`}
+              placeholder="Enter your name"
+              required
+            />
+            <ErrorMessage message={errors.name} />
+          </div>
+
+          {/* Email Field */}
+          <div className="space-y-1">
+            <Label htmlFor="email" className="text-sm text-gray-300">
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={() => handleBlur('email')}
+              className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
+                errors.email ? 'border-red-500' : ''
+              }`}
+              placeholder="Enter your email"
+              required
+            />
+            <ErrorMessage message={errors.email} />
+          </div>
+
+          {/* Password Field */}
           <div className="space-y-1">
             <Label htmlFor="password" className="text-sm text-gray-300">
-              New Password
+              Password
             </Label>
             <Input
               id="password"
@@ -113,7 +123,7 @@ export default function ResetPasswordForm({
               className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
                 errors.password ? 'border-red-500' : ''
               }`}
-              placeholder="Enter new password"
+              placeholder="Enter your password"
               required
             />
             <div className="mt-1">
@@ -171,7 +181,7 @@ export default function ResetPasswordForm({
               className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
                 errors.confirmPassword ? 'border-red-500' : ''
               }`}
-              placeholder="Confirm new password"
+              placeholder="Confirm your password"
               required
             />
             <ErrorMessage message={errors.confirmPassword} />
@@ -187,19 +197,19 @@ export default function ResetPasswordForm({
             } text-white`}
             disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
-            {mutation.isPending ? 'Resetting...' : 'Reset Password'}
+            {mutation.isPending ? 'Signing up...' : 'Sign Up'}
           </Button>
 
-          {/* Status Message */}
-          {message && (
-            <p
-              className={`text-center text-sm font-medium mt-3 ${
-                message.startsWith('✅') ? 'text-green-400' : 'text-red-400'
-              }`}
+          {/* Login Link */}
+          <div className="text-sm text-zinc-400 text-center">
+            <span>Already have account? </span>
+            <Link
+              to="/auth/login"
+              className="text-white hover:underline font-medium"
             >
-              {message}
-            </p>
-          )}
+              Login now
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </form>
