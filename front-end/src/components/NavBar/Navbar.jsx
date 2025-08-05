@@ -16,33 +16,20 @@ import Modal from '../Modals/Modal';
 import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
-import SearchResult from '../Search/SearchResult';
-
 function NavBar() {
   const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [query, setQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [imageErrors, setImageErrors] = useState({});
-
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', query],
     queryFn: () => searchMovies(query),
     enabled: query.length >= 2,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     keepPreviousData: true,
   });
 
-  const handleImageError = (movieId) => {
-    setImageErrors((prev) => ({ ...prev, [movieId]: true }));
-  };
-
-  const handleSearchResultClick = (e) => {
-    e.stopPropagation();
-    setShowDropdown(false);
-    setQuery('');
-  };
   const location = useLocation();
   const isSearchPage = location.pathname === '/search';
   const profileRef = useRef(null);
@@ -116,6 +103,7 @@ function NavBar() {
   const handleConfirmLogout = () => {
     handleLogout();
   };
+
   return (
     <Modal>
       <nav
@@ -164,44 +152,71 @@ function NavBar() {
                 />
               </div>
               {showDropdown && query && (
-                <div className="absolute z-50 mt-1 w-[120%] left-1/2 transform -translate-x-1/2 bg-black/95 backdrop-blur-xl border-2 border-gray-700 rounded-xl shadow-2xl overflow-hidden max-h-[600px] overflow-y-auto">
-                  {isSearching ? (
-                    <div className="p-6 text-center">
-                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent border-red-500"></div>
-                      <p className="mt-2 text-gray-300 font-medium">
-                        Searching...
-                      </p>
-                    </div>
-                  ) : searchResults.length > 0 ? (
-                    <div className="divide-y divide-gray-700">
-                      <SearchResult 
-                        query={query} 
-                        movies={searchResults.slice(0, 5)} 
-                        onPlay={(movie) => {
-                          setShowDropdown(false);
-                          setQuery('');
-                          navigate(`/movie/${movie.slug}`);
-                        }}
-                      />
-                      {searchResults.length > 5 && (
-                        <div className="p-3 text-center">
-                          <Link
-                            to={`/search?q=${encodeURIComponent(query)}`}
-                            onClick={() => setShowDropdown(false)}
-                            className="text-sm text-blue-400 hover:underline"
-                          >
-                            View all {searchResults.length} results
-                          </Link>
+                <div className="absolute z-50 mt-1 w-full left-1/2 transform -translate-x-1/2 bg-black/95 backdrop-blur-xl border-2 border-gray-700 rounded-xl shadow-2xl overflow-hidden will-change-transform">
+                  <div className="max-h-[60vh] overflow-y-auto thin-scrollbar">
+                    {isSearching ? (
+                      <div className="p-4 text-center">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent border-red-500"></div>
+                        <p className="mt-2 text-gray-300 font-medium">
+                          Searching...
+                        </p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="divide-y divide-gray-800">
+                        <div className="p-2">
+                          {searchResults.slice(0, 5).map((movie) => (
+                            <Link
+                              key={movie._id}
+                              to={`/movie/${movie.slug}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDropdown(false);
+                                setQuery('');
+                              }}
+                              className="flex items-center p-3 hover:bg-gray-800/50 rounded-lg transition-colors duration-200 group"
+                            >
+                              <div className="flex-shrink-0 w-12 h-16 bg-gray-800 rounded overflow-hidden">
+                                {movie.poster ? (
+                                  <img
+                                    src={movie.poster}
+                                    alt={movie.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = '/placeholder-poster.png';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-500">
+                                    <Play className="w-5 h-5" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-3 flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate group-hover:text-red-500 transition-colors">
+                                  {movie.title}
+                                </p>
+                                {movie.releaseYear && (
+                                  <p className="text-xs text-gray-400">
+                                    {new Date(movie.releaseYear).getFullYear()}
+                                  </p>
+                                )}
+                              </div>
+                            </Link>
+                          ))}
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-6 text-center">
-                      <p className="text-gray-300 text-lg font-medium">No results found for</p>
-                      <p className="text-white font-semibold">"{query}"</p>
-                      <p className="text-gray-400 text-sm mt-2">Try different keywords or check the spelling</p>
-                    </div>
-                  )}
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center">
+                        <p className="text-gray-300 text-sm font-medium">
+                          No results found for "{query}"
+                        </p>
+                        <p className="text-gray-500 text-sm mt-1">
+                          Try different keywords or check the spelling
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
