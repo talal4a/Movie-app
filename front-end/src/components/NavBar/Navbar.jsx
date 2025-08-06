@@ -89,7 +89,6 @@ function NavBar() {
       navigate('/auth/login');
     }
   }, [user, navigate]);
-
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (user && user._id && user._id !== storedUserId) {
