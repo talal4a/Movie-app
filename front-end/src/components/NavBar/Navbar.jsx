@@ -74,7 +74,6 @@ function NavBar() {
     staleTime: 1000 * 60 * 5,
     cacheTime: 1000 * 60 * 10,
   });
-
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 10;
@@ -85,7 +84,6 @@ function NavBar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isScrolled]);
-
   useEffect(() => {
     if (!user) {
       navigate('/auth/login');
@@ -102,18 +100,15 @@ function NavBar() {
       });
     }
   }, [user, dispatch, showToast]);
-
   useClickOutside(profileRef, () => setShowProfile(false));
   useClickOutside(searchRef, () => setShowDropdown(false));
   useClickOutside(mobileMenuRef, () => setShowMobileMenu(false));
-
   const handleLogout = useCallback(() => {
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
     queryClient.clear();
     navigate('/auth/login');
   }, [dispatch, navigate, queryClient, showToast]);
-
   const handleProfileClick = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -126,7 +121,6 @@ function NavBar() {
     setQuery(value);
     setShowDropdown(value.length > 0);
   }, []);
-
   const handleSearchSubmit = useCallback(
     (e) => {
       e.preventDefault();
@@ -138,12 +132,10 @@ function NavBar() {
     },
     [query, navigate]
   );
-
   const clearSearch = useCallback(() => {
     setQuery('');
     setShowDropdown(false);
   }, []);
-
   const activeClass = useCallback(
     (isActive) =>
       isActive
@@ -151,7 +143,6 @@ function NavBar() {
         : 'text-gray-300 hover:text-white transition-colors duration-200',
     []
   );
-
   if (isAccountPage) {
     return (
       <>
@@ -163,7 +154,6 @@ function NavBar() {
             >
               CINEVERSE
             </Link>
-
             <div className="flex items-center space-x-4">
               <Link
                 to="/account"
@@ -173,8 +163,6 @@ function NavBar() {
               </Link>
             </div>
           </div>
-
-          {/* Back button below the navbar */}
           <div className="border-t border-gray-800">
             <div className="container mx-auto px-4 py-2">
               <button
@@ -202,7 +190,6 @@ function NavBar() {
           </div>
         </header>
 
-        {/* Add padding to account for fixed header */}
         <div className="h-24"></div>
       </>
     );
@@ -436,7 +423,6 @@ function NavBar() {
                       </NavLink>
                     ))}
                   </div>
-
                   <div className="border-t border-gray-700 py-2">
                     <Modal.Open opens="logout">
                       <button
