@@ -1,47 +1,50 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchMovies } from '@/api/movies';
-import Spinner from '../ui/Spinner';
-import VideoPlayer from '../ui/VideoPlayer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addToWatchlist,
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
-import { useInView } from 'react-intersection-observer';
-import HeroButton from './HeroButton';
-import HeroDescription from './HeroDescription';
-import HeroStats from './HeroStats';
-import HeroTitle from './HeroTitle';
-import HeroVideoBackground from './HeroVideoBackground';
-import VolumeButton from './VolumeButton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
+import {
+  Play,
+  Plus,
+  Check,
+  Info,
+  Volume2,
+  VolumeX,
+  ChevronDown,
+} from 'lucide-react';
+import Spinner from '../ui/Spinner';
+
 const Hero = ({ movie: movieProp }) => {
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const location = useLocation();
-  const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: false });
-  const videoRef = useRef(null);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [videoEnded, setVideoEnded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [showDescription, setShowDescription] = useState(true);
-  const [previewStarted, setPreviewStarted] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showVolumeTooltip, setShowVolumeTooltip] = useState(false);
-  const [autoShowTooltip, setAutoShowTooltip] = useState(false);
-  const [wasPlayingBeforeHidden, setWasPlayingBeforeHidden] = useState(false);
-  const [wasPlayingBeforeVideoPlayer, setWasPlayingBeforeVideoPlayer] =
-    useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
+
+  // State management - declare all hooks first
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [fadeContent, setFadeContent] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+  const videoRef = useRef(null);
+  const fadeTimeoutRef = useRef(null);
+
+  // Fetch movies if no movie prop is provided
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
@@ -49,6 +52,11 @@ const Hero = ({ movie: movieProp }) => {
     keepPreviousData: true,
     staleTime: 1000,
   });
+
+  // Get the current movie (from props or fetched)
+  const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
+
+  // Mark movie as watched mutation
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
@@ -56,14 +64,9 @@ const Hero = ({ movie: movieProp }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
-  const movie = movieProp || movies;
-  const isSaved =
-    Array.isArray(watchlist) &&
-    watchlist.some((item) => item && item._id === movie?._id);
-  const fullTitle = movie?.title || '';
-  const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
-  const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
-  const getConsistentMatch = (movie) => {
+
+  // Calculate match percentage
+  const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
     let hash = 0;
     for (let i = 0; i < movie._id.length; i++) {
@@ -78,278 +81,337 @@ const Hero = ({ movie: movieProp }) => {
     if (movie.releaseYear) {
       hash += movie.releaseYear;
     }
-    const percentage = 70 + (Math.abs(hash) % 30);
-    return percentage;
-  };
+    return 70 + (Math.abs(hash) % 30);
+  }, []);
+
+  // Check if movie is in watchlist
+  const isSaved = useMemo(() => {
+    return (
+      movie?._id &&
+      Array.isArray(watchlist) &&
+      watchlist.some((item) => item && item._id === movie._id)
+    );
+  }, [watchlist, movie?._id]);
+
   const matchPercentage =
     movie?.matchPercentage || movie?.match || getConsistentMatch(movie);
-  const handleVideoEnded = useCallback(() => {
-    setVideoEnded(true);
-    setPreviewStarted(false);
-    setAutoShowTooltip(false);
-    setWasPlayingBeforeHidden(false);
-    setTimeout(() => {
-      setShowDescription(true);
-    }, 500);
-  }, []);
+
+  // Auto-play video after delay (Netflix behavior)
+  useEffect(() => {
+    if (!movie?.trailerUrl) return;
+
+    const timer = setTimeout(() => {
+      setShowVideo(true);
+      setFadeContent(true);
+      if (videoRef.current) {
+        videoRef.current
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(console.error);
+      }
+    }, 3000);
+
+    return () => {
+      clearTimeout(timer);
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, [movie?.trailerUrl]);
+
+  // Handle play button click
   const handlePlay = useCallback(() => {
     if (!movie?._id) {
-      console.error('No movie ID found');
-      return;
-    }
-    if (!movie.embedUrl) {
-      console.warn('No movie URL available for this movie');
-      showToast({
-        message: 'Movie not available for playback',
-        type: 'error',
-      });
+      showToast('No movie selected');
       return;
     }
     mutate(movie._id);
-    setIsPlaying(true);
-    if (videoRef.current && !videoRef.current.paused) {
-      videoRef.current.pause();
-      setWasPlayingBeforeVideoPlayer(true);
-    } else {
-      setWasPlayingBeforeVideoPlayer(false);
-    }
-    setPreviewStarted(false);
-    setIsPaused(true);
-    setShowDescription(true);
-    setAutoShowTooltip(false);
   }, [movie, mutate, showToast]);
-  const handleVideoPlayerClose = () => {
-    setIsPlaying(false);
-    if (
-      wasPlayingBeforeVideoPlayer &&
-      inView &&
-      videoRef.current &&
-      !videoEnded
-    ) {
-      setTimeout(() => {
-        if (videoRef.current && inView && !document.hidden) {
-          videoRef.current.play().catch((e) => {
-            console.warn('Resume after video player close failed:', e);
-          });
-          setIsPaused(false);
-          setPreviewStarted(true);
-          setTimeout(() => {
-            setShowDescription(false);
-          }, 1000);
-          setAutoShowTooltip(true);
-          setTimeout(() => {
-            setAutoShowTooltip(false);
-          }, 3000);
-        }
-      }, 300);
-    }
-    setWasPlayingBeforeVideoPlayer(false);
-  };
-  const handleToggleWatchlist = useCallback(() => {
+
+  // Handle add to watchlist
+  const handleAddToWatchlist = useCallback(() => {
     if (!movie?._id) return;
+
     if (isSaved) {
       dispatch(removeFromWatchlist(movie._id));
       showToast('Removed from My List');
     } else {
-      dispatch(addToWatchlist(movie?._id));
-      setJustAdded(true);
+      dispatch(addToWatchlist(movie));
       showToast('Added to My List');
+      setJustAdded(true);
       setButtonDisabled(true);
+
+      // Re-enable the button after animation
       setTimeout(() => setButtonDisabled(false), 3000);
+
+      // Reset the justAdded state after animation
       setTimeout(() => setJustAdded(false), 3000);
     }
-  }, [dispatch, isSaved, movie, showToast]);
+  }, [movie, isSaved, dispatch, showToast]);
 
-  const toggleMute = useCallback(() => {
+  // Handle toggle mute
+  const handleToggleMute = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
-      setIsMuted((prev) => !prev);
+      setIsMuted(!isMuted);
     }
   }, [isMuted]);
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (videoRef.current && previewStarted && !videoEnded && !isPlaying) {
-        if (document.hidden) {
-          if (!videoRef.current.paused) {
-            videoRef.current.pause();
-            setWasPlayingBeforeHidden(true);
-          }
-        } else {
-          if (wasPlayingBeforeHidden && inView) {
-            videoRef.current.play().catch((e) => {
-              console.warn('Resume after tab switch failed:', e);
-            });
-            setWasPlayingBeforeHidden(false);
-          }
-        }
+
+  // Handle more info
+  const handleMoreInfo = useCallback(() => {
+    if (!movie?._id) return;
+    navigate(`/movie/${movie._id}`);
+  }, [movie?._id, navigate]);
+
+  // Handle video end
+  const handleVideoEnd = useCallback(() => {
+    setShowVideo(false);
+    setFadeContent(false);
+    setIsPlaying(false);
+    // Restart after a delay
+    setTimeout(() => {
+      setShowVideo(true);
+      setFadeContent(true);
+      if (videoRef.current) {
+        videoRef.current
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(console.error);
       }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [previewStarted, videoEnded, wasPlayingBeforeHidden, inView, isPlaying]);
+    }, 2000);
+  }, []);
 
-  useEffect(() => {
-    const navigationEntries = performance.getEntriesByType('navigation');
-    const navType =
-      navigationEntries.length > 0 ? navigationEntries[0].type : 'navigate';
-    setIsInitialLoad(navType === 'reload' || navType === 'navigate');
-  }, [location.key]);
-
-  useEffect(() => {
-    if (isPlaying) return;
-
-    let delayTimeout;
-    let playAttemptTimeout;
-    let canPlayListener;
-
-    const attemptPlay = () => {
-      if (!videoRef.current) return;
-
-      if (!videoRef.current.paused) return;
-
-      const playPromise = videoRef.current.play().catch((e) => {
-        console.warn('Autoplay failed:', e);
-
-        if (playAttemptTimeout) clearTimeout(playAttemptTimeout);
-        playAttemptTimeout = setTimeout(attemptPlay, 1000);
-      });
-
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setHasPlayed(true);
-            setPreviewStarted(true);
-            setIsPaused(false);
-            setShowDescription(false);
-            setAutoShowTooltip(true);
-            setTimeout(() => setAutoShowTooltip(false), 3000);
-          })
-          .catch((e) => console.warn('Play promise failed:', e));
-      }
-    };
-
-    const handleCanPlay = () => {
-      delayTimeout = setTimeout(attemptPlay, 400);
-    };
-
-    if (inView && !hasPlayed && videoRef.current) {
-      canPlayListener = handleCanPlay;
-      videoRef.current.addEventListener('canplay', canPlayListener, {
-        once: true,
-      });
-
-      if (videoRef.current.readyState >= 3) {
-        attemptPlay();
-      }
-    } else if (!inView && videoRef.current && previewStarted && !videoEnded) {
-      videoRef.current.pause();
-      setIsPaused(true);
-      setPreviewStarted(false);
-      setShowDescription(true);
-      setAutoShowTooltip(false);
-      setWasPlayingBeforeHidden(false);
-    } else if (
-      inView &&
-      hasPlayed &&
-      videoRef.current &&
-      isPaused &&
-      !videoEnded
-    ) {
-      delayTimeout = setTimeout(() => {
-        if (videoRef.current && inView && !document.hidden) {
-          videoRef.current
-            .play()
-            .then(() => {
-              setIsPaused(false);
-              setPreviewStarted(true);
-              setShowDescription(false);
-              setAutoShowTooltip(true);
-              setTimeout(() => setAutoShowTooltip(false), 3000);
-            })
-            .catch((e) => console.warn('Resume failed:', e));
-        }
-      }, 300);
-    }
-
-    return () => {
-      if (delayTimeout) clearTimeout(delayTimeout);
-      if (playAttemptTimeout) clearTimeout(playAttemptTimeout);
-      if (videoRef.current && canPlayListener) {
-        videoRef.current.removeEventListener('canplay', canPlayListener);
-      }
-    };
-  }, [inView, hasPlayed, previewStarted, videoEnded, isPaused, isPlaying]);
-
-  if (isLoading || !movie) {
+  // Loading state
+  if (isLoading && !movieProp) {
     return (
-      <div className="relative h-screen w-full bg-black flex items-center justify-center">
-        <Spinner size="lg" />
+      <div className="flex items-center justify-center w-full h-screen bg-black">
+        <Spinner />
       </div>
     );
   }
-  return (
-    <section
-      ref={ref}
-      className={`relative w-full h-screen text-white overflow-hidden ${
-        !isInitialLoad ? 'transition-opacity duration-500' : ''
-      }`}
-    >
-      <HeroVideoBackground
-        videoRef={videoRef}
-        movie={movie}
-        videoEnded={videoEnded}
-        isPaused={isPaused}
-        previewStarted={previewStarted}
-        isPlaying={isPlaying}
-        onEnded={handleVideoEnded}
-      />
-      <div
-        className={`absolute top-24 right-4 sm:top-28 sm:right-6 lg:top-32 lg:right-8 z-20 transition-all duration-500 ease-in-out ${
-          previewStarted && !videoEnded && !isPlaying
-            ? 'opacity-100 transform translate-y-0'
-            : 'opacity-0 transform -translate-y-4 pointer-events-none'
-        }`}
-      >
-        <VolumeButton
-          isMuted={isMuted}
-          onToggle={toggleMute}
-          showTooltip={showVolumeTooltip}
-          autoTooltip={autoShowTooltip}
-          onMouseEnter={() => setShowVolumeTooltip(true)}
-          onMouseLeave={() => setShowVolumeTooltip(false)}
-          disabled={!previewStarted || videoEnded || isPlaying}
-        />
+
+  if (!movie) {
+    return (
+      <div className="relative w-full h-screen bg-black flex items-center justify-center">
+        <Spinner />
       </div>
-      <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-6 md:px-8 lg:px-16 xl:px-20 max-w-none">
-        <HeroTitle mainTitle={mainTitle} subtitle={subtitle} />
-        <HeroStats
-          matchPercentage={matchPercentage}
-          releaseYear={movie.releaseYear}
-        />
-        <HeroDescription
-          showDescription={showDescription}
-          description={movie.overview || movie.description}
-        />
-        <div className="flex items-center gap-3 sm:gap-4">
-          <HeroButton
-            isSaved={isSaved}
-            justAdded={justAdded}
-            buttonDisabled={buttonDisabled}
-            onPlay={handlePlay}
-            onToggleWatchlist={handleToggleWatchlist}
-          />
+    );
+  }
+
+  // Extract title parts
+  const fullTitle = movie?.title || 'Loading...';
+  const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
+  const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
+
+  // Parse genres if they exist
+  const genres =
+    movie?.genres || movie?.genre?.split(',').map((g) => g.trim()) || [];
+
+  // Get year from release date
+  const releaseYear =
+    movie?.releaseYear ||
+    (movie?.release_date ? new Date(movie.release_date).getFullYear() : null);
+
+  return (
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Background Layer */}
+      <div className="absolute inset-0">
+        {/* Static Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${movie.backdropPath || movie.posterPath})`,
+          }}
+        >
+          {/* Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
+        </div>
+
+        {/* Video Player (if trailer available) */}
+        {movie.trailerUrl && showVideo && (
+          <div
+            className={`absolute inset-0 transition-opacity duration-1000 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              src={movie.trailerUrl}
+              autoPlay
+              muted={isMuted}
+              loop
+              onEnded={handleVideoEnd}
+              playsInline
+              preload="auto"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-40" />
+          </div>
+        )}
+      </div>
+
+      {/* Content Layer */}
+      <div className="relative h-full flex flex-col justify-center">
+        <div
+          className={`px-12 lg:px-16 transition-all duration-700 ${fadeContent ? 'opacity-70' : 'opacity-100'}`}
+        >
+          {/* Title Section */}
+          <div className="max-w-2xl space-y-4">
+            {/* Netflix Original Badge (optional - show if it's a series or has seasons) */}
+            {movie?.seasons && (
+              <div className="flex items-center space-x-3">
+                <span className="text-red-600 font-bold text-lg tracking-widest">
+                  NETFLIX
+                </span>
+                <span className="text-gray-400 text-sm tracking-[0.3em] font-light">
+                  SERIES
+                </span>
+              </div>
+            )}
+
+            {/* Main Title */}
+            <div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-2xl">
+                {mainTitle}
+              </h1>
+              {subtitle && (
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white/90 mt-2 drop-shadow-xl">
+                  {subtitle}
+                </h2>
+              )}
+            </div>
+
+            {/* Tagline if exists */}
+            {movie.tagline && (
+              <p className="text-lg md:text-xl text-gray-300 italic">
+                {movie.tagline}
+              </p>
+            )}
+
+            {/* Metadata Row */}
+            <div className="flex items-center space-x-4 text-white/90">
+              <span className="text-green-400 font-semibold text-lg">
+                {matchPercentage}% Match
+              </span>
+              {releaseYear && <span className="text-base">{releaseYear}</span>}
+              {movie.seasons && (
+                <span className="text-base">
+                  {movie.seasons} Season{movie.seasons > 1 ? 's' : ''}
+                </span>
+              )}
+              {movie.maturityRating && (
+                <span className="px-2 py-0.5 border border-white/60 text-sm">
+                  {movie.maturityRating}
+                </span>
+              )}
+              {movie.duration && (
+                <span className="text-base">{movie.duration}</span>
+              )}
+              {movie.vote_average && (
+                <span className="flex items-center space-x-1">
+                  <span className="text-yellow-500">★</span>
+                  <span>{movie.vote_average.toFixed(1)}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Genres */}
+            {genres.length > 0 && (
+              <div className="flex items-center space-x-2 text-white/80">
+                {genres.map((genre, index) => (
+                  <React.Fragment key={genre}>
+                    <span>{genre}</span>
+                    {index < genres.length - 1 && (
+                      <span className="text-white/40">•</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+
+            {/* Description */}
+            <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed line-clamp-4">
+              {movie.overview ||
+                movie.description ||
+                'No description available'}
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3 pt-2">
+              {/* Play Button */}
+              <button
+                onClick={handlePlay}
+                className="group flex items-center px-6 py-2.5 bg-white hover:bg-white/80 text-black font-semibold rounded transition-all duration-200 transform hover:scale-105"
+              >
+                <Play className="w-5 h-5 mr-2 fill-current" />
+                <span className="text-lg">Play</span>
+              </button>
+
+              {/* More Info Button */}
+              <button
+                onClick={handleMoreInfo}
+                className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
+              >
+                <Info className="w-5 h-5 mr-2" />
+                <span className="text-lg">More Info</span>
+              </button>
+
+              {/* Add to List Button */}
+              <button
+                onClick={handleAddToWatchlist}
+                disabled={buttonDisabled}
+                className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={isSaved ? 'Remove from My List' : 'Add to My List'}
+              >
+                {isSaved ? (
+                  <Check className="w-5 h-5 text-white" />
+                ) : (
+                  <Plus className="w-5 h-5 text-white" />
+                )}
+              </button>
+
+              {/* Just Added Indicator */}
+              {justAdded && (
+                <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
+                  Added to My List
+                </span>
+              )}
+
+              {/* Mute Button (shows when video is playing) */}
+              {isPlaying && movie.trailerUrl && (
+                <button
+                  onClick={handleToggleMute}
+                  className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 ml-auto"
+                  aria-label={isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-5 h-5 text-white" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 text-white" />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      {isPlaying && movie?.embedUrl && (
-        <VideoPlayer
-          embedUrl={movie.embedUrl}
-          onClose={handleVideoPlayerClose}
-          movieId={movie._id}
-        />
+
+      {/* Age Rating Badge (Netflix style) */}
+      {isPlaying && movie.maturityRating && (
+        <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-3 border-white px-4 py-6 flex items-center">
+          <span className="text-white text-xl font-bold">
+            {movie.maturityRating}
+          </span>
+        </div>
       )}
-    </section>
+
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <ChevronDown className="w-8 h-8 text-white/50" />
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+    </div>
   );
 };
+
 export default Hero;
