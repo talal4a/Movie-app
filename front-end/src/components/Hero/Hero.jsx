@@ -210,21 +210,21 @@ const Hero = ({ movie: movieProp }) => {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url(${movie.backdropPath || movie.posterPath})`,
+            backgroundImage: `url(${movie.backdrop || movie.posterPath})`,
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
 
-        {movie.trailerUrl && showVideo && (
+        {movie.previewTrailer && showVideo && (
           <div
             className={`absolute inset-0 transition-opacity duration-1000 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
           >
             <video
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
-              src={movie.trailerUrl}
+              src={movie.previewTrailer}
               autoPlay
               muted={isMuted}
               loop
