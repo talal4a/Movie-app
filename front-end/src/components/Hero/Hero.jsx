@@ -157,18 +157,16 @@ const Hero = ({ movie: movieProp }) => {
     }
   }, [isMuted]);
 
-  // Handle more info
   const handleMoreInfo = useCallback(() => {
     if (!movie?._id) return;
     navigate(`/movie/${movie._id}`);
   }, [movie?._id, navigate]);
 
-  // Handle video end
   const handleVideoEnd = useCallback(() => {
     setShowVideo(false);
     setFadeContent(false);
     setIsPlaying(false);
-    // Restart after a delay
+
     setTimeout(() => {
       setShowVideo(true);
       setFadeContent(true);
@@ -181,7 +179,6 @@ const Hero = ({ movie: movieProp }) => {
     }, 2000);
   }, []);
 
-  // Loading state
   if (isLoading && !movieProp) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-black">
@@ -189,7 +186,6 @@ const Hero = ({ movie: movieProp }) => {
       </div>
     );
   }
-
   if (!movie) {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
@@ -197,38 +193,30 @@ const Hero = ({ movie: movieProp }) => {
       </div>
     );
   }
-
-  // Extract title parts
   const fullTitle = movie?.title || 'Loading...';
   const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
   const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
 
-  // Parse genres if they exist
   const genres =
     movie?.genres || movie?.genre?.split(',').map((g) => g.trim()) || [];
 
-  // Get year from release date
   const releaseYear =
     movie?.releaseYear ||
     (movie?.release_date ? new Date(movie.release_date).getFullYear() : null);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Background Layer */}
       <div className="absolute inset-0">
-        {/* Static Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${movie.backdropPath || movie.posterPath})`,
           }}
         >
-          {/* Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
 
-        {/* Video Player (if trailer available) */}
         {movie.trailerUrl && showVideo && (
           <div
             className={`absolute inset-0 transition-opacity duration-1000 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
@@ -250,14 +238,11 @@ const Hero = ({ movie: movieProp }) => {
         )}
       </div>
 
-      {/* Content Layer */}
       <div className="relative h-full flex flex-col justify-center">
         <div
           className={`px-12 lg:px-16 transition-all duration-700 ${fadeContent ? 'opacity-70' : 'opacity-100'}`}
         >
-          {/* Title Section */}
           <div className="max-w-2xl space-y-4">
-            {/* Netflix Original Badge (optional - show if it's a series or has seasons) */}
             {movie?.seasons && (
               <div className="flex items-center space-x-3">
                 <span className="text-red-600 font-bold text-lg tracking-widest">
@@ -268,8 +253,6 @@ const Hero = ({ movie: movieProp }) => {
                 </span>
               </div>
             )}
-
-            {/* Main Title */}
             <div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-2xl">
                 {mainTitle}
@@ -369,15 +352,11 @@ const Hero = ({ movie: movieProp }) => {
                   <Plus className="w-5 h-5 text-white" />
                 )}
               </button>
-
-              {/* Just Added Indicator */}
               {justAdded && (
                 <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
                   Added to My List
                 </span>
               )}
-
-              {/* Mute Button (shows when video is playing) */}
               {isPlaying && movie.trailerUrl && (
                 <button
                   onClick={handleToggleMute}
@@ -396,7 +375,6 @@ const Hero = ({ movie: movieProp }) => {
         </div>
       </div>
 
-      {/* Age Rating Badge (Netflix style) */}
       {isPlaying && movie.maturityRating && (
         <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-3 border-white px-4 py-6 flex items-center">
           <span className="text-white text-xl font-bold">
