@@ -25,6 +25,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import Spinner from '../ui/Spinner';
+
 const Hero = ({ movie: movieProp }) => {
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -36,7 +37,9 @@ const Hero = ({ movie: movieProp }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [fadeContent, setFadeContent] = useState(false);
+  const [hideDescription, setHideDescription] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
@@ -91,6 +94,78 @@ const Hero = ({ movie: movieProp }) => {
   const matchPercentage =
     movie?.matchPercentage || movie?.match || getConsistentMatch(movie);
 
+  const handleVideoLoadedData = useCallback(() => {
+    setVideoLoaded(true);
+  }, []);
+
+  const handleVideoEnded = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+
+    setShowVideo(false);
+    setIsPlaying(false);
+    setFadeContent(false);
+    setHideDescription(false);
+  }, []);
+
+  const startVideoPlayback = useCallback(() => {
+    if (!videoRef.current || isPlaying) return;
+
+    setFadeContent(false);
+    setHideDescription(false);
+
+    setTimeout(() => {
+      videoRef.current.currentTime = 0;
+
+      const playPromise = videoRef.current.play();
+
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setFadeContent(true);
+            setTimeout(() => {
+              setHideDescription(true);
+            }, 3000);
+          })
+          .catch((error) => {
+            console.error('Playback error:', error);
+            handleVideoEnded();
+          });
+      }
+    }, 50);
+  }, [isPlaying, handleVideoEnded]);
+
+  const startVideoTransition = useCallback(() => {
+    if (!videoRef.current || !movie?.previewTrailer) {
+      console.log('No video ref or preview trailer available');
+      return;
+    }
+
+    if (isPlaying || showVideo) {
+      console.log('Preview already in progress, skipping');
+      return;
+    }
+    setShowVideo(true);
+    setFadeContent(false);
+    setHideDescription(false);
+
+    if (videoLoaded) {
+      console.log('Video already loaded, starting playback');
+      startVideoPlayback();
+    } else {
+      console.log('Waiting for video to load...');
+    }
+  }, [
+    videoLoaded,
+    movie?.previewTrailer,
+    isPlaying,
+    showVideo,
+    startVideoPlayback,
+  ]);
+
   useEffect(() => {
     if (!heroRef.current || !movie?.previewTrailer) return;
 
@@ -101,22 +176,15 @@ const Hero = ({ movie: movieProp }) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !document.hidden) {
             if (!hasInitiallyPlayed) {
-              setShowVideo(true);
-              setFadeContent(true);
-
               initialPlayTimeoutRef.current = setTimeout(() => {
-                if (videoRef.current) {
-                  videoRef.current
-                    .play()
-                    .then(() => {
-                      setIsPlaying(true);
-                      hasInitiallyPlayed = true;
-                      console.log('Video started playing');
-                    })
-                    .catch(console.error);
-                }
-              }, 3000);
-            } else if (videoRef.current && videoRef.current.paused) {
+                startVideoTransition();
+                hasInitiallyPlayed = true;
+              }, 1500);
+            } else if (
+              videoRef.current &&
+              videoRef.current.paused &&
+              showVideo
+            ) {
               videoRef.current
                 .play()
                 .then(() => setIsPlaying(true))
@@ -138,7 +206,8 @@ const Hero = ({ movie: movieProp }) => {
       } else if (
         !document.hidden &&
         videoRef.current &&
-        videoRef.current.paused
+        videoRef.current.paused &&
+        videoLoaded
       ) {
         const rect = heroRef.current.getBoundingClientRect();
         const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
@@ -164,7 +233,7 @@ const Hero = ({ movie: movieProp }) => {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [movie?.previewTrailer]);
+  }, [movie?.previewTrailer, startVideoTransition, videoLoaded]);
 
   const handlePlay = useCallback(() => {
     if (!movie?._id) {
@@ -176,7 +245,6 @@ const Hero = ({ movie: movieProp }) => {
 
   const handleAddToWatchlist = useCallback(() => {
     if (!movie?._id) return;
-
     if (isSaved) {
       dispatch(removeFromWatchlist(movie._id));
       showToast('Removed from My List');
@@ -185,7 +253,6 @@ const Hero = ({ movie: movieProp }) => {
       showToast('Added to My List');
       setJustAdded(true);
       setButtonDisabled(true);
-
       setTimeout(() => setButtonDisabled(false), 3000);
       setTimeout(() => setJustAdded(false), 3000);
     }
@@ -210,13 +277,22 @@ const Hero = ({ movie: movieProp }) => {
   }, [movie?._id, navigate]);
 
   const handleVideoEnd = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(console.error);
-    }
+    setIsPlaying(false);
+
+    setTimeout(() => {
+      setHideDescription(false);
+    }, 200);
+
+    setTimeout(() => {
+      setFadeContent(false);
+    }, 500);
+
+    setTimeout(() => {
+      setShowVideo(false);
+      setVideoLoaded(false);
+    }, 1200);
+
+    console.log('Video ended - smooth transition back to image');
   }, []);
 
   if (isLoading && !movieProp) {
@@ -253,30 +329,44 @@ const Hero = ({ movie: movieProp }) => {
     >
       <div className="absolute inset-0">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 ease-out"
           style={{
             backgroundImage: `url(${movie.backdrop || movie.posterPath})`,
+            transform: showVideo ? 'scale(1.02)' : 'scale(1)',
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
 
-        {movie.previewTrailer && showVideo && (
+        {movie.previewTrailer && (
           <div
-            className={`absolute inset-0 transition-opacity duration-1000 ${
+            className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
               showVideo ? 'opacity-100' : 'opacity-0'
             }`}
+            style={{
+              visibility: showVideo ? 'visible' : 'hidden',
+            }}
           >
             <video
               ref={videoRef}
+              key={`video-${movie._id}`}
               className="absolute inset-0 w-full h-full object-cover"
               src={movie.previewTrailer}
-              muted={isMuted}
-              loop
+              muted={true}
               onEnded={handleVideoEnd}
+              onLoadedData={handleVideoLoadedData}
+              onCanPlay={handleVideoLoadedData}
               playsInline
               preload="auto"
+              disablePictureInPicture
+              disableRemotePlayback
+              style={{
+                transform: 'scale(1.01)',
+                transition: 'opacity 0.5s ease-in-out',
+                opacity: isPlaying ? 1 : 0,
+                pointerEvents: 'none',
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-40" />
@@ -285,7 +375,13 @@ const Hero = ({ movie: movieProp }) => {
       </div>
 
       {showVideo && movie.previewTrailer && (
-        <div className="fixed top-28 right-10 z-[99999]">
+        <div
+          className={`fixed top-28 right-10 z-[99999] transition-all duration-700 ${
+            isPlaying
+              ? 'opacity-100 transform translate-y-0'
+              : 'opacity-0 transform translate-y-2'
+          }`}
+        >
           <button
             onClick={handleToggleMute}
             className="flex items-center gap-3 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all duration-200 shadow-2xl hover:shadow-xl transform hover:scale-105 font-bold"
@@ -307,8 +403,10 @@ const Hero = ({ movie: movieProp }) => {
 
       <div className="relative h-full flex flex-col justify-center">
         <div
-          className={`px-12 lg:px-16 transition-all duration-700 ${
-            fadeContent ? 'opacity-70' : 'opacity-100'
+          className={`px-12 lg:px-16 transition-all duration-1000 ease-out ${
+            fadeContent
+              ? 'opacity-70 transform translate-x-2'
+              : 'opacity-100 transform translate-x-0'
           }`}
         >
           <div className="max-w-2xl space-y-4">
@@ -379,68 +477,84 @@ const Hero = ({ movie: movieProp }) => {
               </div>
             )}
 
-            <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed line-clamp-4">
-              {movie.overview ||
-                movie.description ||
-                'No description available'}
-            </p>
-
-            <div className="flex items-center space-x-3 pt-2">
-              <button
-                onClick={handlePlay}
-                className="group flex items-center px-6 py-2.5 bg-white hover:bg-white/80 text-black font-semibold rounded transition-all duration-200 transform hover:scale-105"
+            <div className="relative">
+              <div
+                style={{
+                  opacity: hideDescription ? 0 : 1,
+                  maxHeight: hideDescription ? '0px' : '200px',
+                  overflow: 'hidden',
+                  transition: 'opacity 0.5s ease-out, max-height 0.5s ease-out',
+                  marginBottom: hideDescription ? '0' : '16px',
+                }}
               >
-                <Play className="w-5 h-5 mr-2 fill-current" />
-                <span className="text-lg">Play</span>
-              </button>
+                <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed line-clamp-4">
+                  {movie.overview ||
+                    movie.description ||
+                    'No description available'}
+                </p>
+              </div>
 
-              <button
-                onClick={handleMoreInfo}
-                className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
+              <div
+                className={`flex items-center space-x-3 transition-all duration-500 ease-out ${hideDescription ? 'mt-0' : 'mt-4'}`}
               >
-                <Info className="w-5 h-5 mr-2" />
-                <span className="text-lg">More Info</span>
-              </button>
-
-              <button
-                onClick={handleAddToWatchlist}
-                disabled={buttonDisabled}
-                className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label={isSaved ? 'Remove from My List' : 'Add to My List'}
-              >
-                {isSaved ? (
-                  <Check className="w-5 h-5 text-white" />
-                ) : (
-                  <Plus className="w-5 h-5 text-white" />
-                )}
-              </button>
-
-              {justAdded && (
-                <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
-                  Added to My List
-                </span>
-              )}
-
-              {isPlaying && movie.previewTrailer && (
                 <button
-                  onClick={handleToggleMute}
-                  className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 ml-auto"
-                  aria-label={isMuted ? 'Unmute' : 'Mute'}
+                  onClick={handlePlay}
+                  className="group flex items-center px-6 py-2.5 bg-white hover:bg-white/80 text-black font-semibold rounded transition-all duration-200 transform hover:scale-105"
                 >
-                  {isMuted ? (
-                    <VolumeX className="w-5 h-5 text-white" />
+                  <Play className="w-5 h-5 mr-2 fill-current" />
+                  <span className="text-lg">Play</span>
+                </button>
+
+                <button
+                  onClick={handleMoreInfo}
+                  className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
+                >
+                  <Info className="w-5 h-5 mr-2" />
+                  <span className="text-lg">More Info</span>
+                </button>
+
+                <button
+                  onClick={handleAddToWatchlist}
+                  disabled={buttonDisabled}
+                  className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label={
+                    isSaved ? 'Remove from My List' : 'Add to My List'
+                  }
+                >
+                  {isSaved ? (
+                    <Check className="w-5 h-5 text-white" />
                   ) : (
-                    <Volume2 className="w-5 h-5 text-white" />
+                    <Plus className="w-5 h-5 text-white" />
                   )}
                 </button>
-              )}
+
+                {justAdded && (
+                  <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
+                    Added to My List
+                  </span>
+                )}
+
+                {isPlaying && movie.previewTrailer && (
+                  <button
+                    onClick={handleToggleMute}
+                    className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 ml-auto"
+                    aria-label={isMuted ? 'Unmute' : 'Mute'}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5 text-white" />
+                    ) : (
+                      <Volume2 className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {isPlaying && movie.maturityRating && (
-        <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-3 border-white px-4 py-6 flex items-center">
+        <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-4 border-white px-4 py-6 flex items-center transition-all duration-500">
           <span className="text-white text-xl font-bold">
             {movie.maturityRating}
           </span>
@@ -455,4 +569,5 @@ const Hero = ({ movie: movieProp }) => {
     </div>
   );
 };
+
 export default Hero;
