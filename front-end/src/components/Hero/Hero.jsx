@@ -139,7 +139,6 @@ const Hero = ({ movie: movieProp }) => {
 
   const startVideoTransition = useCallback(() => {
     if (!videoRef.current || !movie?.previewTrailer) {
-  
       return;
     }
 
@@ -152,7 +151,7 @@ const Hero = ({ movie: movieProp }) => {
 
     if (videoLoaded) {
       startVideoPlayback();
-    } 
+    }
   }, [
     videoLoaded,
     movie?.previewTrailer,
@@ -413,9 +412,7 @@ const Hero = ({ movie: movieProp }) => {
                 }}
               >
                 <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed line-clamp-4">
-                  {
-                    movie.description ||
-                    'No description available'}
+                  {movie.description || 'No description available'}
                 </p>
               </div>
               <div
@@ -430,25 +427,25 @@ const Hero = ({ movie: movieProp }) => {
                 </button>
 
                 <button
-  onClick={handleAddToWatchlist}
-  disabled={buttonDisabled}
-  className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
-  aria-label={isSaved ? 'Remove from My List' : 'Add to My List'}
->
-  {isSaved ? (
-    <Check className="w-5 h-5 text-white mr-2" />
-  ) : (
-    <Plus className="w-5 h-5 text-white mr-2" />
-  )}
-  My List
-</button>
-
+                  onClick={handleAddToWatchlist}
+                  disabled={buttonDisabled}
+                  className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
+                  aria-label={
+                    isSaved ? 'Remove from My List' : 'Add to My List'
+                  }
+                >
+                  {isSaved ? (
+                    <Check className="w-5 h-5 text-white mr-2" />
+                  ) : (
+                    <Plus className="w-5 h-5 text-white mr-2" />
+                  )}
+                  My List
+                </button>
                 {justAdded && (
                   <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
                     Added to My List
                   </span>
                 )}
-
                 {isPlaying && movie.previewTrailer && (
                   <button
                     onClick={handleToggleMute}
