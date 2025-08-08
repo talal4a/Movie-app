@@ -257,10 +257,7 @@ const Hero = ({ movie: movieProp }) => {
       setIsMuted(!isMuted);
     }
   }, [isMuted, showToast]);
-  const handleMoreInfo = useCallback(() => {
-    if (!movie?._id) return;
-    navigate(`/movie/${movie._id}`);
-  }, [movie?._id, navigate]);
+  
 
   const handleVideoEnd = useCallback(() => {
     setIsPlaying(false);
