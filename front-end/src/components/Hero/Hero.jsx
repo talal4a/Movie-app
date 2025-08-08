@@ -139,12 +139,11 @@ const Hero = ({ movie: movieProp }) => {
 
   const startVideoTransition = useCallback(() => {
     if (!videoRef.current || !movie?.previewTrailer) {
-      console.log('No video ref or preview trailer available');
+  
       return;
     }
 
     if (isPlaying || showVideo) {
-      console.log('Preview already in progress, skipping');
       return;
     }
     setShowVideo(true);
@@ -152,11 +151,8 @@ const Hero = ({ movie: movieProp }) => {
     setHideDescription(false);
 
     if (videoLoaded) {
-      console.log('Video already loaded, starting playback');
       startVideoPlayback();
-    } else {
-      console.log('Waiting for video to load...');
-    }
+    } 
   }, [
     videoLoaded,
     movie?.previewTrailer,
@@ -248,8 +244,7 @@ const Hero = ({ movie: movieProp }) => {
       dispatch(removeFromWatchlist(movie._id));
       showToast('Removed from My List');
     } else {
-      dispatch(addToWatchlist(movie));
-      showToast('Added to My List');
+      dispatch(addToWatchlist(movie._id));
       setJustAdded(true);
       setButtonDisabled(true);
       setTimeout(() => setButtonDisabled(false), 3000);
@@ -261,15 +256,8 @@ const Hero = ({ movie: movieProp }) => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
-
-      if (isMuted) {
-        showToast('Sound on');
-      } else {
-        showToast('Sound off');
-      }
     }
   }, [isMuted, showToast]);
-
   const handleMoreInfo = useCallback(() => {
     if (!movie?._id) return;
     navigate(`/movie/${movie._id}`);
@@ -372,34 +360,6 @@ const Hero = ({ movie: movieProp }) => {
           </div>
         )}
       </div>
-
-      {showVideo && movie.previewTrailer && (
-        <div
-          className={`fixed top-28 right-10 z-[99999] transition-all duration-700 ${
-            isPlaying
-              ? 'opacity-100 transform translate-y-0'
-              : 'opacity-0 transform translate-y-2'
-          }`}
-        >
-          <button
-            onClick={handleToggleMute}
-            className="flex items-center gap-3 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all duration-200 shadow-2xl hover:shadow-xl transform hover:scale-105 font-bold"
-          >
-            {isMuted ? (
-              <>
-                <VolumeX className="w-6 h-6" />
-                <span>Click to unmute</span>
-              </>
-            ) : (
-              <>
-                <Volume2 className="w-6 h-6" />
-                <span>Sound ON</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-
       <div className="relative h-full flex flex-col justify-center">
         <div
           className={`px-12 lg:px-16 transition-all duration-1000 ease-out ${
@@ -409,17 +369,6 @@ const Hero = ({ movie: movieProp }) => {
           }`}
         >
           <div className="max-w-2xl space-y-4">
-            {movie?.seasons && (
-              <div className="flex items-center space-x-3">
-                <span className="text-red-600 font-bold text-lg tracking-widest">
-                  NETFLIX
-                </span>
-                <span className="text-gray-400 text-sm tracking-[0.3em] font-light">
-                  SERIES
-                </span>
-              </div>
-            )}
-
             <div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-2xl">
                 {mainTitle}
@@ -430,39 +379,17 @@ const Hero = ({ movie: movieProp }) => {
                 </h2>
               )}
             </div>
-
             {movie.tagline && (
               <p className="text-lg md:text-xl text-gray-300 italic">
                 {movie.tagline}
               </p>
             )}
-
             <div className="flex items-center space-x-4 text-white/90">
               <span className="text-green-400 font-semibold text-lg">
                 {matchPercentage}% Match
               </span>
               {releaseYear && <span className="text-base">{releaseYear}</span>}
-              {movie.seasons && (
-                <span className="text-base">
-                  {movie.seasons} Season{movie.seasons > 1 ? 's' : ''}
-                </span>
-              )}
-              {movie.maturityRating && (
-                <span className="px-2 py-0.5 border border-white/60 text-sm">
-                  {movie.maturityRating}
-                </span>
-              )}
-              {movie.duration && (
-                <span className="text-base">{movie.duration}</span>
-              )}
-              {movie.vote_average && (
-                <span className="flex items-center space-x-1">
-                  <span className="text-yellow-500">★</span>
-                  <span>{movie.vote_average.toFixed(1)}</span>
-                </span>
-              )}
             </div>
-
             {genres.length > 0 && (
               <div className="flex items-center space-x-2 text-white/80">
                 {genres.map((genre, index) => (
@@ -475,7 +402,6 @@ const Hero = ({ movie: movieProp }) => {
                 ))}
               </div>
             )}
-
             <div className="relative">
               <div
                 style={{
@@ -487,12 +413,11 @@ const Hero = ({ movie: movieProp }) => {
                 }}
               >
                 <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed line-clamp-4">
-                  {movie.overview ||
+                  {
                     movie.description ||
                     'No description available'}
                 </p>
               </div>
-
               <div
                 className={`flex items-center space-x-3 transition-all duration-500 ease-out ${hideDescription ? 'mt-0' : 'mt-4'}`}
               >
@@ -505,27 +430,18 @@ const Hero = ({ movie: movieProp }) => {
                 </button>
 
                 <button
-                  onClick={handleMoreInfo}
-                  className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
-                >
-                  <Info className="w-5 h-5 mr-2" />
-                  <span className="text-lg">More Info</span>
-                </button>
-
-                <button
-                  onClick={handleAddToWatchlist}
-                  disabled={buttonDisabled}
-                  className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label={
-                    isSaved ? 'Remove from My List' : 'Add to My List'
-                  }
-                >
-                  {isSaved ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <Plus className="w-5 h-5 text-white" />
-                  )}
-                </button>
+  onClick={handleAddToWatchlist}
+  disabled={buttonDisabled}
+  className="group flex items-center px-6 py-2.5 bg-gray-500/30 hover:bg-gray-500/20 text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105"
+  aria-label={isSaved ? 'Remove from My List' : 'Add to My List'}
+>
+  {isSaved ? (
+    <Check className="w-5 h-5 text-white mr-2" />
+  ) : (
+    <Plus className="w-5 h-5 text-white mr-2" />
+  )}
+  My List
+</button>
 
                 {justAdded && (
                   <span className="text-sm bg-green-500 text-white px-3 py-1 rounded animate-pulse">
