@@ -25,7 +25,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import Spinner from '../ui/Spinner';
-
 const Hero = ({ movie: movieProp }) => {
   const location = useLocation();
   const queryClient = useQueryClient();
