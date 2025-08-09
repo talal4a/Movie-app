@@ -118,13 +118,11 @@ export default function Account() {
       reader.readAsDataURL(file);
     }
   };
-
   useEffect(() => {
     if (user) {
       setProfileData({ name: user.name, email: user.email });
     }
   }, [user]);
-
   const updateProfileMutation = useMutation({
     mutationFn: () => updateProfile(profileData, token),
     onSuccess: (updatedUser) => {

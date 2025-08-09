@@ -19,7 +19,6 @@ import {
   Play,
   Plus,
   Check,
-  Info,
   Volume2,
   VolumeX,
   ChevronDown,
@@ -32,7 +31,6 @@ const Hero = ({ movie: movieProp }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
-
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -63,7 +61,6 @@ const Hero = ({ movie: movieProp }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
-
   const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
     let hash = 0;
@@ -81,7 +78,6 @@ const Hero = ({ movie: movieProp }) => {
     }
     return 70 + (Math.abs(hash) % 30);
   }, []);
-
   const isSaved = useMemo(() => {
     return (
       movie?._id &&
@@ -236,7 +232,6 @@ const Hero = ({ movie: movieProp }) => {
     }
     mutate(movie._id);
   }, [movie, mutate, showToast]);
-
   const handleAddToWatchlist = useCallback(() => {
     if (!movie?._id) return;
     if (isSaved) {
@@ -250,22 +245,17 @@ const Hero = ({ movie: movieProp }) => {
       setTimeout(() => setJustAdded(false), 3000);
     }
   }, [movie, isSaved, dispatch, showToast]);
-
   const handleToggleMute = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
   }, [isMuted, showToast]);
-  
-
   const handleVideoEnd = useCallback(() => {
     setIsPlaying(false);
-
     setTimeout(() => {
       setHideDescription(false);
     }, 200);
-
     setTimeout(() => {
       setFadeContent(false);
     }, 500);
