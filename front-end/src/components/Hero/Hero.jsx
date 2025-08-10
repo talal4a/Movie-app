@@ -15,14 +15,7 @@ import {
 import { useToast } from '@/context/ToastContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
-import {
-  Play,
-  Plus,
-  Check,
-  Volume2,
-  VolumeX,
-  ChevronDown,
-} from 'lucide-react';
+import { Play, Plus, Check, Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import Spinner from '../ui/Spinner';
 const Hero = ({ movie: movieProp }) => {
   const location = useLocation();
@@ -51,9 +44,7 @@ const Hero = ({ movie: movieProp }) => {
     keepPreviousData: true,
     staleTime: 1000,
   });
-
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
-
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
