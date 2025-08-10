@@ -13,12 +13,27 @@ import {
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { useToast } from '@/context/ToastContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
 import { Play, Plus, Check, Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import Spinner from '../ui/Spinner';
+const getPlayedPreviews = () => {
+  try {
+    const stored = sessionStorage.getItem('playedPreviews');
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  } catch (e) {
+    return new Set();
+  }
+};
+const savePlayedPreviews = (previews) => {
+  try {
+    sessionStorage.setItem('playedPreviews', JSON.stringify([...previews]));
+  } catch (e) {
+    console.error('Failed to save played previews:', e);
+  }
+};
+const playedPreviews = getPlayedPreviews();
 const Hero = ({ movie: movieProp }) => {
-  const location = useLocation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,10 +47,12 @@ const Hero = ({ movie: movieProp }) => {
   const [hideDescription, setHideDescription] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [showSoundPopup, setShowSoundPopup] = useState(false);
 
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
+  const hasPlayedRef = useRef(false);
 
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
@@ -45,6 +62,18 @@ const Hero = ({ movie: movieProp }) => {
     staleTime: 1000,
   });
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
+
+  useEffect(() => {
+    if (movie?._id && playedPreviews.has(movie._id)) {
+      hasPlayedRef.current = true;
+
+      setHideDescription(false);
+    } else {
+      hasPlayedRef.current = false;
+      setHideDescription(false);
+    }
+  }, [movie?._id]);
+
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
@@ -52,6 +81,7 @@ const Hero = ({ movie: movieProp }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
+
   const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
     let hash = 0;
@@ -69,6 +99,7 @@ const Hero = ({ movie: movieProp }) => {
     }
     return 70 + (Math.abs(hash) % 30);
   }, []);
+
   const isSaved = useMemo(() => {
     return (
       movie?._id &&
@@ -90,11 +121,17 @@ const Hero = ({ movie: movieProp }) => {
       videoRef.current.currentTime = 0;
     }
 
+    if (movie?._id) {
+      playedPreviews.add(movie._id);
+      hasPlayedRef.current = true;
+      savePlayedPreviews(playedPreviews);
+    }
+
     setShowVideo(false);
     setIsPlaying(false);
     setFadeContent(false);
     setHideDescription(false);
-  }, []);
+  }, [movie?._id]);
 
   const startVideoPlayback = useCallback(() => {
     if (!videoRef.current || isPlaying) return;
@@ -112,6 +149,11 @@ const Hero = ({ movie: movieProp }) => {
           .then(() => {
             setIsPlaying(true);
             setFadeContent(true);
+
+            setShowSoundPopup(true);
+            setTimeout(() => {
+              setShowSoundPopup(false);
+            }, 4000);
             setTimeout(() => {
               setHideDescription(true);
             }, 3000);
@@ -126,6 +168,10 @@ const Hero = ({ movie: movieProp }) => {
 
   const startVideoTransition = useCallback(() => {
     if (!videoRef.current || !movie?.previewTrailer) {
+      return;
+    }
+
+    if (hasPlayedRef.current) {
       return;
     }
 
@@ -150,30 +196,47 @@ const Hero = ({ movie: movieProp }) => {
   useEffect(() => {
     if (!heroRef.current || !movie?.previewTrailer) return;
 
-    let hasInitiallyPlayed = false;
+    if (hasPlayedRef.current) return;
+
+    let hasInitiallyStarted = false;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !document.hidden) {
-            if (!hasInitiallyPlayed) {
+            if (!hasPlayedRef.current && !hasInitiallyStarted && !showVideo) {
               initialPlayTimeoutRef.current = setTimeout(() => {
                 startVideoTransition();
-                hasInitiallyPlayed = true;
+                hasInitiallyStarted = true;
               }, 1500);
             } else if (
               videoRef.current &&
               videoRef.current.paused &&
-              showVideo
+              showVideo &&
+              !hasPlayedRef.current
             ) {
               videoRef.current
                 .play()
-                .then(() => setIsPlaying(true))
+                .then(() => {
+                  setIsPlaying(true);
+
+                  setFadeContent(true);
+
+                  setShowSoundPopup(true);
+                  setTimeout(() => {
+                    setShowSoundPopup(false);
+                  }, 3000);
+                  setTimeout(() => {
+                    setHideDescription(true);
+                  }, 1000);
+                })
                 .catch(console.error);
             }
           } else if (videoRef.current && !videoRef.current.paused) {
             videoRef.current.pause();
             setIsPlaying(false);
+            setFadeContent(false);
+            setHideDescription(false);
           }
         });
       },
@@ -184,19 +247,32 @@ const Hero = ({ movie: movieProp }) => {
       if (document.hidden && videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
         setIsPlaying(false);
+        setFadeContent(false);
+        setHideDescription(false);
       } else if (
         !document.hidden &&
         videoRef.current &&
         videoRef.current.paused &&
-        videoLoaded
+        showVideo &&
+        !hasPlayedRef.current
       ) {
         const rect = heroRef.current.getBoundingClientRect();
         const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
 
-        if (isInViewport && hasInitiallyPlayed) {
+        if (isInViewport) {
           videoRef.current
             .play()
-            .then(() => setIsPlaying(true))
+            .then(() => {
+              setIsPlaying(true);
+              setFadeContent(true);
+              setShowSoundPopup(true);
+              setTimeout(() => {
+                setShowSoundPopup(false);
+              }, 3000);
+              setTimeout(() => {
+                setHideDescription(true);
+              }, 1000);
+            })
             .catch(console.error);
         }
       }
@@ -214,7 +290,7 @@ const Hero = ({ movie: movieProp }) => {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [movie?.previewTrailer, startVideoTransition, videoLoaded]);
+  }, [movie?.previewTrailer, startVideoTransition, videoLoaded, showVideo]);
 
   const handlePlay = useCallback(() => {
     if (!movie?._id) {
@@ -223,6 +299,7 @@ const Hero = ({ movie: movieProp }) => {
     }
     mutate(movie._id);
   }, [movie, mutate, showToast]);
+
   const handleAddToWatchlist = useCallback(() => {
     if (!movie?._id) return;
     if (isSaved) {
@@ -236,13 +313,21 @@ const Hero = ({ movie: movieProp }) => {
       setTimeout(() => setJustAdded(false), 3000);
     }
   }, [movie, isSaved, dispatch, showToast]);
+
   const handleToggleMute = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
+      setShowSoundPopup(false);
     }
-  }, [isMuted, showToast]);
+  }, [isMuted]);
+
   const handleVideoEnd = useCallback(() => {
+    if (movie?._id) {
+      playedPreviews.add(movie._id);
+      hasPlayedRef.current = true;
+      savePlayedPreviews(playedPreviews);
+    }
     setIsPlaying(false);
     setTimeout(() => {
       setHideDescription(false);
@@ -256,9 +341,10 @@ const Hero = ({ movie: movieProp }) => {
       setVideoLoaded(false);
     }, 1200);
 
-    console.log('Video ended - smooth transition back to image');
-  }, []);
-
+    console.log(
+      'Video ended - preview will not play again until new tab session'
+    );
+  }, [movie?._id]);
   if (isLoading && !movieProp) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-black">
@@ -266,7 +352,6 @@ const Hero = ({ movie: movieProp }) => {
       </div>
     );
   }
-
   if (!movie) {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
@@ -274,18 +359,14 @@ const Hero = ({ movie: movieProp }) => {
       </div>
     );
   }
-
   const fullTitle = movie?.title || 'Loading...';
   const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
   const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
-
   const genres =
     movie?.genres || movie?.genre?.split(',').map((g) => g.trim()) || [];
-
   const releaseYear =
     movie?.releaseYear ||
     (movie?.release_date ? new Date(movie.release_date).getFullYear() : null);
-
   return (
     <div
       ref={heroRef}
@@ -302,7 +383,6 @@ const Hero = ({ movie: movieProp }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
-
         {movie.previewTrailer && (
           <div
             className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
@@ -403,7 +483,6 @@ const Hero = ({ movie: movieProp }) => {
                   <Play className="w-5 h-5 mr-2 fill-current" />
                   <span className="text-lg">Play</span>
                 </button>
-
                 <button
                   onClick={handleAddToWatchlist}
                   disabled={buttonDisabled}
@@ -424,24 +503,39 @@ const Hero = ({ movie: movieProp }) => {
                     Added to My List
                   </span>
                 )}
-                {isPlaying && movie.previewTrailer && (
-                  <button
-                    onClick={handleToggleMute}
-                    className="group flex items-center justify-center w-11 h-11 rounded-full border-2 border-white/50 hover:border-white bg-gray-500/30 hover:bg-gray-500/20 backdrop-blur-sm transition-all duration-200 transform hover:scale-110 ml-auto"
-                    aria-label={isMuted ? 'Unmute' : 'Mute'}
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-5 h-5 text-white" />
-                    ) : (
-                      <Volume2 className="w-5 h-5 text-white" />
-                    )}
-                  </button>
-                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+      {isPlaying && movie.previewTrailer && (
+        <div className="absolute !top-[120px] sm:!top-[150px] md:!top-[120px] lg:!top-[100px] right-6 sm:right-8 z-10">
+          <div className="relative">
+            <button
+              onClick={handleToggleMute}
+              className="group flex items-center justify-center w-12 h-12 rounded-full border-2 border-white/50 hover:border-white bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all duration-200 transform hover:scale-110"
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6 text-white" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-white" />
+              )}
+            </button>
+
+            {showSoundPopup && (
+              <div className="absolute top-full right-0 mt-2 bg-black/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap animate-pulse border border-white/30 shadow-lg">
+                <div className="flex items-center space-x-2">
+                  <Volume2 className="w-4 h-4" />
+                  <span>Click to unmute</span>
+                </div>
+                {/* Arrow pointing up */}
+                <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-black/90"></div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {isPlaying && movie.maturityRating && (
         <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-4 border-white px-4 py-6 flex items-center transition-all duration-500">
