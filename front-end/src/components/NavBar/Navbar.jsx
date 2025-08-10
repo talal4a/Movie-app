@@ -36,18 +36,15 @@ const useClickOutside = (ref, handler) => {
     };
   }, [ref, handler]);
 };
-
 const NAV_ITEMS = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/movies', label: 'Movies', icon: Film },
   { path: '/my-list', label: 'My List', icon: List },
 ];
-
 const PROFILE_MENU_ITEMS = [
   { path: '/account', label: 'Account', icon: User },
   { path: '/help', label: 'Help Center', icon: HelpCircle },
 ];
-
 function NavBar() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
