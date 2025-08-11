@@ -23,9 +23,7 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
     }
     return url;
   };
-
   const src = getOptimizedUrl(movie.poster || movie.backdrop);
-
   const handleAddToWatchlist = async (movieId) => {
     try {
       if (isSaved) {
@@ -39,7 +37,6 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
       showToast({ message: 'Something went wrong', type: 'error' });
     }
   };
-
   const handleWatchlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -52,16 +49,14 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
         transition={{ type: 'spring', stiffness: 260, damping: 18 }}
         className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg w-45"
       >
-        <div className="w-full h-60 overflow-hidden relative">
-          <div className="w-full h-auto flex items-center justify-center">
-            <ProgressiveImage
-              src={src}
-              alt={movie.title}
-              className="max-w-full max-h-full object-contain"
-              priority="high"
-              loading="eager"
-            />
-          </div>
+        <div className="w-full max-w-xs aspect-[2/3] relative group cursor-pointer overflow-hidden rounded-lg bg-black">
+          <ProgressiveImage
+            src={src}
+            alt={movie.title}
+            className="w-full h-full object-contain"
+            priority="high"
+            loading="eager"
+          />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
               <Play className="w-6 h-6 fill-current" />
@@ -83,7 +78,6 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
             )}
           </button>
         )}
-
         {isContinueWatching && onRemove && (
           <button
             onClick={(e) => {
@@ -98,25 +92,27 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
           </button>
         )}
         <div className="p-3 text-white space-y-1">
-          <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
-          <p className="text-xs text-gray-400">{movie.releaseYear}</p>
-          <p className="text-xs text-gray-400">{movie.runtime}</p>
-          <div className="flex gap-1">
-            {movie.genres?.slice(0, 2).map((genre, i) => (
-              <span
-                key={i}
-                className={`text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ${
-                  i === 1 ? 'hidden md:inline' : ''
-                }`}
-              >
-                {genre}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
+            <p className="text-xs text-gray-400">{movie.releaseYear}</p>
+            <p className="text-xs text-gray-400">{movie.runtime}</p>
+            <div className="flex gap-1">
+              {movie.genres?.slice(0, 2).map((genre, i) => (
+                <span
+                  key={i}
+                  className={`text-[10px] bg-gray-700 px-2 py-0.5 rounded-full ${
+                    i === 1 ? 'hidden md:inline' : ''
+                  }`}
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-yellow-400 text-xs font-medium">
+                ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
               </span>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-yellow-400 text-xs font-medium">
-              ⭐ {movie.tmdbRatings?.average?.toFixed(1) || 'N/A'}
-            </span>
+            </div>
           </div>
         </div>
       </motion.div>

@@ -81,7 +81,6 @@ const Hero = ({ movie: movieProp }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
-
   const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
     let hash = 0;
@@ -126,24 +125,18 @@ const Hero = ({ movie: movieProp }) => {
       hasPlayedRef.current = true;
       savePlayedPreviews(playedPreviews);
     }
-
     setShowVideo(false);
     setIsPlaying(false);
     setFadeContent(false);
     setHideDescription(false);
   }, [movie?._id]);
-
   const startVideoPlayback = useCallback(() => {
     if (!videoRef.current || isPlaying) return;
-
     setFadeContent(false);
     setHideDescription(false);
-
     setTimeout(() => {
       videoRef.current.currentTime = 0;
-
       const playPromise = videoRef.current.play();
-
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
@@ -165,16 +158,13 @@ const Hero = ({ movie: movieProp }) => {
       }
     }, 50);
   }, [isPlaying, handleVideoEnded]);
-
   const startVideoTransition = useCallback(() => {
     if (!videoRef.current || !movie?.previewTrailer) {
       return;
     }
-
     if (hasPlayedRef.current) {
       return;
     }
-
     if (isPlaying || showVideo) {
       return;
     }
@@ -518,14 +508,13 @@ const Hero = ({ movie: movieProp }) => {
                   <Volume2 className="w-4 h-4" />
                   <span>Click to unmute</span>
                 </div>
-                {/* Arrow pointing up */}
+
                 <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-black/90"></div>
               </div>
             )}
           </div>
         </div>
       )}
-
       {isPlaying && movie.maturityRating && (
         <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-4 border-white px-4 py-6 flex items-center transition-all duration-500">
           <span className="text-white text-xl font-bold">
@@ -533,7 +522,6 @@ const Hero = ({ movie: movieProp }) => {
           </span>
         </div>
       )}
-
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <ChevronDown className="w-8 h-8 text-white/50" />
       </div>
