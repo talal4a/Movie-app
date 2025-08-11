@@ -45,7 +45,6 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
     e.stopPropagation();
     handleAddToWatchlist(movie._id);
   };
-
   return (
     <Link to={`/movie/${movie.slug || movie._id}`} className="block">
       <motion.div
@@ -63,14 +62,12 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
               loading="eager"
             />
           </div>
-
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
               <Play className="w-6 h-6 fill-current" />
             </button>
           </div>
         </div>
-
         {!isContinueWatching && (
           <button
             onClick={handleWatchlistClick}

@@ -192,14 +192,10 @@ const Hero = ({ movie: movieProp }) => {
     showVideo,
     startVideoPlayback,
   ]);
-
   useEffect(() => {
     if (!heroRef.current || !movie?.previewTrailer) return;
-
     if (hasPlayedRef.current) return;
-
     let hasInitiallyStarted = false;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -313,7 +309,6 @@ const Hero = ({ movie: movieProp }) => {
       setTimeout(() => setJustAdded(false), 3000);
     }
   }, [movie, isSaved, dispatch, showToast]);
-
   const handleToggleMute = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -321,7 +316,6 @@ const Hero = ({ movie: movieProp }) => {
       setShowSoundPopup(false);
     }
   }, [isMuted]);
-
   const handleVideoEnd = useCallback(() => {
     if (movie?._id) {
       playedPreviews.add(movie._id);
@@ -335,15 +329,10 @@ const Hero = ({ movie: movieProp }) => {
     setTimeout(() => {
       setFadeContent(false);
     }, 500);
-
     setTimeout(() => {
       setShowVideo(false);
       setVideoLoaded(false);
     }, 1200);
-
-    console.log(
-      'Video ended - preview will not play again until new tab session'
-    );
   }, [movie?._id]);
   if (isLoading && !movieProp) {
     return (
