@@ -62,7 +62,9 @@ function NavBar() {
   const searchRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const user = useSelector((state) => state.user?.user);
+  const isMovieDetailPage = location.pathname.startsWith('/movie/');
   const isSearchPage = location.pathname === '/search';
+  const hideSearchBar = isSearchPage || isMovieDetailPage;
   const debouncedQuery = useDebounce(query, 300);
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', debouncedQuery],
@@ -214,7 +216,7 @@ function NavBar() {
     <Link
       to={`/movie/${movie.slug}`}
       onClick={onClick}
-      className="flex items-center p-3 hover:bg-gray-800/50 rounded-lg transition-all duration-200 group"
+      className="flex items-center p-3 hover:bg-gray-800/50 rounded-lg transition-all duration-200 group border-b border-gray-700 last:border-b-0"
     >
       <div className="flex-shrink-0 w-14 h-20 bg-gray-800 rounded overflow-hidden">
         {movie.poster ? (
@@ -281,7 +283,7 @@ function NavBar() {
             ))}
           </ul>
           <div className="flex items-center space-x-2 md:space-x-4">
-            {!isSearchPage && (
+            {!hideSearchBar && (
               <div
                 ref={searchRef}
                 className="relative w-full max-w-xs md:max-w-md"
@@ -325,7 +327,7 @@ function NavBar() {
                     id="search-results"
                     className="absolute z-50 mt-2 left-0 right-0 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn"
                   >
-                    <div className="max-h-[60vh] overflow-y-auto thin-scrollbar">
+                    <div className="max-h-[60vh] overflow-y-auto thin-scrollbar border-t border-gray-700">
                       {isSearching ? (
                         <div className="p-6 text-center">
                           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent border-red-500"></div>
@@ -373,7 +375,7 @@ function NavBar() {
                 aria-label="User menu"
               >
                 <UserAvatar user={user} size={32} className="md:w-10 md:h-10" />
-                <span className="hidden md:inline font-medium group-hover:text-red-500 transition-colors">
+                <span className="hidden md:inline font-medium">
                   {user?.name || 'User'}
                 </span>
                 <ChevronDown

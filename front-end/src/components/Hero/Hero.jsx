@@ -16,9 +16,7 @@ import { useToast } from '@/context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
 import { Play, Plus, Check, Volume2, VolumeX, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Spinner from '../ui/Spinner';
-import VideoPlayer from '../ui/VideoPlayer';
 const getPlayedPreviews = () => {
   try {
     const stored = sessionStorage.getItem('playedPreviews');
@@ -44,19 +42,16 @@ const Hero = ({ movie: movieProp }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [fadeContent, setFadeContent] = useState(false);
   const [hideDescription, setHideDescription] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
   const [showSoundPopup, setShowSoundPopup] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [showFullMovie, setShowFullMovie] = useState(false);
-  const [isAddingToList, setIsAddingToList] = useState(false);
-
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
   const hasPlayedRef = useRef(false);
-
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
@@ -65,7 +60,6 @@ const Hero = ({ movie: movieProp }) => {
     staleTime: 1000,
   });
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
-
   useEffect(() => {
     if (movie?._id && playedPreviews.has(movie._id)) {
       hasPlayedRef.current = true;
@@ -76,11 +70,11 @@ const Hero = ({ movie: movieProp }) => {
       setHideDescription(false);
     }
   }, [movie?._id]);
-
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['continue-Watching']);
+      navigate(`/movie/${movie?._id}`);
     },
   });
   const getConsistentMatch = useCallback((movie) => {
@@ -127,18 +121,24 @@ const Hero = ({ movie: movieProp }) => {
       hasPlayedRef.current = true;
       savePlayedPreviews(playedPreviews);
     }
+
     setShowVideo(false);
     setIsPlaying(false);
     setFadeContent(false);
     setHideDescription(false);
   }, [movie?._id]);
+
   const startVideoPlayback = useCallback(() => {
     if (!videoRef.current || isPlaying) return;
+
     setFadeContent(false);
     setHideDescription(false);
+
     setTimeout(() => {
       videoRef.current.currentTime = 0;
+
       const playPromise = videoRef.current.play();
+
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
@@ -160,13 +160,16 @@ const Hero = ({ movie: movieProp }) => {
       }
     }, 50);
   }, [isPlaying, handleVideoEnded]);
+
   const startVideoTransition = useCallback(() => {
     if (!videoRef.current || !movie?.previewTrailer) {
       return;
     }
+
     if (hasPlayedRef.current) {
       return;
     }
+
     if (isPlaying || showVideo) {
       return;
     }
@@ -246,7 +249,6 @@ const Hero = ({ movie: movieProp }) => {
       ) {
         const rect = heroRef.current.getBoundingClientRect();
         const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-
         if (isInViewport) {
           videoRef.current
             .play()
@@ -282,33 +284,32 @@ const Hero = ({ movie: movieProp }) => {
 
   const handlePlay = useCallback(() => {
     if (!movie?._id) {
-      showToast({ message: 'No movie selected', type: 'error' });
+      showToast('No movie selected');
       return;
     }
-    
-
     mutate(movie._id);
-    setShowFullMovie(true);
-  }, [movie, mutate, showToast, navigate]);
+  }, [movie, mutate, showToast]);
 
   const handleAddToWatchlist = useCallback(async () => {
-    if (!movie?._id || isAddingToList) return;
-    
-    setIsAddingToList(true);
+    if (!movie?._id) return;
+
+    setButtonDisabled(true);
     try {
       if (isSaved) {
-        await dispatch(removeFromWatchlist(movie._id));
+        await dispatch(removeFromWatchlist(movie._id)).unwrap();
         showToast({ message: 'Removed from My List', type: 'success' });
       } else {
-        await dispatch(addToWatchlist(movie._id));
+        await dispatch(addToWatchlist(movie._id)).unwrap();
         showToast({ message: 'Added to My List', type: 'success' });
       }
     } catch (error) {
-      showToast({ message: 'An error occurred. Please try again.', type: 'error' });
+      console.error('Failed to update watchlist:', error);
+      showToast({ message: 'Failed to update My List', type: 'error' });
     } finally {
-      setIsAddingToList(false);
+      setButtonDisabled(false);
     }
-  }, [movie, isSaved, dispatch, showToast, isAddingToList]);
+  }, [dispatch, isSaved, movie, showToast]);
+
   const handleToggleMute = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -316,6 +317,7 @@ const Hero = ({ movie: movieProp }) => {
       setShowSoundPopup(false);
     }
   }, [isMuted]);
+
   const handleVideoEnd = useCallback(() => {
     if (movie?._id) {
       playedPreviews.add(movie._id);
@@ -334,6 +336,7 @@ const Hero = ({ movie: movieProp }) => {
       setVideoLoaded(false);
     }, 1200);
   }, [movie?._id]);
+
   if (isLoading && !movieProp) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-black">
@@ -381,56 +384,26 @@ const Hero = ({ movie: movieProp }) => {
               visibility: showVideo ? 'visible' : 'hidden',
             }}
           >
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: showVideo ? 'block' : 'none'
-            }}>
-              <video
-                ref={videoRef}
-                key={`video-${movie._id}-${showVideo}`}
-                className="w-full h-full object-cover"
-                src={movie.previewTrailer}
-                muted={true}
-                onEnded={handleVideoEnd}
-                onLoadedData={handleVideoLoadedData}
-                onCanPlay={() => {
-                  handleVideoLoadedData();
-                  console.log('Video can play');
-                  console.log('Video duration:', videoRef.current?.duration);
-                }}
-                onPlay={() => {
-                  setIsPlaying(true);
-                  setFadeContent(true);
-                }}
-                onPause={() => {
-                  setIsPlaying(false);
-                  setFadeContent(false);
-                }}
-                onError={(e) => {
-                  console.error('Video error event fired');
-                  console.error('Video error details:', e.target.error);
-                  console.error('Video network state:', e.target.networkState);
-                  console.error('Video ready state:', e.target.readyState);
-                  // Fallback to navigating to the movie page on error
-                  mutate(movie._id);
-                }}
-                playsInline
-                preload="auto"
-                disablePictureInPicture
-                disableRemotePlayback
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  opacity: isPlaying ? 1 : 0,
-                  transition: 'opacity 0.5s ease-in-out',
-                }}
-              />
-            </div>
+            <video
+              ref={videoRef}
+              key={`video-${movie._id}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              src={movie.previewTrailer}
+              muted={true}
+              onEnded={handleVideoEnd}
+              onLoadedData={handleVideoLoadedData}
+              onCanPlay={handleVideoLoadedData}
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              disableRemotePlayback
+              style={{
+                transform: 'scale(1.01)',
+                transition: 'opacity 0.5s ease-in-out',
+                opacity: isPlaying ? 1 : 0,
+                pointerEvents: 'none',
+              }}
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-40" />
           </div>
@@ -504,24 +477,18 @@ const Hero = ({ movie: movieProp }) => {
                 </button>
                 <button
                   onClick={handleAddToWatchlist}
-                  disabled={isAddingToList || isSaved}
-                  className={`group flex items-center px-6 py-2.5 ${
-                    isAddingToList || isSaved
-                      ? 'bg-gray-700/50 cursor-not-allowed' 
-                      : 'bg-gray-500/30 hover:bg-gray-500/20 hover:scale-105'
-                  } text-white font-semibold rounded backdrop-blur-sm transition-all duration-200`}
+                  disabled={buttonDisabled || isSaved}
+                  className={`group flex items-center px-6 py-2.5 ${isSaved ? 'bg-gray-700/50 cursor-not-allowed' : 'bg-gray-500/30 hover:bg-gray-500/20'} text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105`}
                   aria-label={
-                    isSaved ? 'In Your List' : 'Add to My List'
+                    isSaved ? 'Movie is in your list' : 'Add to My List'
                   }
                 >
-                  {isAddingToList ? (
-                    <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin mr-2"></div>
-                  ) : isSaved ? (
+                  {isSaved ? (
                     <Check className="w-5 h-5 text-white mr-2" />
                   ) : (
                     <Plus className="w-5 h-5 text-white mr-2" />
                   )}
-                  {isAddingToList ? 'Processing...' : 'My List'}
+                  {buttonDisabled ? 'My List'  : 'My List'}
                 </button>
               </div>
             </div>
@@ -529,10 +496,12 @@ const Hero = ({ movie: movieProp }) => {
         </div>
       </div>
       {isPlaying && movie.previewTrailer && (
-        <div className="absolute !top-[120px] sm:!top-[150px] md:!top-[120px] lg:!top-[100px] right-6 sm:right-8 z-10">
+        <div className="absolute !top-[160px] sm:!top-[190px] md:!top-[160px] lg:!top-[140px] right-6 sm:right-8 z-10">
           <div className="relative">
             <button
               onClick={handleToggleMute}
+              onMouseEnter={() => setShowSoundPopup(true)}
+              onMouseLeave={() => setShowSoundPopup(false)}
               className="group flex items-center justify-center w-12 h-12 rounded-full border-2 border-white/50 hover:border-white bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all duration-200 transform hover:scale-110"
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
@@ -544,18 +513,18 @@ const Hero = ({ movie: movieProp }) => {
             </button>
 
             {showSoundPopup && (
-              <div className="absolute top-full right-0 mt-2 bg-black/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap animate-pulse border border-white/30 shadow-lg">
+              <div className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap animate-pulse border border-white/30 shadow-lg">
                 <div className="flex items-center space-x-2">
                   <Volume2 className="w-4 h-4" />
-                  <span>Click to unmute</span>
+                  <span>{isMuted ? 'Click to unmute' : 'Click to mute'}</span>
                 </div>
-
-                <div className="absolute bottom-full right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-black/90"></div>
+                <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
               </div>
             )}
           </div>
         </div>
       )}
+
       {isPlaying && movie.maturityRating && (
         <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-4 border-white px-4 py-6 flex items-center transition-all duration-500">
           <span className="text-white text-xl font-bold">
@@ -563,29 +532,12 @@ const Hero = ({ movie: movieProp }) => {
           </span>
         </div>
       )}
+
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <ChevronDown className="w-8 h-8 text-white/50" />
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
-
-      {/* Full Movie Player */}
-      <AnimatePresence>
-        {showFullMovie && movie?.embedUrl && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100]"
-          >
-            <VideoPlayer
-              embedUrl={movie.embedUrl}
-              onClose={() => setShowFullMovie(false)}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
