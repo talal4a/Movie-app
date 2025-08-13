@@ -33,7 +33,7 @@ const savePlayedPreviews = (previews) => {
   }
 };
 const playedPreviews = getPlayedPreviews();
-const Hero = ({ movie: movieProp }) => {
+const Hero = ({ movie: movieProp, onPlayClick }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -287,8 +287,15 @@ const Hero = ({ movie: movieProp }) => {
       showToast('No movie selected');
       return;
     }
-    mutate(movie._id);
-  }, [movie, mutate, showToast]);
+    
+    // If onPlayClick prop is provided, use it
+    if (onPlayClick) {
+      onPlayClick();
+    } else {
+      // Otherwise, use the default behavior
+      mutate(movie._id);
+    }
+  }, [movie, mutate, showToast, onPlayClick]);
 
   const handleAddToWatchlist = useCallback(async () => {
     if (!movie?._id) return;

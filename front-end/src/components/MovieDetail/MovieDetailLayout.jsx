@@ -4,10 +4,13 @@ import RelatedMovies from '../Features/RelatedMovies';
 import CastList from './CastList';
 import MovieMeta from './MovieMeta';
 import MovieReviews from './MovieReviews';
-export default function MovieDetailLayout({ movie, refetchMovie, id }) {
+export default function MovieDetailLayout({ movie, refetchMovie, id, setShowPlayer }) {
   return (
     <>
-      <Hero movie={movie} />
+      <Hero 
+        movie={movie} 
+        onPlayClick={() => setShowPlayer(true)}
+      />
       <RelatedMovies id={movie._id} />
 
       <div className="px-4 md:px-16 py-12">
