@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Input } from "@/components/ui/input";
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validateEmail } from '@/utils/validations';
+import Spinner from '@/components/ui/Spinner';
+import MiniSpinner from '@/components/ui/MiniSpinner';
 
-export default function LoginForm({ handleSubmit, formData, handleChange, mutation }) {
+export default function LoginForm({
+  handleSubmit,
+  formData,
+  handleChange,
+  mutation,
+}) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Validate on form data change
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
       const newErrors = {};
-      
-      // Email validation
+
       if (touched.email) {
         if (!formData.email) {
           newErrors.email = 'Email is required';
@@ -24,8 +29,7 @@ export default function LoginForm({ handleSubmit, formData, handleChange, mutati
           newErrors.email = 'Please enter a valid email address';
         }
       }
-      
-      // Password validation
+
       if (touched.password) {
         if (!formData.password) {
           newErrors.password = 'Password is required';
@@ -33,42 +37,39 @@ export default function LoginForm({ handleSubmit, formData, handleChange, mutati
           newErrors.password = 'Password must be at least 8 characters';
         }
       }
-      
+
       setErrors(newErrors);
     }
   }, [formData, touched]);
 
   const handleBlur = (field) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleLocalSubmit = (e) => {
     e.preventDefault();
-    
-    // Mark all fields as touched to show all errors
+
     const allTouched = {
       email: true,
       password: true,
     };
     setTouched(allTouched);
-    
-    // Validate all fields
+
     const newErrors = {};
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
     }
-    
+
     setErrors(newErrors);
-    
-    // Only submit if there are no errors
+
     if (Object.keys(newErrors).length === 0) {
       handleSubmit(e);
     }
@@ -85,7 +86,6 @@ export default function LoginForm({ handleSubmit, formData, handleChange, mutati
           <CardTitle className="text-3xl text-center">Log In</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -105,12 +105,11 @@ export default function LoginForm({ handleSubmit, formData, handleChange, mutati
             <ErrorMessage message={errors.email} />
           </div>
 
-          {/* Password Field */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="password">Password</Label>
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="text-xs text-zinc-400 hover:text-white hover:underline"
               >
                 Forgot password?
@@ -133,18 +132,24 @@ export default function LoginForm({ handleSubmit, formData, handleChange, mutati
             <ErrorMessage message={errors.password} />
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             className={`w-full bg-red-600 hover:bg-red-700 text-white font-semibold ${
-              Object.keys(errors).length > 0 ? 'opacity-80 cursor-not-allowed' : ''
+              Object.keys(errors).length > 0
+                ? 'opacity-80 cursor-not-allowed'
+                : ''
             }`}
             disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
-            {mutation.isPending ? 'Signing in...' : 'Sign In'}
+            {mutation.isPending ? (
+              <>
+                <MiniSpinner size="sm" />
+                Logging in...
+              </>
+            ) : (
+              'Log In'
+            )}
           </Button>
-
-          {/* Sign Up Link */}
           <div className="text-sm text-zinc-400 text-center pt-2">
             <span>New to Cineverse? </span>
             <Link

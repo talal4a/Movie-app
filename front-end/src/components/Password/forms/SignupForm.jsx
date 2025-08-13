@@ -6,23 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validateForm, getPasswordStrength } from '@/utils/validations';
-
-export default function SignUpForm({ handleSubmit, formData, handleChange, mutation }) {
+import MiniSpinner from './../../ui/MiniSpinner';
+export default function SignUpForm({
+  handleSubmit,
+  formData,
+  handleChange,
+  mutation,
+}) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
-
-  // Validate on form data change
   useEffect(() => {
     if (formData.password) {
       setPasswordStrength(getPasswordStrength(formData.password));
     }
-    
     if (Object.keys(touched).length > 0) {
       const { errors: validationErrors } = validateForm(formData);
-      // Only update errors for fields that have been touched
       const newErrors = {};
-      Object.keys(validationErrors).forEach(key => {
+      Object.keys(validationErrors).forEach((key) => {
         if (touched[key]) {
           newErrors[key] = validationErrors[key];
         }
@@ -32,22 +33,21 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
   }, [formData, touched]);
 
   const handleBlur = (field) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleLocalSubmit = (e) => {
     e.preventDefault();
     const { isValid, errors: validationErrors } = validateForm(formData);
     setErrors(validationErrors);
-    
-    // Mark all fields as touched to show all errors
+
     setTouched({
       name: true,
       email: true,
       password: true,
       confirmPassword: true,
     });
-    
+
     if (isValid) {
       handleSubmit(e);
     }
@@ -66,7 +66,6 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          {/* Name Field */}
           <div className="space-y-1">
             <Label htmlFor="name" className="text-sm text-gray-300">
               Name
@@ -87,7 +86,6 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
             <ErrorMessage message={errors.name} />
           </div>
 
-          {/* Email Field */}
           <div className="space-y-1">
             <Label htmlFor="email" className="text-sm text-gray-300">
               Email
@@ -107,8 +105,6 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
             />
             <ErrorMessage message={errors.email} />
           </div>
-
-          {/* Password Field */}
           <div className="space-y-1">
             <Label htmlFor="password" className="text-sm text-gray-300">
               Password
@@ -130,14 +126,21 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
               <div className="flex justify-between text-xs text-gray-400 mb-1">
                 <span>Password Strength:</span>
                 <span>
-                  {passwordStrength < 2 ? 'Weak' : passwordStrength < 4 ? 'Good' : 'Strong'}
+                  {passwordStrength < 2
+                    ? 'Weak'
+                    : passwordStrength < 4
+                      ? 'Good'
+                      : 'Strong'}
                 </span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-1.5">
-                <div 
+                <div
                   className={`h-1.5 rounded-full ${
-                    passwordStrength < 2 ? 'bg-red-500' : 
-                    passwordStrength < 4 ? 'bg-yellow-500' : 'bg-green-500'
+                    passwordStrength < 2
+                      ? 'bg-red-500'
+                      : passwordStrength < 4
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
                   }`}
                   style={{ width: `${(passwordStrength / 5) * 100}%` }}
                 />
@@ -145,19 +148,41 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
               <div className="mt-2 text-xs text-gray-400">
                 <p>Password must contain:</p>
                 <ul className="list-disc pl-5 mt-1 space-y-1">
-                  <li className={formData.password?.length >= 8 ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      formData.password?.length >= 8 ? 'text-green-400' : ''
+                    }
+                  >
                     At least 8 characters
                   </li>
-                  <li className={/[A-Z]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[A-Z]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One uppercase letter
                   </li>
-                  <li className={/[a-z]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[a-z]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One lowercase letter
                   </li>
-                  <li className={/[0-9]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[0-9]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One number
                   </li>
-                  <li className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[^A-Za-z0-9]/.test(formData.password)
+                        ? 'text-green-400'
+                        : ''
+                    }
+                  >
                     One special character
                   </li>
                 </ul>
@@ -165,8 +190,6 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
             </div>
             <ErrorMessage message={errors.password} />
           </div>
-
-          {/* Confirm Password Field */}
           <div className="space-y-1">
             <Label htmlFor="confirmPassword" className="text-sm text-gray-300">
               Confirm Password
@@ -186,8 +209,6 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
             />
             <ErrorMessage message={errors.confirmPassword} />
           </div>
-
-          {/* Submit Button */}
           <Button
             type="submit"
             className={`w-full mt-4 font-semibold ${
@@ -197,10 +218,15 @@ export default function SignUpForm({ handleSubmit, formData, handleChange, mutat
             } text-white`}
             disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
-            {mutation.isPending ? 'Signing up...' : 'Sign Up'}
+            {mutation.isPending ? (
+              <>
+                <MiniSpinner />
+                'Signing up...'
+              </>
+            ) : (
+              'Sign Up'
+            )}
           </Button>
-
-          {/* Login Link */}
           <div className="text-sm text-zinc-400 text-center">
             <span>Already have account? </span>
             <Link

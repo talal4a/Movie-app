@@ -11,7 +11,6 @@ export default function MiniSpinner({
     md: 'w-6 h-6 border-[3px]',
     lg: 'w-8 h-8 border-4',
   };
-
   return (
     <span
       role="status"
