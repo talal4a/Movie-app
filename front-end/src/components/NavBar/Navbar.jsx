@@ -21,6 +21,7 @@ import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
 import { useDebounce } from '../../hooks/useDebounce';
+import CinverseLogo from '../ui/Logo';
 
 const useClickOutside = (ref, handler) => {
   useEffect(() => {

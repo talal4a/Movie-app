@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Cinematic red gradient -->
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF0000" />
+      <stop offset="25%" stop-color="#DC143C" />
+      <stop offset="50%" stop-color="#B22222" />
+      <stop offset="75%" stop-color="#8B0000" />
+      <stop offset="100%" stop-color="#660000" />
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="55" fill="url(#redGrad)" />
+  <text x="60" y="75" font-family="Arial, sans-serif" font-size="60" font-weight="bold" text-anchor="middle" fill="white">C</text>
+</svg>

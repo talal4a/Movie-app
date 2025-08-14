@@ -6,7 +6,6 @@ import GuestRoute from './components/Routes/GuestRoute';
 import MainLayout from './MainLayout';
 import { fetchWatchlist } from './redux/slice/watchListSlice';
 import Modal from './components/Modals/Modal';
-import { AnimatePresence } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   prefetchGroupedMovies,
@@ -114,7 +113,7 @@ export default function App() {
                   </PrivateRoute>
                 }
               />
-              
+
               <Route
                 path="*"
                 element={

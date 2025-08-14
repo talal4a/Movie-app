@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar Styles */
 :root {
   --scrollbar-track: #0f172a;
   --scrollbar-thumb: #334155;
@@ -11,13 +10,11 @@
   --scrollbar-border-radius: 10px;
 }
 
-/* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-/* Webkit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
   width: var(--scrollbar-width);
   height: var(--scrollbar-width);
@@ -40,7 +37,6 @@
   background: var(--scrollbar-thumb-hover);
 }
 
-/* For thin scrollbars (like in dropdowns) */
 .thin-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -50,19 +46,16 @@
   border-width: 1px;
 }
 
-/* Smooth scrolling for the entire app */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar for dark mode */
 .dark {
   --scrollbar-track: #0f172a;
   --scrollbar-thumb: #334155;
   --scrollbar-thumb-hover: #475569;
 }
 
-/* Custom scrollbar for light mode (if needed) */
 .light {
   --scrollbar-track: #f1f5f9;
   --scrollbar-thumb: #cbd5e1;
