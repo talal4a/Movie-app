@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validatePassword, getPasswordStrength } from '@/utils/validations';
+import MiniSpinner from '@/components/ui/MiniSpinner';
 
 export default function ResetPasswordForm({
   handleSubmit,
@@ -17,27 +18,25 @@ export default function ResetPasswordForm({
   const [touched, setTouched] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
 
-  // Validate on form data change
   useEffect(() => {
     if (formData.password) {
       setPasswordStrength(getPasswordStrength(formData.password));
     }
-    
+
     if (Object.keys(touched).length > 0) {
       const newErrors = {};
-      
-      // Password validation
+
       if (touched.password) {
         if (!formData.password) {
           newErrors.password = 'Password is required';
         } else if (formData.password.length < 8) {
           newErrors.password = 'Password must be at least 8 characters';
         } else if (!validatePassword(formData.password)) {
-          newErrors.password = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
+          newErrors.password =
+            'Password must contain at least one uppercase, one lowercase, one number, and one special character';
         }
       }
-      
-      // Confirm password validation
+
       if (touched.confirmPassword) {
         if (!formData.confirmPassword) {
           newErrors.confirmPassword = 'Please confirm your password';
@@ -45,45 +44,43 @@ export default function ResetPasswordForm({
           newErrors.confirmPassword = 'Passwords do not match';
         }
       }
-      
+
       setErrors(newErrors);
     }
   }, [formData, touched]);
 
   const handleBlur = (field) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleLocalSubmit = (e) => {
     e.preventDefault();
-    
-    // Mark all fields as touched to show all errors
+
     const allTouched = {
       password: true,
       confirmPassword: true,
     };
     setTouched(allTouched);
-    
-    // Validate all fields
+
     const newErrors = {};
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
     } else if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
+      newErrors.password =
+        'Password must contain at least one uppercase, one lowercase, one number, and one special character';
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
-    
-    // Only submit if there are no errors
+
     if (Object.keys(newErrors).length === 0) {
       handleSubmit(e);
     }
@@ -98,7 +95,6 @@ export default function ResetPasswordForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          {/* New Password Field */}
           <div className="space-y-1">
             <Label htmlFor="password" className="text-sm text-gray-300">
               New Password
@@ -120,14 +116,21 @@ export default function ResetPasswordForm({
               <div className="flex justify-between text-xs text-gray-400 mb-1">
                 <span>Password Strength:</span>
                 <span>
-                  {passwordStrength < 2 ? 'Weak' : passwordStrength < 4 ? 'Good' : 'Strong'}
+                  {passwordStrength < 2
+                    ? 'Weak'
+                    : passwordStrength < 4
+                      ? 'Good'
+                      : 'Strong'}
                 </span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-1.5">
-                <div 
+                <div
                   className={`h-1.5 rounded-full ${
-                    passwordStrength < 2 ? 'bg-red-500' : 
-                    passwordStrength < 4 ? 'bg-yellow-500' : 'bg-green-500'
+                    passwordStrength < 2
+                      ? 'bg-red-500'
+                      : passwordStrength < 4
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
                   }`}
                   style={{ width: `${(passwordStrength / 5) * 100}%` }}
                 />
@@ -135,19 +138,41 @@ export default function ResetPasswordForm({
               <div className="mt-2 text-xs text-gray-400">
                 <p>Password must contain:</p>
                 <ul className="list-disc pl-5 mt-1 space-y-1">
-                  <li className={formData.password?.length >= 8 ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      formData.password?.length >= 8 ? 'text-green-400' : ''
+                    }
+                  >
                     At least 8 characters
                   </li>
-                  <li className={/[A-Z]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[A-Z]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One uppercase letter
                   </li>
-                  <li className={/[a-z]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[a-z]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One lowercase letter
                   </li>
-                  <li className={/[0-9]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[0-9]/.test(formData.password) ? 'text-green-400' : ''
+                    }
+                  >
                     One number
                   </li>
-                  <li className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-400' : ''}>
+                  <li
+                    className={
+                      /[^A-Za-z0-9]/.test(formData.password)
+                        ? 'text-green-400'
+                        : ''
+                    }
+                  >
                     One special character
                   </li>
                 </ul>
@@ -156,7 +181,6 @@ export default function ResetPasswordForm({
             <ErrorMessage message={errors.password} />
           </div>
 
-          {/* Confirm Password Field */}
           <div className="space-y-1">
             <Label htmlFor="confirmPassword" className="text-sm text-gray-300">
               Confirm Password
@@ -177,7 +201,6 @@ export default function ResetPasswordForm({
             <ErrorMessage message={errors.confirmPassword} />
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             className={`w-full mt-4 font-semibold ${
@@ -187,10 +210,16 @@ export default function ResetPasswordForm({
             } text-white`}
             disabled={mutation.isPending || Object.keys(errors).length > 0}
           >
-            {mutation.isPending ? 'Resetting...' : 'Reset Password'}
+            {mutation.isPending ? (
+              <>
+                ( <MiniSpinner />
+                'Resetting...')
+              </>
+            ) : (
+              'Reset Password'
+            )}
           </Button>
 
-          {/* Status Message */}
           {message && (
             <p
               className={`text-center text-sm font-medium mt-3 ${

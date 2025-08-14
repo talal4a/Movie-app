@@ -6,6 +6,7 @@ import { Button } from '../../ui/button';
 import { Label } from '@radix-ui/react-label';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validateEmail } from '@/utils/validations';
+import MiniSpinner from '@/components/ui/MiniSpinner';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -13,17 +14,16 @@ export default function ForgotPasswordForm() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState(false);
 
-  // Validate on email change
   useEffect(() => {
     if (touched) {
       const newErrors = {};
-      
+
       if (!email) {
         newErrors.email = 'Email is required';
       } else if (!validateEmail(email)) {
         newErrors.email = 'Please enter a valid email address';
       }
-      
+
       setErrors(newErrors);
     }
   }, [email, touched]);
@@ -47,22 +47,19 @@ export default function ForgotPasswordForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Mark as touched to show errors
+
     setTouched(true);
-    
-    // Validate before submitting
+
     const newErrors = {};
-    
+
     if (!email) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     setErrors(newErrors);
-    
-    // Only submit if there are no errors
+
     if (Object.keys(newErrors).length === 0) {
       mutation.mutate({ email });
     }
@@ -104,7 +101,14 @@ export default function ForgotPasswordForm() {
           } text-white`}
           disabled={mutation.isPending || Object.keys(errors).length > 0}
         >
-          {mutation.isPending ? 'Sending...' : 'Send Reset Link'}
+          {mutation.isPending ? (
+            <>
+              (<MiniSpinner />
+              'Sending...')
+            </>
+          ) : (
+            'Send Reset Link'
+          )}
         </Button>
 
         {message && (

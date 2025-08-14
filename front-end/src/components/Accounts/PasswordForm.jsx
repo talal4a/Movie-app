@@ -15,45 +15,42 @@ export default function PasswordForm({
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [localPasswordData, setLocalPasswordData] = useState(passwordData);
 
-  // Update local state when passwordData prop changes
   useEffect(() => {
     setLocalPasswordData(passwordData);
   }, [passwordData]);
 
-  // Validate on localPasswordData change
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
       const newErrors = {};
-      
-      // Current password validation
+
       if (touched.currentPassword && !localPasswordData.currentPassword) {
         newErrors.currentPassword = 'Current password is required';
       }
-      
-      // New password validation
+
       if (touched.newPassword) {
         if (!localPasswordData.newPassword) {
           newErrors.newPassword = 'New password is required';
         } else if (localPasswordData.newPassword.length < 8) {
           newErrors.newPassword = 'Password must be at least 8 characters';
         } else if (!validatePassword(localPasswordData.newPassword)) {
-          newErrors.newPassword = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
+          newErrors.newPassword =
+            'Password must contain at least one uppercase, one lowercase, one number, and one special character';
         }
       }
-      
-      // Confirm password validation
+
       if (touched.confirmPassword) {
         if (!localPasswordData.confirmPassword) {
           newErrors.confirmPassword = 'Please confirm your new password';
-        } else if (localPasswordData.newPassword !== localPasswordData.confirmPassword) {
+        } else if (
+          localPasswordData.newPassword !== localPasswordData.confirmPassword
+        ) {
           newErrors.confirmPassword = 'Passwords do not match';
         }
       }
-      
+
       setErrors(newErrors);
     }
-    
-    // Update password strength meter
+
     if (localPasswordData.newPassword) {
       setPasswordStrength(getPasswordStrength(localPasswordData.newPassword));
     } else {
@@ -62,65 +59,63 @@ export default function PasswordForm({
   }, [localPasswordData, touched]);
 
   const handleLocalChange = (key, value) => {
-    setLocalPasswordData(prev => ({
+    setLocalPasswordData((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
-    
-    // Mark field as touched
+
     if (!touched[key]) {
-      setTouched(prev => ({
+      setTouched((prev) => ({
         ...prev,
-        [key]: true
+        [key]: true,
       }));
     }
-    
-    // Propagate changes to parent
+
     handlePasswordChange(key, value);
   };
 
   const handleBlur = (field) => {
     if (!touched[field]) {
-      setTouched(prev => ({
+      setTouched((prev) => ({
         ...prev,
-        [field]: true
+        [field]: true,
       }));
     }
   };
 
   const handleLocalSave = () => {
-    // Mark all fields as touched to show all errors
     const allTouched = {
       currentPassword: true,
       newPassword: true,
-      confirmPassword: true
+      confirmPassword: true,
     };
     setTouched(allTouched);
-    
-    // Validate all fields
+
     const newErrors = {};
-    
+
     if (!localPasswordData.currentPassword) {
       newErrors.currentPassword = 'Current password is required';
     }
-    
+
     if (!localPasswordData.newPassword) {
       newErrors.newPassword = 'New password is required';
     } else if (localPasswordData.newPassword.length < 8) {
       newErrors.newPassword = 'Password must be at least 8 characters';
     } else if (!validatePassword(localPasswordData.newPassword)) {
-      newErrors.newPassword = 'Password must contain at least one uppercase, one lowercase, one number, and one special character';
+      newErrors.newPassword =
+        'Password must contain at least one uppercase, one lowercase, one number, and one special character';
     }
-    
+
     if (!localPasswordData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your new password';
-    } else if (localPasswordData.newPassword !== localPasswordData.confirmPassword) {
+    } else if (
+      localPasswordData.newPassword !== localPasswordData.confirmPassword
+    ) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
-    
-    // Only save if there are no errors
+
     if (Object.keys(newErrors).length === 0) {
       handleSavePassword();
     }
@@ -157,7 +152,11 @@ export default function PasswordForm({
                   size={16}
                 />
                 <input
-                  autoComplete={key === 'currentPassword' ? 'current-password' : 'new-password'}
+                  autoComplete={
+                    key === 'currentPassword'
+                      ? 'current-password'
+                      : 'new-password'
+                  }
                   type={showPasswords[fieldKey] ? 'text' : 'password'}
                   value={localPasswordData[key] || ''}
                   onChange={(e) => handleLocalChange(key, e.target.value)}
@@ -171,7 +170,9 @@ export default function PasswordForm({
                   type="button"
                   onClick={() => togglePasswordVisibility(fieldKey)}
                   className="absolute right-3 top-3 text-gray-400 hover:text-white"
-                  aria-label={showPasswords[fieldKey] ? 'Hide password' : 'Show password'}
+                  aria-label={
+                    showPasswords[fieldKey] ? 'Hide password' : 'Show password'
+                  }
                 >
                   {showPasswords[fieldKey] ? (
                     <EyeOff size={16} />
@@ -185,14 +186,21 @@ export default function PasswordForm({
                   <div className="flex justify-between text-xs text-gray-400 mb-1">
                     <span>Password Strength:</span>
                     <span>
-                      {passwordStrength < 2 ? 'Weak' : passwordStrength < 4 ? 'Good' : 'Strong'}
+                      {passwordStrength < 2
+                        ? 'Weak'
+                        : passwordStrength < 4
+                          ? 'Good'
+                          : 'Strong'}
                     </span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-1.5">
-                    <div 
+                    <div
                       className={`h-1.5 rounded-full ${
-                        passwordStrength < 2 ? 'bg-red-500' : 
-                        passwordStrength < 4 ? 'bg-yellow-500' : 'bg-green-500'
+                        passwordStrength < 2
+                          ? 'bg-red-500'
+                          : passwordStrength < 4
+                            ? 'bg-yellow-500'
+                            : 'bg-green-500'
                       }`}
                       style={{ width: `${(passwordStrength / 5) * 100}%` }}
                     />
@@ -206,19 +214,49 @@ export default function PasswordForm({
         <div className="bg-gray-900/50 p-4 rounded-md border border-gray-700/50 text-sm text-gray-400 space-y-1">
           <p className="text-gray-300 font-medium">Password Requirements:</p>
           <ul className="list-disc list-inside">
-            <li className={localPasswordData.newPassword?.length >= 8 ? 'text-green-400' : ''}>
+            <li
+              className={
+                localPasswordData.newPassword?.length >= 8
+                  ? 'text-green-400'
+                  : ''
+              }
+            >
               At least 8 characters long
             </li>
-            <li className={/[A-Z]/.test(localPasswordData.newPassword) ? 'text-green-400' : ''}>
+            <li
+              className={
+                /[A-Z]/.test(localPasswordData.newPassword)
+                  ? 'text-green-400'
+                  : ''
+              }
+            >
               Include uppercase letters
             </li>
-            <li className={/[a-z]/.test(localPasswordData.newPassword) ? 'text-green-400' : ''}>
+            <li
+              className={
+                /[a-z]/.test(localPasswordData.newPassword)
+                  ? 'text-green-400'
+                  : ''
+              }
+            >
               Include lowercase letters
             </li>
-            <li className={/[0-9]/.test(localPasswordData.newPassword) ? 'text-green-400' : ''}>
+            <li
+              className={
+                /[0-9]/.test(localPasswordData.newPassword)
+                  ? 'text-green-400'
+                  : ''
+              }
+            >
               Include at least one number
             </li>
-            <li className={/[^A-Za-z0-9]/.test(localPasswordData.newPassword) ? 'text-green-400' : ''}>
+            <li
+              className={
+                /[^A-Za-z0-9]/.test(localPasswordData.newPassword)
+                  ? 'text-green-400'
+                  : ''
+              }
+            >
               Include at least one special character
             </li>
           </ul>

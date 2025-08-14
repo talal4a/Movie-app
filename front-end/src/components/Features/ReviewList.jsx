@@ -5,8 +5,9 @@ import UserAvatar from '../ui/UserAvatar';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
-import Modal from "../Modals/Modal";
+import Modal from '../Modals/Modal';
 import LogoutConfirm from '../Password/LogoutConfirm';
+import MiniSpinner from '../ui/MiniSpinner';
 export default function ReviewList({ id }) {
   const [editText, setEditText] = useState('');
   const [editRating, setEditRating] = useState(5);
@@ -54,7 +55,12 @@ export default function ReviewList({ id }) {
     }
   };
   const reviews = Array.isArray(data?.data) ? data.data : [];
-  if (isLoading) return <p className="text-gray-400">Loading reviews...</p>;
+  if (isLoading)
+    return (
+      <p className="text-gray-400">
+        <MiniSpinner />
+      </p>
+    );
   if (isError) return <p className="text-red-400">Failed to load reviews.</p>;
   return (
     <Modal>
