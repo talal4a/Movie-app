@@ -25,7 +25,6 @@ const NavbarHeader = ({
             >
               CINEVERSE
             </Link>
-
             <button
               onClick={() => {
                 onProfileClick({ stopPropagation: () => {} });
@@ -35,7 +34,6 @@ const NavbarHeader = ({
               Sign Out
             </button>
           </div>
-
           <div className="border-t border-gray-800">
             <div className="px-4 py-2">
               <button
@@ -49,12 +47,10 @@ const NavbarHeader = ({
             </div>
           </div>
         </nav>
-
         <div className="h-24"></div>
       </>
     );
   }
-
   return (
     <nav
       className={`fixed z-50 flex items-center px-0 py-3 text-white w-full transition-all duration-300  ${

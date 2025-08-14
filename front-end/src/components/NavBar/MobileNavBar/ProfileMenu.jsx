@@ -8,10 +8,8 @@ import LogoutConfirm from '../../Password/LogoutConfirm';
 const ProfileMenu = ({ user, onLogout, onClose }) => {
   const menuRef = useRef(null);
 
-  // Handle clicks outside the menu
   useEffect(() => {
     function handleClickOutside(event) {
-      // Don't close if clicking on the profile button or the menu itself
       const profileButton = document.querySelector(
         '[aria-expanded][aria-haspopup="true"]'
       );
@@ -24,15 +22,13 @@ const ProfileMenu = ({ user, onLogout, onClose }) => {
       }
     }
 
-    // Add when component mounts
     document.addEventListener('mousedown', handleClickOutside);
-    // Clean up when component unmounts
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onClose]);
 
-  // Stop propagation on menu clicks to prevent immediate closing
   const handleMenuClick = (e) => {
     e.stopPropagation();
   };

@@ -13,17 +13,14 @@ export default function ProfileForm({
   const [touched, setTouched] = useState({});
   const [localProfileData, setLocalProfileData] = useState(profileData);
 
-  // Update local state when profileData prop changes
   useEffect(() => {
     setLocalProfileData(profileData);
   }, [profileData]);
 
-  // Validate on localProfileData change
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
       const newErrors = {};
-      
-      // Name validation
+
       if (touched.name) {
         if (!localProfileData.name) {
           newErrors.name = 'Name is required';
@@ -35,48 +32,44 @@ export default function ProfileForm({
           newErrors.name = 'Name must be less than 50 characters';
         }
       }
-      
+
       setErrors(newErrors);
     }
   }, [localProfileData, touched]);
 
   const handleLocalChange = (field, value) => {
-    setLocalProfileData(prev => ({
+    setLocalProfileData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
-    // Mark field as touched
+
     if (!touched[field]) {
-      setTouched(prev => ({
+      setTouched((prev) => ({
         ...prev,
-        [field]: true
+        [field]: true,
       }));
     }
-    
-    // Propagate changes to parent
+
     handleProfileChange(field, value);
   };
 
   const handleBlur = (field) => {
     if (!touched[field]) {
-      setTouched(prev => ({
+      setTouched((prev) => ({
         ...prev,
-        [field]: true
+        [field]: true,
       }));
     }
   };
 
   const handleLocalSave = () => {
-    // Mark all fields as touched to show all errors
     const allTouched = {
       name: true,
     };
     setTouched(allTouched);
-    
-    // Validate all fields
+
     const newErrors = {};
-    
+
     if (!localProfileData.name) {
       newErrors.name = 'Name is required';
     } else if (!validateName(localProfileData.name)) {
@@ -86,10 +79,9 @@ export default function ProfileForm({
     } else if (localProfileData.name.length > 50) {
       newErrors.name = 'Name must be less than 50 characters';
     }
-    
+
     setErrors(newErrors);
-    
-    // Only save if there are no errors
+
     if (Object.keys(newErrors).length === 0) {
       handleSaveProfile();
     }
