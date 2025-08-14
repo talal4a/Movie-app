@@ -6,7 +6,6 @@ const NavbarHeader = ({
   isScrolled,
   onMenuClick,
   onSearchClick,
-  showSearchButton = true,
   user,
   onProfileClick,
   isProfileOpen,
@@ -15,21 +14,20 @@ const NavbarHeader = ({
   const isAccountPage = location.pathname.startsWith('/account');
   const navigate = useNavigate();
 
-  // Netflix-style layout for account page
   if (isAccountPage) {
     return (
       <>
         <nav className="fixed z-50 w-full bg-black/90 backdrop-blur-md">
           <div className="px-4 py-3 flex justify-between items-center">
-            {/* CINEVERSE Logo on the left */}
-            <Link to="/" className="text-red-600 font-black text-xl hover:text-red-500 transition-colors">
+            <Link
+              to="/"
+              className="text-red-600 font-black text-xl hover:text-red-500 transition-colors"
+            >
               CINEVERSE
             </Link>
-            
-            {/* Sign Out on the right */}
+
             <button
               onClick={() => {
-                // Handle sign out
                 onProfileClick({ stopPropagation: () => {} });
               }}
               className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
@@ -37,12 +35,11 @@ const NavbarHeader = ({
               Sign Out
             </button>
           </div>
-          
-          {/* Back button below the navbar */}
+
           <div className="border-t border-gray-800">
             <div className="px-4 py-2">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/')}
                 className="text-gray-300 hover:text-white transition-colors flex items-center text-sm"
                 aria-label="Go back"
               >
@@ -52,13 +49,12 @@ const NavbarHeader = ({
             </div>
           </div>
         </nav>
-        {/* Add padding to account for fixed header */}
+
         <div className="h-24"></div>
       </>
     );
   }
 
-  // Regular mobile navbar for other pages
   return (
     <nav
       className={`fixed z-50 flex items-center px-0 py-3 text-white w-full transition-all duration-300  ${

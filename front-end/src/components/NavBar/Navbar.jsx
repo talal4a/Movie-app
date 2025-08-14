@@ -4,7 +4,6 @@ import {
   ChevronDown,
   User,
   LogOut,
-  HelpCircle,
   Play,
   X,
   Menu,
@@ -22,6 +21,7 @@ import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
 import { useDebounce } from '../../hooks/useDebounce';
+
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
     const listener = (event) => {
@@ -41,23 +41,19 @@ const NAV_ITEMS = [
   { path: '/movies', label: 'Movies', icon: Film },
   { path: '/my-list', label: 'My List', icon: List },
 ];
-const PROFILE_MENU_ITEMS = [
-  { path: '/account', label: 'Account', icon: User },
-  { path: '/help', label: 'Help Center', icon: HelpCircle },
-];
+const PROFILE_MENU_ITEMS = [{ path: '/account', label: 'Account', icon: User }];
 function NavBar() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const isAccountPage = location.pathname.startsWith('/account');
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [query, setQuery] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
+  const [setShowDropdown] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -65,7 +61,9 @@ function NavBar() {
   const isMovieDetailPage = location.pathname.startsWith('/movie/');
   const isSearchPage = location.pathname === '/search';
   const hideSearchBar = isSearchPage || isMovieDetailPage;
+
   const debouncedQuery = useDebounce(query, 300);
+
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', debouncedQuery],
     queryFn: () => searchMovies(debouncedQuery),
@@ -73,21 +71,20 @@ function NavBar() {
     staleTime: 1000 * 60 * 5,
     cacheTime: 1000 * 60 * 10,
   });
+
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 10;
-      if (scrolled !== isScrolled) {
-        setIsScrolled(scrolled);
-      }
+      if (scrolled !== isScrolled) setIsScrolled(scrolled);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isScrolled]);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/auth/login');
-    }
+    if (!user) navigate('/auth/login');
   }, [user, navigate]);
+
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (user && user._id && user._id !== storedUserId) {
@@ -98,15 +95,18 @@ function NavBar() {
       });
     }
   }, [user, dispatch, showToast]);
+
   useClickOutside(profileRef, () => setShowProfile(false));
   useClickOutside(searchRef, () => setShowDropdown(false));
   useClickOutside(mobileMenuRef, () => setShowMobileMenu(false));
+
   const handleLogout = useCallback(() => {
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
     queryClient.clear();
     navigate('/auth/login');
   }, [dispatch, navigate, queryClient, showToast]);
+
   const handleProfileClick = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -119,6 +119,7 @@ function NavBar() {
     setQuery(value);
     setShowDropdown(value.length > 0);
   }, []);
+
   const handleSearchSubmit = useCallback(
     (e) => {
       e.preventDefault();
@@ -126,14 +127,12 @@ function NavBar() {
         navigate(`/search?q=${encodeURIComponent(query.trim())}`);
         setQuery('');
         setShowDropdown(false);
+        setShowSearchModal(false);
       }
     },
     [query, navigate]
   );
-  const clearSearch = useCallback(() => {
-    setQuery('');
-    setShowDropdown(false);
-  }, []);
+
   const activeClass = useCallback(
     (isActive) =>
       isActive
@@ -141,64 +140,6 @@ function NavBar() {
         : 'text-gray-300 hover:text-white transition-colors duration-200',
     []
   );
-  if (isAccountPage) {
-    return (
-      <>
-        <header className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md">
-          <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-            <Link
-              to="/"
-              className="text-red-600 font-black text-2xl hover:text-red-500 transition-colors"
-            >
-              CINEVERSE
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/account"
-                className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
-              >
-                Sign Out
-              </Link>
-            </div>
-          </div>
-          <div className="border-t border-gray-800">
-            <div className="container mx-auto px-4 py-2">
-              <button
-                onClick={() => navigate(-1)}
-                className="text-gray-300 hover:text-white transition-colors flex items-center text-sm"
-                aria-label="Go back"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span className="ml-1">Back</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <div className="h-24"></div>
-      </>
-    );
-  }
-
-  const navClasses = `fixed z-50 flex items-center px-4 md:px-6 py-3 text-white w-full transition-all duration-300 ${
-    isScrolled
-      ? 'bg-black/95 backdrop-blur-xl shadow-lg'
-      : 'bg-gradient-to-b from-black via-black/50 to-transparent'
-  }`;
-
   const NavItem = ({ to, children, icon: Icon, onClick }) => (
     <NavLink
       to={to}
@@ -211,7 +152,6 @@ function NavBar() {
       {children}
     </NavLink>
   );
-
   const SearchResult = ({ movie, onClick }) => (
     <Link
       to={`/movie/${movie.slug}`}
@@ -248,9 +188,13 @@ function NavBar() {
       </div>
     </Link>
   );
-
+  const navClasses = `fixed z-50 flex items-center px-4 md:px-6 py-3 text-white w-full transition-all duration-300 ${
+    isScrolled
+      ? 'bg-black/95 backdrop-blur-xl shadow-lg'
+      : 'bg-gradient-to-b from-black via-black/50 to-transparent'
+  }`;
   return (
-    <Modal>
+    <>
       <nav
         className={navClasses}
         role="navigation"
@@ -265,7 +209,6 @@ function NavBar() {
             >
               CINEVERSE
             </Link>
-
             <button
               className="md:hidden ml-4 p-2 hover:bg-gray-800 rounded-lg transition-colors"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -282,87 +225,20 @@ function NavBar() {
               </li>
             ))}
           </ul>
+
           <div className="flex items-center space-x-2 md:space-x-4">
             {!hideSearchBar && (
-              <div
-                ref={searchRef}
-                className="relative w-full max-w-xs md:max-w-md"
-              >
-                <form onSubmit={handleSearchSubmit} className="relative">
+              <div>
+                <button
+                  onClick={() => setShowSearchModal(true)}
+                  className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+                  aria-label="Open search"
+                >
                   <Search
-                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
-                      searchFocused ? 'text-red-500' : 'text-gray-400'
-                    }`}
-                    size={18}
+                    size={20}
+                    className="text-gray-400 hover:text-white"
                   />
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={handleSearchChange}
-                    onFocus={() => {
-                      setSearchFocused(true);
-                      setShowDropdown(query.length > 0);
-                    }}
-                    onBlur={() => setSearchFocused(false)}
-                    placeholder="Search movies..."
-                    className="w-full pl-10 pr-10 py-2 rounded-full bg-zinc-900/80 text-white placeholder-gray-400 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-zinc-900 transition-all"
-                    aria-label="Search movies"
-                    aria-expanded={showDropdown}
-                    aria-controls="search-results"
-                  />
-                  {query && (
-                    <button
-                      type="button"
-                      onClick={clearSearch}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </form>
-
-                {showDropdown && query && (
-                  <div
-                    id="search-results"
-                    className="absolute z-50 mt-2 left-0 right-0 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-fadeIn"
-                  >
-                    <div className="max-h-[60vh] overflow-y-auto thin-scrollbar border-t border-gray-700">
-                      {isSearching ? (
-                        <div className="p-6 text-center">
-                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-transparent border-red-500"></div>
-                          <p className="mt-2 text-gray-300 font-medium">
-                            Searching...
-                          </p>
-                        </div>
-                      ) : searchResults.length > 0 ? (
-                        <div className="divide-y divide-gray-800">
-                          <div className="p-2">
-                            {searchResults.slice(0, 8).map((movie) => (
-                              <SearchResult
-                                key={movie._id}
-                                movie={movie}
-                                onClick={() => {
-                                  setShowDropdown(false);
-                                  setQuery('');
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="p-6 text-center">
-                          <p className="text-gray-300 text-sm font-medium">
-                            No results found for "{query}"
-                          </p>
-                          <p className="text-gray-500 text-xs mt-1">
-                            Try different keywords
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                </button>
               </div>
             )}
 
@@ -421,6 +297,7 @@ function NavBar() {
                       </NavLink>
                     ))}
                   </div>
+
                   <div className="border-t border-gray-700 py-2">
                     <Modal.Open opens="logout">
                       <button
@@ -441,6 +318,7 @@ function NavBar() {
             </div>
           </div>
         </div>
+
         {showMobileMenu && (
           <div
             ref={mobileMenuRef}
@@ -463,6 +341,52 @@ function NavBar() {
         )}
       </nav>
 
+      {showSearchModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-start pt-24 px-4">
+          <div className="w-full max-w-2xl">
+            <div className="relative">
+              <form onSubmit={handleSearchSubmit}>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={handleSearchChange}
+                  autoFocus
+                  placeholder="Search movies..."
+                  className="w-full px-4 py-3 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </form>
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:text-black"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-[60vh] overflow-y-auto bg-black/80 rounded-xl">
+              {isSearching ? (
+                <div className="p-6 text-center text-white">Searching...</div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((movie) => (
+                  <SearchResult
+                    key={movie._id}
+                    movie={movie}
+                    onClick={() => {
+                      setShowSearchModal(false);
+                      setQuery('');
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="p-6 text-center text-gray-400">
+                  No results for "{query}"
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <Modal.Window name="logout">
         <LogoutConfirm
           message="You'll need to sign in again to access your account and continue watching."
@@ -472,7 +396,7 @@ function NavBar() {
           onCloseModal={() => {}}
         />
       </Modal.Window>
-    </Modal>
+    </>
   );
 }
 

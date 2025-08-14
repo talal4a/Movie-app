@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Search } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slice/userSlice';
 import { useToast } from '@/context/ToastContext';
@@ -12,12 +11,11 @@ const MobileNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const location = useLocation();
   const user = useSelector((state) => state.user?.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const isSearchPage = location.pathname === '/search';
+
   const profileMenuRef = useRef(null);
 
   useEffect(() => {
@@ -65,7 +63,7 @@ const MobileNavbar = () => {
           isProfileOpen={isProfileOpen}
           user={user}
         />
-        
+
         <MobileSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
