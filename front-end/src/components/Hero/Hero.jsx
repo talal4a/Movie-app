@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
 import { Play, Plus, Check, Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import Spinner from '../ui/Spinner';
+
 const getPlayedPreviews = () => {
   try {
     const stored = sessionStorage.getItem('playedPreviews');
@@ -25,6 +26,7 @@ const getPlayedPreviews = () => {
     return new Set();
   }
 };
+
 const savePlayedPreviews = (previews) => {
   try {
     sessionStorage.setItem('playedPreviews', JSON.stringify([...previews]));
@@ -32,13 +34,14 @@ const savePlayedPreviews = (previews) => {
     console.error('Failed to save played previews:', e);
   }
 };
-const playedPreviews = getPlayedPreviews();
+
 const Hero = ({ movie: movieProp, onPlayClick }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
+
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -48,11 +51,12 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const [videoError, setVideoError] = useState(false);
   const [videoLoading, setVideoLoading] = useState(true);
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
+  const [hasPlayedInSession, setHasPlayedInSession] = useState(false);
+
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
-  const hasPlayedRef = useRef(false);
+  const playedPreviews = useRef(getPlayedPreviews());
 
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
@@ -62,19 +66,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
     staleTime: 1000,
   });
 
-  const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
-
-  useEffect(() => {
-    if (movie?._id && playedPreviews.has(movie._id)) {
-      hasPlayedRef.current = true;
-
-      setHideDescription(false);
-    } else {
-      hasPlayedRef.current = false;
-      setHideDescription(false);
-    }
-  }, [movie?._id]);
-
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
@@ -82,6 +73,15 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
+
+  const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
+
+  useEffect(() => {
+    if (movie?._id) {
+      const hasPlayed = playedPreviews.current.has(movie._id);
+      setHasPlayedInSession(hasPlayed);
+    }
+  }, [movie?._id]);
 
   const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
@@ -112,69 +112,68 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const matchPercentage =
     movie?.matchPercentage || movie?.match || getConsistentMatch(movie);
 
-  const handleVideoLoadedData = useCallback(() => {
-    setVideoLoaded(true);
-  }, []);
-
   const handleVideoEnded = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
 
-    if (movie?._id) {
-      playedPreviews.add(movie._id);
-      hasPlayedRef.current = true;
-      savePlayedPreviews(playedPreviews);
+    if (movie?._id && !playedPreviews.current.has(movie._id)) {
+      playedPreviews.current.add(movie._id);
+      savePlayedPreviews(playedPreviews.current);
+      setHasPlayedInSession(true);
     }
 
-    setShowVideo(false);
     setIsPlaying(false);
-    setFadeContent(false);
-    setHideDescription(false);
-  }, [movie?._id]);
-
-  const startVideoPlayback = useCallback(() => {
-    if (!videoRef.current || isPlaying) return;
-
-    setFadeContent(false);
     setHideDescription(false);
 
     setTimeout(() => {
-      videoRef.current.currentTime = 0;
+      setFadeContent(false);
+    }, 300);
 
-      const playPromise = videoRef.current.play();
+    setTimeout(() => {
+      setShowVideo(false);
+      setVideoLoading(true);
+    }, 800);
+  }, [movie?._id]);
 
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
+  const startVideoPlayback = useCallback(() => {
+    if (!videoRef.current || isPlaying || hasPlayedInSession) return;
 
-            setFadeContent(true);
-
-            setShowSoundPopup(true);
-            setTimeout(() => {
-              setShowSoundPopup(false);
-            }, 4000);
-            setTimeout(() => {
-              setHideDescription(true);
-            }, 3000);
-          })
-          .catch((error) => {
-            console.error('Playback error:', error);
-            handleVideoEnded();
-          });
-      }
-    }, 50);
-  }, [isPlaying, handleVideoEnded]);
-
-  const startVideoTransition = useCallback(() => {
     setVideoLoading(true);
     setVideoError(false);
     setShowVideo(true);
-    setFadeContent(true);
-    setHideDescription(true);
-  }, []);
+
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+
+        const playPromise = videoRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              setVideoLoading(false);
+              setFadeContent(true);
+
+              setShowSoundPopup(true);
+              setTimeout(() => {
+                setShowSoundPopup(false);
+              }, 4000);
+
+              setTimeout(() => {
+                setHideDescription(true);
+              }, 1500);
+            })
+            .catch((error) => {
+              console.error('Playback error:', error);
+              handleVideoError();
+            });
+        }
+      }
+    }, 100);
+  }, [isPlaying, hasPlayedInSession]);
 
   const handleVideoError = useCallback(() => {
     console.error('Video playback error - falling back to poster image');
@@ -193,27 +192,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const handleVideoCanPlay = useCallback(() => {
     setVideoLoading(false);
   }, []);
-
-  const handlePlayClick = useCallback(() => {
-    if (videoError) {
-      // If there was an error, try reloading the page to reset the component
-      window.location.reload();
-      return;
-    }
-
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch((error) => {
-          console.error('Error playing video:', error);
-          handleVideoError();
-        });
-      } else {
-        videoRef.current.pause();
-      }
-    } else if (onPlayClick) {
-      onPlayClick();
-    }
-  }, [onPlayClick, videoError, handleVideoError]);
 
   const handleAddToWatchlist = useCallback(async () => {
     if (!movie?._id) return;
@@ -256,83 +234,39 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
     }
   }, [isMuted]);
 
-  const handleVideoEnd = useCallback(() => {
-    if (movie?._id) {
-      playedPreviews.add(movie._id);
-      hasPlayedRef.current = true;
-      savePlayedPreviews(playedPreviews);
-    }
-    setIsPlaying(false);
-    setTimeout(() => {
-      setHideDescription(false);
-    }, 200);
-    setTimeout(() => {
-      setFadeContent(false);
-    }, 500);
-    setTimeout(() => {
-      setShowVideo(false);
-      setVideoLoaded(false);
-    }, 1200);
-  }, [movie?._id]);
-
   useEffect(() => {
-    if (!heroRef.current || !movie?.previewTrailer) {
-      setVideoError(true);
+    if (!heroRef.current || !movie?.previewTrailer || hasPlayedInSession) {
+      if (!movie?.previewTrailer) {
+        setVideoError(true);
+      }
       return;
     }
 
-    // Reset states when movie changes
     setVideoError(false);
-    setVideoLoading(true);
 
-    // Check if the video source is valid before attempting to play
-    if (!movie.previewTrailer) {
-      console.warn('Invalid video source, falling back to poster');
-      setVideoError(true);
-      setShowVideo(false);
-      setVideoLoading(false);
-      return;
-    }
+    let hasStartedAutoplay = false;
 
-    if (hasPlayedRef.current) return;
-    let hasInitiallyStarted = false;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !document.hidden) {
-            if (!hasPlayedRef.current && !hasInitiallyStarted && !showVideo) {
+          if (entry.isIntersecting && !document.hidden && !hasPlayedInSession) {
+            if (!hasStartedAutoplay && !showVideo) {
               initialPlayTimeoutRef.current = setTimeout(() => {
-                startVideoTransition();
-                hasInitiallyStarted = true;
-              }, 1500);
+                if (!hasPlayedInSession) {
+                  startVideoPlayback();
+                  hasStartedAutoplay = true;
+                }
+              }, 2000);
             } else if (
               videoRef.current &&
               videoRef.current.paused &&
               showVideo &&
-              !hasPlayedRef.current
+              isPlaying
             ) {
-              videoRef.current
-                .play()
-                .then(() => {
-                  setIsPlaying(true);
-
-                  setFadeContent(true);
-
-                  setShowSoundPopup(true);
-                  setTimeout(() => {
-                    setShowSoundPopup(false);
-                  }, 3000);
-                  setTimeout(() => {
-                    setHideDescription(true);
-                  }, 1000);
-                })
-                .catch(console.error);
+              videoRef.current.play().catch(console.error);
             }
           } else if (videoRef.current && !videoRef.current.paused) {
             videoRef.current.pause();
-            setIsPlaying(false);
-            setFadeContent(false);
-            setHideDescription(false);
           }
         });
       },
@@ -342,33 +276,17 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
     const handleVisibilityChange = () => {
       if (document.hidden && videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
-        setIsPlaying(false);
-        setFadeContent(false);
-        setHideDescription(false);
       } else if (
         !document.hidden &&
         videoRef.current &&
         videoRef.current.paused &&
-        showVideo &&
-        !hasPlayedRef.current
+        isPlaying &&
+        !hasPlayedInSession
       ) {
         const rect = heroRef.current.getBoundingClientRect();
         const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
         if (isInViewport) {
-          videoRef.current
-            .play()
-            .then(() => {
-              setIsPlaying(true);
-              setFadeContent(true);
-              setShowSoundPopup(true);
-              setTimeout(() => {
-                setShowSoundPopup(false);
-              }, 3000);
-              setTimeout(() => {
-                setHideDescription(true);
-              }, 1000);
-            })
-            .catch(console.error);
+          videoRef.current.play().catch(console.error);
         }
       }
     };
@@ -385,7 +303,13 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [movie?.previewTrailer, startVideoTransition, videoLoading, showVideo]);
+  }, [
+    movie?.previewTrailer,
+    startVideoPlayback,
+    showVideo,
+    isPlaying,
+    hasPlayedInSession,
+  ]);
 
   if (isLoading && !movieProp) {
     return (
@@ -394,6 +318,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       </div>
     );
   }
+
   if (!movie) {
     return (
       <div className="relative w-full h-screen bg-black flex items-center justify-center">
@@ -401,6 +326,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       </div>
     );
   }
+
   const fullTitle = movie?.title || 'Loading...';
   const [mainTitle, ...rest] = fullTitle?.split(':') || [''];
   const subtitle = rest.length > 0 ? rest.join(':').trim() : '';
@@ -420,72 +346,56 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 ease-out"
           style={{
             backgroundImage: `url(${movie.backdrop || movie.posterPath})`,
-            transform: showVideo ? 'scale(1.02)' : 'scale(1)',
+            transform: showVideo && isPlaying ? 'scale(1.02)' : 'scale(1)',
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
-        {movie.previewTrailer && (
+
+        {movie.previewTrailer && !hasPlayedInSession && (
           <div
             className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
-              showVideo ? 'opacity-100' : 'opacity-0'
+              showVideo && isPlaying ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
-              visibility: showVideo || videoError ? 'visible' : 'hidden',
+              visibility: showVideo ? 'visible' : 'hidden',
               pointerEvents: 'none',
             }}
           >
-            {showVideo && movie?.previewTrailer && !videoError ? (
-              <>
-                {videoLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
-                  </div>
-                )}
-                <video
-                  ref={videoRef}
-                  className={`absolute inset-0 w-full h-full object-cover ${
-                    videoLoading ? 'opacity-0' : 'opacity-100'
-                  }`}
-                  src={movie.previewTrailer}
-                  muted
-                  playsInline
-                  preload="auto"
-                  onError={handleVideoError}
-                  onLoadStart={handleVideoLoadStart}
-                  onCanPlay={handleVideoCanPlay}
-                  onEmptied={handleVideoError}
-                  onStalled={handleVideoError}
-                  style={{
-                    transform: 'scale(1.01)',
-                    transition: 'opacity 0.5s ease-in-out',
-                    opacity: isPlaying ? 1 : 0,
-                  }}
-                />
-              </>
-            ) : null}
-            {videoError && (
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-black/80 to-black/20 flex items-end">
-                <div className="p-4 md:p-8 w-full">
-                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
-                    {movie?.title || 'Movie Title'}
-                  </h1>
-                  <p className="text-gray-200 text-sm md:text-base max-w-2xl">
-                    {movie?.overview ||
-                      "Sorry, we couldn't load the trailer. Please try again later."}
-                  </p>
-                </div>
+            {videoLoading && showVideo && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
               </div>
             )}
+
+            {!videoError && (
+              <video
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-cover"
+                src={movie.previewTrailer}
+                muted
+                playsInline
+                preload="auto"
+                onEnded={handleVideoEnded}
+                onError={handleVideoError}
+                onLoadStart={handleVideoLoadStart}
+                onCanPlay={handleVideoCanPlay}
+                style={{
+                  transform: 'scale(1.01)',
+                }}
+              />
+            )}
+
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-40" />
           </div>
         )}
       </div>
+
       <div className="relative h-full flex flex-col justify-center">
         <div
-          className={`px-12 lg:px-16 transition-all duration-1000 ease-out ${
+          className={`px-12 lg:px-16 transition-all duration-700 ease-out ${
             fadeContent
               ? 'opacity-70 transform translate-x-2'
               : 'opacity-100 transform translate-x-0'
@@ -502,17 +412,20 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                 </h2>
               )}
             </div>
+
             {movie.tagline && (
               <p className="text-lg md:text-xl text-gray-300 italic">
                 {movie.tagline}
               </p>
             )}
+
             <div className="flex items-center space-x-4 text-white/90">
               <span className="text-green-400 font-semibold text-lg">
                 {matchPercentage}% Match
               </span>
               {releaseYear && <span className="text-base">{releaseYear}</span>}
             </div>
+
             {genres.length > 0 && (
               <div className="flex items-center space-x-2 text-white/80">
                 {genres.map((genre, index) => (
@@ -525,13 +438,14 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                 ))}
               </div>
             )}
+
             <div className="relative">
               <div
+                className="transition-all duration-700 ease-out"
                 style={{
                   opacity: hideDescription ? 0 : 1,
                   maxHeight: hideDescription ? '0px' : '200px',
                   overflow: 'hidden',
-                  transition: 'opacity 0.5s ease-out, max-height 0.5s ease-out',
                   marginBottom: hideDescription ? '0' : '16px',
                 }}
               >
@@ -539,8 +453,11 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                   {movie.description || 'No description available'}
                 </p>
               </div>
+
               <div
-                className={`flex items-center space-x-3 transition-all duration-500 ease-out ${hideDescription ? 'mt-0' : 'mt-4'}`}
+                className={`flex items-center space-x-3 transition-all duration-500 ease-out ${
+                  hideDescription ? 'mt-0' : 'mt-4'
+                }`}
               >
                 <button
                   onClick={handlePlay}
@@ -549,10 +466,15 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                   <Play className="w-5 h-5 mr-2 fill-current" />
                   <span className="text-lg">Play</span>
                 </button>
+
                 <button
                   onClick={handleAddToWatchlist}
                   disabled={buttonDisabled || isSaved}
-                  className={`group flex items-center px-6 py-2.5 ${isSaved ? 'bg-gray-700/50 cursor-not-allowed' : 'bg-gray-500/30 hover:bg-gray-500/20'} text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105`}
+                  className={`group flex items-center px-6 py-2.5 ${
+                    isSaved
+                      ? 'bg-gray-700/50 cursor-not-allowed'
+                      : 'bg-gray-500/30 hover:bg-gray-500/20'
+                  } text-white font-semibold rounded backdrop-blur-sm transition-all duration-200 transform hover:scale-105`}
                   aria-label={
                     isSaved ? 'Movie is in your list' : 'Add to My List'
                   }
@@ -562,14 +484,15 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                   ) : (
                     <Plus className="w-5 h-5 text-white mr-2" />
                   )}
-                  {buttonDisabled ? 'My List' : 'My List'}
+                  My List
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {isPlaying && movie.previewTrailer && (
+
+      {isPlaying && movie.previewTrailer && !hasPlayedInSession && (
         <div className="absolute !top-[160px] sm:!top-[190px] md:!top-[160px] lg:!top-[140px] right-6 sm:right-8 z-10">
           <div className="relative">
             <button
@@ -599,7 +522,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
         </div>
       )}
 
-      {isPlaying && movie.maturityRating && (
+      {isPlaying && movie.maturityRating && !hasPlayedInSession && (
         <div className="absolute right-0 bottom-20 bg-black/50 backdrop-blur-sm border-l-4 border-white px-4 py-6 flex items-center transition-all duration-500">
           <span className="text-white text-xl font-bold">
             {movie.maturityRating}

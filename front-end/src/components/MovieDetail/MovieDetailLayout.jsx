@@ -1,15 +1,35 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { markAsWatched } from '@/api/continueWatching';
 import Hero from '../Hero/Hero';
 import RecommendedMovies from '../Features/RecommendationMovie';
 import RelatedMovies from '../Features/RelatedMovies';
 import CastList from './CastList';
 import MovieMeta from './MovieMeta';
 import MovieReviews from './MovieReviews';
+
 export default function MovieDetailLayout({ movie, refetchMovie, id, setShowPlayer }) {
+  const queryClient = useQueryClient();
+  
+  const { mutate: markWatched } = useMutation({
+    mutationFn: markAsWatched,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['continue-Watching']);
+      setShowPlayer(true);
+    },
+  });
+  
+  const handlePlayClick = () => {
+    if (movie?._id) {
+      markWatched(movie._id);
+    } else {
+      setShowPlayer(true);
+    }
+  };
   return (
     <>
       <Hero 
         movie={movie} 
-        onPlayClick={() => setShowPlayer(true)}
+        onPlayClick={handlePlayClick}
       />
       <RelatedMovies id={movie._id} />
       <div className="px-4 md:px-16 py-12">
