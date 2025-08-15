@@ -1,15 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <!-- Cinematic red gradient -->
-    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF0000" />
-      <stop offset="25%" stop-color="#DC143C" />
-      <stop offset="50%" stop-color="#B22222" />
-      <stop offset="75%" stop-color="#8B0000" />
-      <stop offset="100%" stop-color="#660000" />
+    <!-- Simplified red gradient -->
+    <linearGradient id="faviconRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF0000" />
+      <stop offset="50%" style="stop-color:#DC143C" />
+      <stop offset="100%" style="stop-color:#8B0000" />
     </linearGradient>
+    
+    <!-- Simple glow -->
+    <filter id="faviconGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <circle cx="60" cy="60" r="55" fill="url(#redGrad)" />
-  <text x="60" y="75" font-family="Arial, sans-serif" font-size="60" font-weight="bold" text-anchor="middle" fill="white">C</text>
+  
+  <!-- Background circle - FILLS ENTIRE SPACE -->
+  <circle cx="256" cy="256" r="255" fill="#1a0000" opacity="0.9"/>
+  
+  <!-- Aperture blades - EXTEND TO EDGES -->
+  <g transform="translate(256, 256)">
+    <!-- 6 aperture blades - TOUCHING THE EDGES -->
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(0)"/>
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(60)"/>
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(120)"/>
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(180)"/>
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(240)"/>
+    <path d="M 0,0 L 200,-200 A 240,240 0 0,1 240,0 Z" fill="url(#faviconRed)" transform="rotate(300)"/>
+  </g>
+  
+  <!-- Center circle - MUCH BIGGER PROPORTION -->
+  <circle cx="256" cy="256" r="140" fill="#0A0A0A"/>
+  
+  <!-- Play button - HUGE -->
+  <polygon points="200,176 200,336 340,256" fill="#FFFFFF" filter="url(#faviconGlow)"/>
 </svg>

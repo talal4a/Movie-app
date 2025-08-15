@@ -12,7 +12,6 @@ export default function MovieDetailLayout({ movie, refetchMovie, id, setShowPlay
         onPlayClick={() => setShowPlayer(true)}
       />
       <RelatedMovies id={movie._id} />
-
       <div className="px-4 md:px-16 py-12">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-8">

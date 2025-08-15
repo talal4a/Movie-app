@@ -1,12 +1,15 @@
 import MovieRow from '../components/ui/MovieRow';
-import Hero from '../components/Hero/Hero';
+
 import React, { useEffect } from 'react';
 import LatestMovies from '../components/Features/LatestMovie';
 import GenreSection from '../components/Features/GenreSection';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchMovies } from '@/api/movies';
 import axiosInstance from '@/api/axioInstance';
 import { motion } from 'framer-motion';
 import ContinueWatching from '@/components/Features/ContinueWatching';
+import Hero from './../components/Hero/Hero';
+
 const pageVariants = {
   initial: { opacity: 0, y: 50 },
   animate: { opacity: 1, y: 0 },
@@ -17,9 +20,18 @@ const transition = {
   ease: 'easeInOut',
 };
 export default function Home() {
+  const { data: featuredMovie, isLoading } = useQuery({
+    queryKey: ['featured-movie'],
+    queryFn: async () => {
+      const movies = await fetchMovies({ limit: 1 });
+      return movies[0] || null;
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
+
   useEffect(() => {
-    console.log('MoviePage mounted');
-    return () => console.log('MoviePage unmounted');
+    console.log('Home mounted');
+    return () => console.log('Home unmounted');
   }, []);
   const genres = ['Action', 'Comedy', 'Drama', 'Horror', 'Thriller'];
   const queryClient = useQueryClient();
@@ -45,7 +57,7 @@ export default function Home() {
       exit="exit"
       transition={transition}
     >
-      <Hero />
+      <Hero movie={featuredMovie} />
       <MovieRow title="Trending Now" />
       <ContinueWatching />
       <LatestMovies />

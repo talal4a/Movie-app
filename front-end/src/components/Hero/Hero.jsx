@@ -42,16 +42,18 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [fadeContent, setFadeContent] = useState(false);
   const [hideDescription, setHideDescription] = useState(false);
+  const [showSoundPopup, setShowSoundPopup] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(true);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
-  const [showSoundPopup, setShowSoundPopup] = useState(false);
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
   const hasPlayedRef = useRef(false);
+
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,
@@ -59,7 +61,9 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
     keepPreviousData: true,
     staleTime: 1000,
   });
+
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
+
   useEffect(() => {
     if (movie?._id && playedPreviews.has(movie._id)) {
       hasPlayedRef.current = true;
@@ -70,6 +74,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       setHideDescription(false);
     }
   }, [movie?._id]);
+
   const { mutate } = useMutation({
     mutationFn: (id) => markAsWatched(id),
     onSuccess: () => {
@@ -77,6 +82,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       navigate(`/movie/${movie?._id}`);
     },
   });
+
   const getConsistentMatch = useCallback((movie) => {
     if (!movie?._id) return 85;
     let hash = 0;
@@ -143,6 +149,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
         playPromise
           .then(() => {
             setIsPlaying(true);
+
             setFadeContent(true);
 
             setShowSoundPopup(true);
@@ -162,33 +169,131 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   }, [isPlaying, handleVideoEnded]);
 
   const startVideoTransition = useCallback(() => {
-    if (!videoRef.current || !movie?.previewTrailer) {
-      return;
-    }
-
-    if (hasPlayedRef.current) {
-      return;
-    }
-
-    if (isPlaying || showVideo) {
-      return;
-    }
+    setVideoLoading(true);
+    setVideoError(false);
     setShowVideo(true);
+    setFadeContent(true);
+    setHideDescription(true);
+  }, []);
+
+  const handleVideoError = useCallback(() => {
+    console.error('Video playback error - falling back to poster image');
+    setVideoError(true);
+    setShowVideo(false);
     setFadeContent(false);
     setHideDescription(false);
+    setVideoLoading(false);
+  }, []);
 
-    if (videoLoaded) {
-      startVideoPlayback();
+  const handleVideoLoadStart = useCallback(() => {
+    setVideoLoading(true);
+    setVideoError(false);
+  }, []);
+
+  const handleVideoCanPlay = useCallback(() => {
+    setVideoLoading(false);
+  }, []);
+
+  const handlePlayClick = useCallback(() => {
+    if (videoError) {
+      // If there was an error, try reloading the page to reset the component
+      window.location.reload();
+      return;
     }
-  }, [
-    videoLoaded,
-    movie?.previewTrailer,
-    isPlaying,
-    showVideo,
-    startVideoPlayback,
-  ]);
+
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch((error) => {
+          console.error('Error playing video:', error);
+          handleVideoError();
+        });
+      } else {
+        videoRef.current.pause();
+      }
+    } else if (onPlayClick) {
+      onPlayClick();
+    }
+  }, [onPlayClick, videoError, handleVideoError]);
+
+  const handleAddToWatchlist = useCallback(async () => {
+    if (!movie?._id) return;
+
+    setButtonDisabled(true);
+    try {
+      if (isSaved) {
+        await dispatch(removeFromWatchlist(movie._id)).unwrap();
+        showToast({ message: 'Removed from My List', type: 'success' });
+      } else {
+        await dispatch(addToWatchlist(movie._id)).unwrap();
+        showToast({ message: 'Added to My List', type: 'success' });
+      }
+    } catch (error) {
+      console.error('Failed to update watchlist:', error);
+      showToast({ message: 'Failed to update My List', type: 'error' });
+    } finally {
+      setButtonDisabled(false);
+    }
+  }, [dispatch, isSaved, movie, showToast]);
+
+  const handlePlay = useCallback(() => {
+    if (!movie?._id) {
+      showToast('No movie selected');
+      return;
+    }
+
+    if (onPlayClick) {
+      onPlayClick();
+    } else {
+      mutate(movie._id);
+    }
+  }, [movie, onPlayClick, mutate, showToast]);
+
+  const handleToggleMute = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+      setShowSoundPopup(false);
+    }
+  }, [isMuted]);
+
+  const handleVideoEnd = useCallback(() => {
+    if (movie?._id) {
+      playedPreviews.add(movie._id);
+      hasPlayedRef.current = true;
+      savePlayedPreviews(playedPreviews);
+    }
+    setIsPlaying(false);
+    setTimeout(() => {
+      setHideDescription(false);
+    }, 200);
+    setTimeout(() => {
+      setFadeContent(false);
+    }, 500);
+    setTimeout(() => {
+      setShowVideo(false);
+      setVideoLoaded(false);
+    }, 1200);
+  }, [movie?._id]);
+
   useEffect(() => {
-    if (!heroRef.current || !movie?.previewTrailer) return;
+    if (!heroRef.current || !movie?.previewTrailer) {
+      setVideoError(true);
+      return;
+    }
+
+    // Reset states when movie changes
+    setVideoError(false);
+    setVideoLoading(true);
+
+    // Check if the video source is valid before attempting to play
+    if (!movie.previewTrailer) {
+      console.warn('Invalid video source, falling back to poster');
+      setVideoError(true);
+      setShowVideo(false);
+      setVideoLoading(false);
+      return;
+    }
+
     if (hasPlayedRef.current) return;
     let hasInitiallyStarted = false;
     const observer = new IntersectionObserver(
@@ -280,69 +385,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [movie?.previewTrailer, startVideoTransition, videoLoaded, showVideo]);
-
-  const handlePlay = useCallback(() => {
-    if (!movie?._id) {
-      showToast('No movie selected');
-      return;
-    }
-    
-    // If onPlayClick prop is provided, use it
-    if (onPlayClick) {
-      onPlayClick();
-    } else {
-      // Otherwise, use the default behavior
-      mutate(movie._id);
-    }
-  }, [movie, mutate, showToast, onPlayClick]);
-
-  const handleAddToWatchlist = useCallback(async () => {
-    if (!movie?._id) return;
-
-    setButtonDisabled(true);
-    try {
-      if (isSaved) {
-        await dispatch(removeFromWatchlist(movie._id)).unwrap();
-        showToast({ message: 'Removed from My List', type: 'success' });
-      } else {
-        await dispatch(addToWatchlist(movie._id)).unwrap();
-        showToast({ message: 'Added to My List', type: 'success' });
-      }
-    } catch (error) {
-      console.error('Failed to update watchlist:', error);
-      showToast({ message: 'Failed to update My List', type: 'error' });
-    } finally {
-      setButtonDisabled(false);
-    }
-  }, [dispatch, isSaved, movie, showToast]);
-
-  const handleToggleMute = useCallback(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-      setShowSoundPopup(false);
-    }
-  }, [isMuted]);
-
-  const handleVideoEnd = useCallback(() => {
-    if (movie?._id) {
-      playedPreviews.add(movie._id);
-      hasPlayedRef.current = true;
-      savePlayedPreviews(playedPreviews);
-    }
-    setIsPlaying(false);
-    setTimeout(() => {
-      setHideDescription(false);
-    }, 200);
-    setTimeout(() => {
-      setFadeContent(false);
-    }, 500);
-    setTimeout(() => {
-      setShowVideo(false);
-      setVideoLoaded(false);
-    }, 1200);
-  }, [movie?._id]);
+  }, [movie?.previewTrailer, startVideoTransition, videoLoading, showVideo]);
 
   if (isLoading && !movieProp) {
     return (
@@ -366,6 +409,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const releaseYear =
     movie?.releaseYear ||
     (movie?.release_date ? new Date(movie.release_date).getFullYear() : null);
+
   return (
     <div
       ref={heroRef}
@@ -388,29 +432,52 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
               showVideo ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
-              visibility: showVideo ? 'visible' : 'hidden',
+              visibility: showVideo || videoError ? 'visible' : 'hidden',
+              pointerEvents: 'none',
             }}
           >
-            <video
-              ref={videoRef}
-              key={`video-${movie._id}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              src={movie.previewTrailer}
-              muted={true}
-              onEnded={handleVideoEnd}
-              onLoadedData={handleVideoLoadedData}
-              onCanPlay={handleVideoLoadedData}
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-              disableRemotePlayback
-              style={{
-                transform: 'scale(1.01)',
-                transition: 'opacity 0.5s ease-in-out',
-                opacity: isPlaying ? 1 : 0,
-                pointerEvents: 'none',
-              }}
-            />
+            {showVideo && movie?.previewTrailer && !videoError ? (
+              <>
+                {videoLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+                  </div>
+                )}
+                <video
+                  ref={videoRef}
+                  className={`absolute inset-0 w-full h-full object-cover ${
+                    videoLoading ? 'opacity-0' : 'opacity-100'
+                  }`}
+                  src={movie.previewTrailer}
+                  muted
+                  playsInline
+                  preload="auto"
+                  onError={handleVideoError}
+                  onLoadStart={handleVideoLoadStart}
+                  onCanPlay={handleVideoCanPlay}
+                  onEmptied={handleVideoError}
+                  onStalled={handleVideoError}
+                  style={{
+                    transform: 'scale(1.01)',
+                    transition: 'opacity 0.5s ease-in-out',
+                    opacity: isPlaying ? 1 : 0,
+                  }}
+                />
+              </>
+            ) : null}
+            {videoError && (
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-black/80 to-black/20 flex items-end">
+                <div className="p-4 md:p-8 w-full">
+                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
+                    {movie?.title || 'Movie Title'}
+                  </h1>
+                  <p className="text-gray-200 text-sm md:text-base max-w-2xl">
+                    {movie?.overview ||
+                      "Sorry, we couldn't load the trailer. Please try again later."}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-40" />
           </div>
@@ -495,7 +562,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                   ) : (
                     <Plus className="w-5 h-5 text-white mr-2" />
                   )}
-                  {buttonDisabled ? 'My List'  : 'My List'}
+                  {buttonDisabled ? 'My List' : 'My List'}
                 </button>
               </div>
             </div>
