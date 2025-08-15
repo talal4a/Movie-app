@@ -26,7 +26,14 @@ export default function ReviewList({ id }) {
       setEditingReviewId(null);
       setEditText('');
       setEditRating(5);
-      await queryClient.invalidateQueries(['reviews', id]);
+      // Reset review state in the Review component
+      queryClient.setQueryData(['reviews', id], (oldData) => {
+        if (!oldData?.data) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.filter(review => review._id !== reviewId)
+        };
+      });
       showToast({ message: 'Review deleted successfully', type: 'success' });
     } catch (err) {
       console.error('Failed to delete review:', err);

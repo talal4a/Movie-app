@@ -20,6 +20,9 @@ export default function Review({ id, refetchMovie }) {
     const review = reviewsData.data.find((r) => r.user?._id === user.id);
     setHasReviewed(!!review);
     setMyReview(review || null);
+    if (!review) {
+      setRating(0); // Reset rating when review is deleted
+    }
   }, [reviewsData?.data, user?.id]);
   const handleSubmit = async (e) => {
     e.preventDefault();

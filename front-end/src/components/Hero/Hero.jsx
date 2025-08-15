@@ -343,9 +343,14 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
     >
       <div className="absolute inset-0">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 ease-out"
+          className="absolute inset-0 transition-transform duration-1000 ease-out"
           style={{
             backgroundImage: `url(${movie.backdrop || movie.posterPath})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            width: '100%',
+            height: '100%',
             transform: showVideo && isPlaying ? 'scale(1.02)' : 'scale(1)',
           }}
         >
