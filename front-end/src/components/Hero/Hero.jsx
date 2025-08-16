@@ -17,7 +17,6 @@ import { useNavigate } from 'react-router-dom';
 import { markAsWatched } from '@/api/continueWatching';
 import { Play, Plus, Check, Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import Spinner from '../ui/Spinner';
-
 const getPlayedPreviews = () => {
   try {
     const stored = sessionStorage.getItem('playedPreviews');
@@ -26,7 +25,6 @@ const getPlayedPreviews = () => {
     return new Set();
   }
 };
-
 const savePlayedPreviews = (previews) => {
   try {
     sessionStorage.setItem('playedPreviews', JSON.stringify([...previews]));
@@ -34,14 +32,12 @@ const savePlayedPreviews = (previews) => {
     console.error('Failed to save played previews:', e);
   }
 };
-
 const Hero = ({ movie: movieProp, onPlayClick }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlist = useSelector((state) => state.watchList.items);
-
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -52,12 +48,10 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const [videoLoading, setVideoLoading] = useState(true);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [hasPlayedInSession, setHasPlayedInSession] = useState(false);
-
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
   const playedPreviews = useRef(getPlayedPreviews());
-
   const { isLoading, data: movies } = useQuery({
     queryKey: ['movies'],
     queryFn: fetchMovies,

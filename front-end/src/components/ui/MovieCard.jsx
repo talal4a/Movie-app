@@ -8,10 +8,8 @@ import {
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
-
 const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
   const dispatch = useDispatch();
-
   const { showToast } = useToast();
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
   const isSaved = watchlistItems.some((item) => item._id === movie._id);
@@ -26,7 +24,6 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
     return url;
   };
   const src = getOptimizedUrl(movie.poster || movie.backdrop);
-
   const handleAddToWatchlist = async (movieId) => {
     try {
       if (isSaved) {
@@ -48,7 +45,7 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
   return (
     <Link
       to={`/movie/${movie.slug || movie._id}`}
-      className="block "
+      className="block"
     >
       <motion.div
         whileHover={{ scale: 1.04, y: -6 }}

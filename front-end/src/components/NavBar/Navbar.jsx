@@ -10,6 +10,7 @@ import {
   Film,
   List,
   Home,
+  ArrowLeft,
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -61,7 +62,8 @@ function NavBar() {
   const user = useSelector((state) => state.user?.user);
   const isMovieDetailPage = location.pathname.startsWith('/movie/');
   const isSearchPage = location.pathname === '/search';
-  const hideSearchBar = isSearchPage || isMovieDetailPage;
+  const isAccountPage = location.pathname === '/account';
+  const hideSearchBar = isSearchPage || isMovieDetailPage || isAccountPage;
 
   const debouncedQuery = useDebounce(query, 300);
 
@@ -189,19 +191,19 @@ function NavBar() {
       </div>
     </Link>
   );
-  const navClasses = `fixed z-50 flex items-center px-4 md:px-6 py-3 text-white w-full transition-all duration-300 ${
-    isScrolled
-      ? 'bg-black/95 backdrop-blur-xl shadow-lg'
-      : 'bg-gradient-to-b from-black via-black/50 to-transparent'
-  }`;
+  const navClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    isScrolled || showMobileMenu
+      ? 'bg-black/95 backdrop-blur-md shadow-lg'
+      : 'bg-gradient-to-b from-black/80 to-transparent'
+  } ${isAccountPage ? 'border-b border-gray-800' : ''} h-20`;
   return (
-    <>
+    <div className="fixed top-0 left-0 right-0 z-50">
       <nav
         className={navClasses}
         role="navigation"
         aria-label="Main navigation"
       >
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full h-20 px-4">
           <div className="flex items-center">
             <Link
               to="/"
@@ -219,108 +221,120 @@ function NavBar() {
               {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-          <ul className="hidden md:flex space-x-8 mx-auto">
-            {NAV_ITEMS.map(({ path, label }) => (
-              <li key={path}>
-                <NavItem to={path}>{label}</NavItem>
-              </li>
-            ))}
-          </ul>
+          {!isAccountPage && (
+            <ul className="hidden md:flex space-x-8 mx-auto">
+              {NAV_ITEMS.map(({ path, label }) => (
+                <li key={path}>
+                  <NavItem to={path}>{label}</NavItem>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="flex items-center space-x-2 md:space-x-4">
-            {!hideSearchBar && (
-              <div>
+            {isAccountPage ? (
+              <div className="flex items-center">
                 <button
-                  onClick={() => setShowSearchModal(true)}
-                  className="p-2 hover:bg-gray-800 rounded-full transition-colors"
-                  aria-label="Open search"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors mr-4"
                 >
-                  <Search
-                    size={20}
-                    className="text-gray-400 hover:text-white"
-                  />
+                  <LogOut size={16} className="mr-1" />
+                  <span>Sign Out</span>
                 </button>
               </div>
-            )}
+            ) : (
+              <>
+                {!hideSearchBar && (
+                  <div>
+                    <button
+                      onClick={() => setShowSearchModal(true)}
+                      className="p-2 hover:bg-gray-800 rounded-full transition-colors"
+                      aria-label="Open search"
+                    >
+                      <Search
+                        size={20}
+                        className="text-gray-400 hover:text-white"
+                      />
+                    </button>
+                  </div>
+                )}
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={handleProfileClick}
+                    className="flex items-center space-x-1 md:space-x-2 hover:bg-gray-800 rounded-lg p-1.5 md:p-2 transition-all duration-200 group"
+                    aria-expanded={showProfile}
+                    aria-haspopup="true"
+                    aria-label="User menu"
+                  >
+                    <UserAvatar user={user} size={32} className="md:w-10 md:h-10" />
+                    <span className="hidden md:inline font-medium">
+                      {user?.name || 'User'}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
+                    />
+                  </button>
 
-            <div className="relative" ref={profileRef}>
-              <button
-                onClick={handleProfileClick}
-                className="flex items-center space-x-1 md:space-x-2 hover:bg-gray-800 rounded-lg p-1.5 md:p-2 transition-all duration-200 group"
-                aria-expanded={showProfile}
-                aria-haspopup="true"
-                aria-label="User menu"
-              >
-                <UserAvatar user={user} size={32} className="md:w-10 md:h-10" />
-                <span className="hidden md:inline font-medium">
-                  {user?.name || 'User'}
-                </span>
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`}
-                />
-              </button>
+                  {showProfile && (
+                    <div
+                      className="absolute right-0 top-12 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl animate-fadeIn"
+                      role="menu"
+                      aria-orientation="vertical"
+                    >
+                      <div className="p-4 border-b border-gray-700">
+                        <div className="flex items-center space-x-3">
+                          <UserAvatar user={user} size={40} />
+                          <div className="min-w-0">
+                            <p className="font-semibold truncate">
+                              {user?.name || 'User'}
+                            </p>
+                            <p className="text-sm text-gray-400 truncate">
+                              {user?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
-              {showProfile && (
-                <div
-                  className="absolute right-0 top-12 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-lg w-64 shadow-2xl animate-fadeIn"
-                  role="menu"
-                  aria-orientation="vertical"
-                >
-                  <div className="p-4 border-b border-gray-700">
-                    <div className="flex items-center space-x-3">
-                      <UserAvatar user={user} size={40} />
-                      <div className="min-w-0">
-                        <p className="font-semibold truncate">
-                          {user?.name || 'User'}
-                        </p>
-                        <p className="text-sm text-gray-400 truncate">
-                          {user?.email}
-                        </p>
+                      <div className="py-2">
+                        {PROFILE_MENU_ITEMS.map(({ path, label, icon: Icon }) => (
+                          <NavLink
+                            key={path}
+                            to={path}
+                            onClick={() => setShowProfile(false)}
+                            className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors group"
+                            role="menuitem"
+                          >
+                            <Icon size={16} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+                            <span className="text-sm">{label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+
+                      <div className="border-t border-gray-700 py-2">
+                        <Modal.Open opens="logout">
+                          <button
+                            onClick={() => setShowProfile(false)}
+                            className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left group"
+                            role="menuitem"
+                          >
+                            <LogOut
+                              size={16}
+                              className="text-gray-400 group-hover:text-red-500 transition-colors"
+                            />
+                            <span className="text-sm">Sign out</span>
+                          </button>
+                        </Modal.Open>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="py-2">
-                    {PROFILE_MENU_ITEMS.map(({ path, label, icon: Icon }) => (
-                      <NavLink
-                        key={path}
-                        to={path}
-                        onClick={() => setShowProfile(false)}
-                        className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors group"
-                        role="menuitem"
-                      >
-                        <Icon
-                          size={16}
-                          className="text-gray-400 group-hover:text-red-500 transition-colors"
-                        />
-                        <span className="text-sm">{label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-
-                  <div className="border-t border-gray-700 py-2">
-                    <Modal.Open opens="logout">
-                      <button
-                        onClick={() => setShowProfile(false)}
-                        className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors w-full text-left group"
-                        role="menuitem"
-                      >
-                        <LogOut
-                          size={16}
-                          className="text-gray-400 group-hover:text-red-500 transition-colors"
-                        />
-                        <span className="text-sm">Sign out</span>
-                      </button>
-                    </Modal.Open>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
 
-        {showMobileMenu && (
+        {showMobileMenu && !isAccountPage && (
           <div
             ref={mobileMenuRef}
             className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-gray-700 animate-slideDown"
@@ -341,6 +355,22 @@ function NavBar() {
           </div>
         )}
       </nav>
+
+      {isAccountPage && (
+        <div className="fixed top-20 left-0 right-0 bg-black z-40 py-2">
+          <div className="px-4">
+            <button 
+              onClick={() => window.history.back()}
+              className="text-gray-300 hover:text-white transition-colors flex items-center gap-1 text-sm pl-0"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Back</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {showSearchModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-start pt-24 px-4">
@@ -397,7 +427,7 @@ function NavBar() {
           onCloseModal={() => {}}
         />
       </Modal.Window>
-    </>
+    </div>
   );
 }
 
