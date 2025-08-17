@@ -211,17 +211,29 @@ export default function SignUpForm({
           </div>
           <Button
             type="submit"
-            className={`w-full mt-4 font-semibold ${
-              Object.keys(errors).length > 0
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'bg-red-600 hover:bg-red-700'
-            } text-white`}
-            disabled={mutation.isPending || Object.keys(errors).length > 0}
+            className={`w-full mt-4 font-semibold bg-red-600 hover:bg-red-700 text-white ${
+              mutation.isPending || 
+              Object.keys(errors).length > 0 || 
+              !formData.name || 
+              !formData.email || 
+              !formData.password || 
+              !formData.confirmPassword
+                ? 'cursor-not-allowed'
+                : ''
+            }`}
+            disabled={
+              mutation.isPending || 
+              Object.keys(errors).length > 0 || 
+              !formData.name || 
+              !formData.email || 
+              !formData.password || 
+              !formData.confirmPassword
+            }
           >
             {mutation.isPending ? (
               <>
                 <MiniSpinner />
-                'Signing up...'
+                Signing up...
               </>
             ) : (
               'Sign Up'

@@ -1,3 +1,6 @@
+import { Card, CardHeader, CardTitle } from '../../ui/card';
+import ForgotPasswordForm from '../forms/ForgotPasswordForm';
+
 export default function ForgotPasswordLayout() {
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-black text-white font-sans">

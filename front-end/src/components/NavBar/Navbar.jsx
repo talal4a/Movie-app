@@ -13,11 +13,12 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useContext } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import UserAvatar from '../ui/UserAvatar';
 import { useToast } from '@/context/ToastContext';
 import LogoutConfirm from '../Password/LogoutConfirm';
-import Modal from '../Modals/Modal';
+import Modal, { ModalContext } from '../Modals/Modal';
 import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
@@ -103,12 +104,15 @@ function NavBar() {
   useClickOutside(searchRef, () => setShowDropdown(false));
   useClickOutside(mobileMenuRef, () => setShowMobileMenu(false));
 
+  const { close } = useContext(ModalContext);
+
   const handleLogout = useCallback(() => {
+    close(); // Close the modal first
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
     queryClient.clear();
     navigate('/auth/login');
-  }, [dispatch, navigate, queryClient, showToast]);
+  }, [dispatch, navigate, queryClient, showToast, close]);
 
   const handleProfileClick = useCallback((e) => {
     e.preventDefault();
@@ -423,8 +427,9 @@ function NavBar() {
           message="You'll need to sign in again to access your account and continue watching."
           heading="Sign Out?"
           button="Sign Out"
-          onConfirm={handleLogout}
-          onCloseModal={() => {}}
+          onConfirm={() => {
+            handleLogout();
+          }}
         />
       </Modal.Window>
     </div>

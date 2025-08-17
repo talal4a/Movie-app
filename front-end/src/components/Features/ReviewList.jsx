@@ -73,7 +73,6 @@ export default function ReviewList({ id }) {
     <Modal>
       <div className="mt-6">
         <h3 className="text-2xl font-bold text-white mb-6">Reviews</h3>
-
         {reviews.length === 0 ? (
           <p className="text-gray-400">
             No reviews yet. Be the first to review!

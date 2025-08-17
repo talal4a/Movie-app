@@ -94,12 +94,10 @@ export default function ForgotPasswordForm() {
 
         <Button
           type="submit"
-          className={`w-full font-semibold ${
-            errors.email || !email
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-red-600 hover:bg-red-700'
-          } text-white`}
-          disabled={mutation.isPending || Object.keys(errors).length > 0}
+          className={`w-full font-semibold bg-red-600 hover:bg-red-700 text-white ${
+            mutation.isPending || Object.keys(errors).length > 0 || !email ? 'cursor-not-allowed' : ''
+          }`}
+          disabled={mutation.isPending || Object.keys(errors).length > 0 || !email}
         >
           {mutation.isPending ? (
             <>

@@ -135,11 +135,19 @@ export default function LoginForm({
           <Button
             type="submit"
             className={`w-full bg-red-600 hover:bg-red-700 text-white font-semibold ${
-              Object.keys(errors).length > 0
-                ? 'opacity-80 cursor-not-allowed'
+              mutation.isPending ||
+              Object.keys(errors).length > 0 || 
+              !formData.email || 
+              !formData.password
+                ? 'cursor-not-allowed'
                 : ''
             }`}
-            disabled={mutation.isPending || Object.keys(errors).length > 0}
+            disabled={
+              mutation.isPending || 
+              Object.keys(errors).length > 0 || 
+              !formData.email || 
+              !formData.password
+            }
           >
             {mutation.isPending ? (
               <>

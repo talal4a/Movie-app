@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-const ModalContext = createContext();
+export const ModalContext = createContext();
 function Modal({ children }) {
   const [openName, setOpenName] = useState('');
   const open = useCallback((name) => setOpenName(name), []);
