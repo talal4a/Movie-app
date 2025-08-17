@@ -130,7 +130,7 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password/${resetToken}`;
 
     const message = `
   <div style="font-family: sans-serif; padding: 20px;">

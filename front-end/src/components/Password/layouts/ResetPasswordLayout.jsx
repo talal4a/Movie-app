@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { resetPassword } from '../../../api/auth';
-import ResetPasswordForm from '@/components/Password/ResetPasswordForm';
+import ResetPasswordForm from "../forms/ResetPasswordForm";
 export default function ResetPasswordLayout() {
   const { token } = useParams();
   const navigate = useNavigate();

@@ -95,14 +95,18 @@ export default function ForgotPasswordForm() {
         <Button
           type="submit"
           className={`w-full font-semibold bg-red-600 hover:bg-red-700 text-white ${
-            mutation.isPending || Object.keys(errors).length > 0 || !email ? 'cursor-not-allowed' : ''
+            mutation.isPending || Object.keys(errors).length > 0 || !email
+              ? 'cursor-not-allowed'
+              : ''
           }`}
-          disabled={mutation.isPending || Object.keys(errors).length > 0 || !email}
+          disabled={
+            mutation.isPending || Object.keys(errors).length > 0 || !email
+          }
         >
           {mutation.isPending ? (
             <>
               (<MiniSpinner />
-              'Sending...')
+              Sending...)
             </>
           ) : (
             'Send Reset Link'

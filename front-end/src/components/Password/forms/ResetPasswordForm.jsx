@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Label } from '@radix-ui/react-label';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validatePassword, getPasswordStrength } from '@/utils/validations';
 import MiniSpinner from '@/components/ui/MiniSpinner';
-
 export default function ResetPasswordForm({
   handleSubmit,
   formData,
@@ -88,15 +87,18 @@ export default function ResetPasswordForm({
 
   return (
     <form onSubmit={handleLocalSubmit} className="z-10 w-full max-w-md px-4">
-      <Card className="bg-transparent text-white shadow-md border-none">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center font-bold">
-            Reset Password
+      <Card className="bg-black/80 text-white border border-gray-800 rounded-lg shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Reset Your Password
           </CardTitle>
+          <p className="text-sm text-center text-gray-400">
+            Enter your new password below
+          </p>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-1">
-            <Label htmlFor="password" className="text-sm text-gray-300">
+        <CardContent className="space-y-4 px-8 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-sm font-medium text-gray-300">
               New Password
             </Label>
             <Input
@@ -106,7 +108,7 @@ export default function ResetPasswordForm({
               value={formData.password}
               onChange={handleChange}
               onBlur={() => handleBlur('password')}
-              className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
+              className={`h-11 bg-gray-900/80 border-gray-700 text-white hover:border-gray-600 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
                 errors.password ? 'border-red-500' : ''
               }`}
               placeholder="Enter new password"
@@ -181,9 +183,9 @@ export default function ResetPasswordForm({
             <ErrorMessage message={errors.password} />
           </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="confirmPassword" className="text-sm text-gray-300">
-              Confirm Password
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
+              Confirm New Password
             </Label>
             <Input
               id="confirmPassword"
@@ -192,7 +194,7 @@ export default function ResetPasswordForm({
               value={formData.confirmPassword}
               onChange={handleChange}
               onBlur={() => handleBlur('confirmPassword')}
-              className={`bg-zinc-800 text-white border-zinc-600 placeholder:text-zinc-400 ${
+              className={`h-11 bg-gray-900/80 border-gray-700 text-white hover:border-gray-600 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
                 errors.confirmPassword ? 'border-red-500' : ''
               }`}
               placeholder="Confirm new password"
@@ -203,26 +205,28 @@ export default function ResetPasswordForm({
 
           <Button
             type="submit"
-            className={`w-full mt-4 font-semibold bg-red-600 hover:bg-red-700 text-white ${
-              mutation.isPending || 
-              Object.keys(errors).length > 0 ||
-              !formData.password ||
-              !formData.confirmPassword
-                ? 'cursor-not-allowed'
-                : ''
-            }`}
+            className="w-full h-11 mt-6 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 text-base"
             disabled={
-              mutation.isPending || 
-              Object.keys(errors).length > 0 ||
               !formData.password ||
-              !formData.confirmPassword
+              !formData.confirmPassword ||
+              Object.keys(errors).length > 0 ||
+              mutation.isPending
             }
+            style={{
+              cursor:
+                !formData.password ||
+                !formData.confirmPassword ||
+                Object.keys(errors).length > 0 ||
+                mutation.isPending
+                  ? 'not-allowed'
+                  : 'pointer',
+            }}
           >
             {mutation.isPending ? (
-              <>
-                ( <MiniSpinner />
-                'Resetting...')
-              </>
+              <div className="flex items-center justify-center">
+                <MiniSpinner className="h-5 w-5 mr-2" />
+                Resetting...
+              </div>
             ) : (
               'Reset Password'
             )}
@@ -239,6 +243,12 @@ export default function ResetPasswordForm({
           )}
         </CardContent>
       </Card>
+      <div className="mt-4 text-center text-sm text-gray-400">
+        Remember your password?{' '}
+        <a href="/auth/login" className="text-red-500 hover:underline">
+          Sign in
+        </a>
+      </div>
     </form>
   );
 }
