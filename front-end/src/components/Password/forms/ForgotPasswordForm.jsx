@@ -7,13 +7,11 @@ import { Label } from '@radix-ui/react-label';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { validateEmail } from '@/utils/validations';
 import MiniSpinner from '@/components/ui/MiniSpinner';
-
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState(false);
-
   useEffect(() => {
     if (touched) {
       const newErrors = {};
@@ -64,7 +62,6 @@ export default function ForgotPasswordForm() {
       mutation.mutate({ email });
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -91,7 +88,6 @@ export default function ForgotPasswordForm() {
           />
           <ErrorMessage message={errors.email} />
         </div>
-
         <Button
           type="submit"
           className={`w-full font-semibold bg-red-600 hover:bg-red-700 text-white ${
