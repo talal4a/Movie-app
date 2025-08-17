@@ -148,7 +148,7 @@ export default function App() {
               }
             />
             <Route
-              path="/reset-password/:token"
+              path="/auth/reset-password/:token"
               element={
                 <GuestRoute>
                   <ResetPassword />

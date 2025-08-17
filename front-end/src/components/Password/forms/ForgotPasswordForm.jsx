@@ -105,14 +105,13 @@ export default function ForgotPasswordForm() {
         >
           {mutation.isPending ? (
             <>
-              (<MiniSpinner />
-              Sending...)
+              <MiniSpinner />
+              Sending...
             </>
           ) : (
             'Send Reset Link'
           )}
         </Button>
-
         {message && (
           <p
             className={`text-center text-sm font-medium ${

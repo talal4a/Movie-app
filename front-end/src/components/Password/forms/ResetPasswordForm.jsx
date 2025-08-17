@@ -86,19 +86,19 @@ export default function ResetPasswordForm({
   };
 
   return (
-    <form onSubmit={handleLocalSubmit} className="z-10 w-full max-w-md px-4">
-      <Card className="bg-black/80 text-white border border-gray-800 rounded-lg shadow-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Reset Your Password
+    <form
+      onSubmit={handleLocalSubmit}
+      className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
+    >
+      <Card className="bg-transparent text-white shadow-md border-none">
+        <CardHeader>
+          <CardTitle className="text-3xl text-center font-bold">
+            Reset Password
           </CardTitle>
-          <p className="text-sm text-center text-gray-400">
-            Enter your new password below
-          </p>
         </CardHeader>
-        <CardContent className="space-y-4 px-8 py-2">
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+        <CardContent className="space-y-5">
+          <div className="space-y-1">
+            <Label htmlFor="password" className="text-sm text-gray-300">
               New Password
             </Label>
             <Input
@@ -108,11 +108,9 @@ export default function ResetPasswordForm({
               value={formData.password}
               onChange={handleChange}
               onBlur={() => handleBlur('password')}
-              className={`h-11 bg-gray-900/80 border-gray-700 text-white hover:border-gray-600 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
+              className={`bg-gray-900/50 border-gray-700 text-white focus-visible:ring-red-500 ${
                 errors.password ? 'border-red-500' : ''
               }`}
-              placeholder="Enter new password"
-              required
             />
             <div className="mt-1">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -183,8 +181,8 @@ export default function ResetPasswordForm({
             <ErrorMessage message={errors.password} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
+          <div className="space-y-1">
+            <Label htmlFor="confirmPassword" className="text-sm text-gray-300">
               Confirm New Password
             </Label>
             <Input
@@ -194,18 +192,16 @@ export default function ResetPasswordForm({
               value={formData.confirmPassword}
               onChange={handleChange}
               onBlur={() => handleBlur('confirmPassword')}
-              className={`h-11 bg-gray-900/80 border-gray-700 text-white hover:border-gray-600 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
+              className={`bg-gray-900/50 border-gray-700 text-white focus-visible:ring-red-500 ${
                 errors.confirmPassword ? 'border-red-500' : ''
               }`}
-              placeholder="Confirm new password"
-              required
             />
             <ErrorMessage message={errors.confirmPassword} />
           </div>
 
           <Button
             type="submit"
-            className="w-full h-11 mt-6 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-200 text-base"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
             disabled={
               !formData.password ||
               !formData.confirmPassword ||
@@ -231,10 +227,9 @@ export default function ResetPasswordForm({
               'Reset Password'
             )}
           </Button>
-
           {message && (
             <p
-              className={`text-center text-sm font-medium mt-3 ${
+              className={`text-center text-sm font-medium ${
                 message.startsWith('✅') ? 'text-green-400' : 'text-red-400'
               }`}
             >
@@ -243,12 +238,6 @@ export default function ResetPasswordForm({
           )}
         </CardContent>
       </Card>
-      <div className="mt-4 text-center text-sm text-gray-400">
-        Remember your password?{' '}
-        <a href="/auth/login" className="text-red-500 hover:underline">
-          Sign in
-        </a>
-      </div>
     </form>
   );
 }
