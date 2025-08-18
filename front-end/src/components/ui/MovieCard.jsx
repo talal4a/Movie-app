@@ -96,19 +96,19 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
           </AnimatePresence>
         </div>
         
-        <div className="absolute bottom-3 right-3">
+        <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3">
           <motion.button
             onClick={handleWatchlistClick}
-            className={`${isLoading || isSaved ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-600/90'} bg-gray-700/90 p-2.5 rounded-full transition-all`}
+            className={`${isLoading || isSaved ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-600/90'} bg-gray-700/90 p-2 md:p-2.5 rounded-full transition-all`}
             whileHover={(!isLoading && !isSaved) ? { scale: 1.1 } : {}}
             whileTap={(!isLoading && !isSaved) ? { scale: 0.9 } : {}}
             title={isSaved ? 'In your watchlist' : 'Add to watchlist'}
             disabled={isLoading || isSaved}
           >
             {isSaved ? (
-              <BookmarkCheck className="w-5 h-5 text-white" strokeWidth={2} />
+              <BookmarkCheck className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
             ) : (
-              <Bookmark className="w-5 h-5 text-white" strokeWidth={2} />
+              <Bookmark className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
             )}
           </motion.button>
         </div>

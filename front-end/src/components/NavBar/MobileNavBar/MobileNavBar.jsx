@@ -62,6 +62,7 @@ const MobileNavbar = () => {
           onProfileClick={toggleProfile}
           isProfileOpen={isProfileOpen}
           user={user}
+          onLogout={handleLogout}
         />
 
         <MobileSidebar

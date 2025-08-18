@@ -88,7 +88,7 @@ export default function SearchPage() {
             </div>
             <div className="flex items-center justify-between">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/')}
                 className="group flex items-center justify-center w-12 h-12 bg-white/10 rounded-full border border-white/20 hover:bg-white/20 hover:border-white/30 hover:scale-105 transition-all duration-300"
                 aria-label="Go back"
               >

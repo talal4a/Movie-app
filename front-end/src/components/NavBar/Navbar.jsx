@@ -238,13 +238,14 @@ function NavBar() {
           <div className="flex items-center space-x-2 md:space-x-4">
             {isAccountPage ? (
               <div className="flex items-center">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors mr-4"
-                >
-                  <LogOut size={16} className="mr-1" />
-                  <span>Sign Out</span>
-                </button>
+                <Modal.Open opens="logout">
+                  <button
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors mr-4 whitespace-nowrap h-10 shrink-0"
+                  >
+                    <LogOut size={16} />
+                    <span>Sign Out</span>
+                  </button>
+                </Modal.Open>
               </div>
             ) : (
               <>
@@ -363,7 +364,7 @@ function NavBar() {
       {isAccountPage && (
         <div className="fixed top-20 left-0 right-0 bg-black z-40 py-2">
           <div className="px-4">
-            <button 
+            <button
               onClick={() => window.history.back()}
               className="text-gray-300 hover:text-white transition-colors flex items-center gap-1 text-sm pl-0"
             >

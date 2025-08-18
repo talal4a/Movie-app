@@ -42,7 +42,6 @@ const getOptimizedBackdropUrl = (url) => {
   }
   return url;
 };
-
 const Hero = ({ movie: movieProp, onPlayClick }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -59,6 +58,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   const [videoLoading, setVideoLoading] = useState(true);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [hasPlayedInSession, setHasPlayedInSession] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const videoRef = useRef(null);
   const heroRef = useRef(null);
   const initialPlayTimeoutRef = useRef(null);
@@ -80,6 +80,24 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
   });
 
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
+
+  // Preload backdrop/poster image and toggle isImageLoaded
+  useEffect(() => {
+    const src = movie?.backdrop || movie?.posterPath;
+    if (!src) {
+      setIsImageLoaded(true);
+      return;
+    }
+    setIsImageLoaded(false);
+    const img = new Image();
+    img.onload = () => setIsImageLoaded(true);
+    img.onerror = () => setIsImageLoaded(true);
+    img.src = src;
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [movie?.backdrop, movie?.posterPath]);
 
   useEffect(() => {
     if (movie?._id) {
@@ -247,9 +265,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       return;
     }
     setVideoError(false);
-
     let hasStartedAutoplay = false;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -362,6 +378,13 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
 
+        {/* Show spinner while hero image is loading (only when video is not showing) */}
+        {!isImageLoaded && !(showVideo && isPlaying) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Spinner />
+          </div>
+        )}
+
         {movie.previewTrailer && !hasPlayedInSession && (
           <div
             className={`absolute inset-0 transition-opacity duration-1000 ease-out ${
@@ -377,6 +400,7 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
               </div>
             )}
+
             {!videoError && (
               <video
                 ref={videoRef}

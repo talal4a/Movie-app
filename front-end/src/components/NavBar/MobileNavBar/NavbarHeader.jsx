@@ -1,6 +1,8 @@
 import { Menu, Search, ChevronDown, ArrowLeft } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UserAvatar from '../../ui/UserAvatar';
+import Modal from '../../Modals/Modal';
+import LogoutConfirm from '../../Password/LogoutConfirm';
 
 const NavbarHeader = ({
   isScrolled,
@@ -9,6 +11,7 @@ const NavbarHeader = ({
   user,
   onProfileClick,
   isProfileOpen,
+  onLogout,
 }) => {
   const location = useLocation();
   const isAccountPage = location.pathname.startsWith('/account');
@@ -25,14 +28,13 @@ const NavbarHeader = ({
             >
               CINEVERSE
             </Link>
-            <button
-              onClick={() => {
-                onProfileClick({ stopPropagation: () => {} });
-              }}
-              className="text-gray-300 hover:text-white transition-colors text-sm font-medium"
-            >
-              Sign Out
-            </button>
+            <Modal.Open opens="logout-mobile">
+              <button
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10 shrink-0"
+              >
+                Sign Out
+              </button>
+            </Modal.Open>
           </div>
           <div className="border-t border-gray-800">
             <div className="px-4 py-2">
@@ -47,6 +49,14 @@ const NavbarHeader = ({
             </div>
           </div>
         </nav>
+        <Modal.Window name="logout-mobile">
+          <LogoutConfirm
+            message="You'll need to sign in again to access your account and continue watching."
+            heading="Sign Out?"
+            button="Sign Out"
+            onConfirm={onLogout}
+          />
+        </Modal.Window>
         <div className="h-24"></div>
       </>
     );

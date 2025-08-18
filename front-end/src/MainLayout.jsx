@@ -15,11 +15,22 @@ const MainLayout = () => {
     const handleRouteChange = () => {
       setIsVisible(false);
       const timer = setTimeout(() => setIsVisible(true), 10);
+      // Always scroll to top when route changes
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
       return () => clearTimeout(timer);
     };
 
     handleRouteChange();
   }, [location.pathname]);
+
+  // Disable browser's automatic scroll restoration so we fully control it
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
 
   // List of routes where we don't want to show the navbar
   const hideNavbarRoutes = [
@@ -34,7 +45,7 @@ const MainLayout = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white overflow-x-hidden">
       <AuthWatcher />
       {shouldShowNavbar && (isMobile ? <MobileNavbar /> : <NavBar />)}
       <div className="flex-1">

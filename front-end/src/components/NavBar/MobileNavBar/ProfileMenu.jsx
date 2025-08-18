@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { HelpCircle, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import UserAvatar from '../../ui/UserAvatar';
 import Modal from '../../Modals/Modal';
@@ -63,16 +63,6 @@ const ProfileMenu = ({ user, onLogout, onClose }) => {
         >
           <User size={16} />
           <span className="text-sm">Account</span>
-        </NavLink>
-        <NavLink
-          to="/help"
-          onClick={handleMenuItemClick}
-          className={({ isActive }) =>
-            `flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors ${isActive ? 'bg-gray-800' : ''}`
-          }
-        >
-          <HelpCircle size={16} />
-          <span className="text-sm">Help Center</span>
         </NavLink>
       </div>
 

@@ -11,7 +11,7 @@ export default function MoviePage() {
 
   return (
     <div 
-      className="flex flex-col min-h-screen bg-black"
+      className="flex flex-col min-h-screen bg-black pt-20 md:pt-0"
       style={{
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.3s ease-in-out',
