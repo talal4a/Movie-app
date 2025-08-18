@@ -1,29 +1,36 @@
+import { useEffect, useState } from 'react';
 import GroupedMovieCollections from '@/components/Features/GroupedMovieCollections';
-import { motion } from 'framer-motion';
-export default function MoviesPage() {
-  const pageVariants = {
-    initial: { opacity: 0, y: 50 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -50 },
-  };
-  const transition = {
-    duration: 0.5,
-    ease: 'easeInOut',
-  };
+
+export default function MoviePage() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    return () => setIsVisible(false);
+  }, []);
+
   return (
-    <motion.div
-      className="flex flex-col min-h-screen bg-background bg-black"
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={transition}
+    <div 
+      className="flex flex-col min-h-screen bg-black"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+      }}
     >
-      <main className="p-10">
-        <section className="my-10">
-          <GroupedMovieCollections />
+      <main className="p-4 md:p-8 lg:p-10">
+        <section className="my-6 md:my-8 lg:my-10">
+          <div 
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+              transitionDelay: '0.1s',
+            }}
+          >
+            <GroupedMovieCollections />
+          </div>
         </section>
       </main>
-    </motion.div>
+    </div>
   );
 }

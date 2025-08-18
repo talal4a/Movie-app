@@ -32,6 +32,17 @@ const savePlayedPreviews = (previews) => {
     console.error('Failed to save played previews:', e);
   }
 };
+const getOptimizedBackdropUrl = (url) => {
+  if (!url) return '';
+  if (url.includes('image.tmdb.org')) {
+    const width = window.innerWidth;
+    if (width < 640) return url.replace('/original/', '/w300/');
+    if (width < 1024) return url.replace('/original/', '/780/');
+    return url.replace('/original/', '/1280/');
+  }
+  return url;
+};
+
 const Hero = ({ movie: movieProp, onPlayClick }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();

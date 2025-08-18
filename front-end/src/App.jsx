@@ -29,7 +29,6 @@ export default function App() {
   const queryClient = useQueryClient();
   const user = useSelector((state) => state.user?.user);
   const location = useLocation();
-
   useEffect(() => {
     if (user) {
       dispatch(fetchWatchlist());

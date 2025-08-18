@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Bookmark, BookmarkCheck, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/context/ToastContext';
@@ -8,11 +8,14 @@ import {
   removeFromWatchlist,
 } from '@/redux/slice/watchListSlice';
 import { ProgressiveImage } from './ProgressiveImage';
+import { useState } from 'react';
 const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
   const dispatch = useDispatch();
   const { showToast } = useToast();
   const watchlistItems = useSelector((state) => state.watchList?.items || []);
+  const [isLoading, setIsLoading] = useState(false);
   const isSaved = watchlistItems.some((item) => item._id === movie._id);
+  const [isHovered, setIsHovered] = useState(false);
   const getOptimizedUrl = (url) => {
     if (!url) return '/fallback.jpg';
     if (url.includes('image.tmdb.org')) {
@@ -25,6 +28,9 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
   };
   const src = getOptimizedUrl(movie.poster || movie.backdrop);
   const handleAddToWatchlist = async (movieId) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
       if (isSaved) {
         await dispatch(removeFromWatchlist(movieId));
@@ -35,22 +41,31 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
       }
     } catch (error) {
       showToast({ message: 'Something went wrong', type: 'error' });
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleWatchlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    handleAddToWatchlist(movie._id);
+    if (!isLoading && !isSaved) {
+      handleAddToWatchlist(movie._id);
+    }
   };
+
   return (
     <Link
       to={`/movie/${movie.slug || movie._id}`}
-      className="block"
+      className="block relative group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <motion.div
-        whileHover={{ scale: 1.04, y: -6 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 18 }}
         className="relative group bg-zinc-900 rounded-xl overflow-hidden shadow-lg w-45"
+        whileHover={{ scale: 1.04, y: -6 }}
       >
         <div className="w-full max-w-xs aspect-[2/3] relative group cursor-pointer overflow-hidden rounded-lg bg-black">
           <ProgressiveImage
@@ -60,27 +75,43 @@ const MovieCard = ({ movie, isContinueWatching = false, onRemove }) => {
             priority="high"
             loading="eager"
           />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <button className="bg-white text-black rounded-full p-3 shadow-lg hover:scale-110 transition-transform">
-              <Play className="w-6 h-6 fill-current" />
-            </button>
-          </div>
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div 
+                className="absolute inset-0 bg-black/40 flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.div 
+                  className="bg-white p-3.5 rounded-full hover:scale-110 transition-transform"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Play className="w-6 h-6 text-black" fill="currentColor" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        {!isContinueWatching && (
-          <button
+        
+        <div className="absolute bottom-3 right-3">
+          <motion.button
             onClick={handleWatchlistClick}
-            className={`absolute bottom-2 right-2 bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-colors duration-200 z-10 hover:bg-gray-600 hover:text-white ${
-              isSaved ? 'text-blue-400 cursor-not-allowed' : 'text-white'
-            }`}
-            aria-label={isSaved ? 'Remove from Watchlist' : 'Add to Watchlist'}
+            className={`${isLoading || isSaved ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-600/90'} bg-gray-700/90 p-2.5 rounded-full transition-all`}
+            whileHover={(!isLoading && !isSaved) ? { scale: 1.1 } : {}}
+            whileTap={(!isLoading && !isSaved) ? { scale: 0.9 } : {}}
+            title={isSaved ? 'In your watchlist' : 'Add to watchlist'}
+            disabled={isLoading || isSaved}
           >
             {isSaved ? (
-              <BookmarkCheck className="w-5 h-5" />
+              <BookmarkCheck className="w-5 h-5 text-white" strokeWidth={2} />
             ) : (
-              <Bookmark className="w-5 h-5" />
+              <Bookmark className="w-5 h-5 text-white" strokeWidth={2} />
             )}
-          </button>
-        )}
+          </motion.button>
+        </div>
         {isContinueWatching && onRemove && (
           <button
             onClick={(e) => {

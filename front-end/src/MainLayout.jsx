@@ -1,33 +1,42 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import NavBar from './components/NavBar/Navbar';
 import NetflixFooter from './components/Footer/Footer';
 import useIsMobile from './hooks/useIsMobile';
-import { AnimatePresence, motion } from 'framer-motion';
 import AuthWatcher from './components/ui/AuthWatcher';
 import MobileNavbar from './components/NavBar/MobileNavBar/MobileNavBar';
+
 const MainLayout = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsVisible(false);
+      const timer = setTimeout(() => setIsVisible(true), 10);
+      return () => clearTimeout(timer);
+    };
+
+    handleRouteChange();
+  }, [location.pathname]);
+
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white">
       <AuthWatcher />
       {isMobile ? <MobileNavbar /> : <NavBar />}
-      <AnimatePresence mode="wait">
-        <div className="relative flex-1 overflow-hidden">
-          <motion.div
-            layout
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-            className="flex flex-col min-h-screen"
-          >
-            <main className="flex-1">
-              <Outlet />
-            </main>
-            <NetflixFooter />
-          </motion.div>
+      <div className="flex-1">
+        <div 
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transition: 'opacity 0.15s ease-in-out',
+            height: '100%',
+          }}
+        >
+          <Outlet />
         </div>
-      </AnimatePresence>
+      </div>
+      <NetflixFooter />
     </div>
   );
 };
