@@ -4,7 +4,7 @@ import ProfileForm from '@/components/Accounts/ProfileForm';
 import ProfileInfo from '@/components/Accounts/ProfileInfo';
 import Spinner from '@/components/ui/Spinner';
 import { useMutation } from '@tanstack/react-query';
-import { updatePassword, updateProfile } from '@/api/auth';
+import { updatePassword, updateProfile } from '@/api/user';
 import { setCredentials } from '@/redux/slice/userSlice';
 import { useToast } from '@/context/ToastContext';
 import { useDispatch, useSelector } from 'react-redux';

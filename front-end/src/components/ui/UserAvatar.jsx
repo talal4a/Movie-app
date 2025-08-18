@@ -1,10 +1,10 @@
 import { useState } from 'react';
-export default function UserAvatar({ user, size = 32 }) {
+export default function UserAvatar({ user, size = 32, preview = null }) {
   const [imageError, setImageError] = useState(false);
   const hasRealAvatar = user?.avatar && user.avatar !== 'default.jpg';
-  const avatarUrl = hasRealAvatar
+  const avatarUrl = preview || (hasRealAvatar
     ? `http://localhost:8000/img/users/${user.avatar}`
-    : null;
+    : null);
 
   const fallbackLetter = user?.name?.charAt(0)?.toUpperCase() || 'U';
 

@@ -61,68 +61,65 @@ export default function App() {
   }, [location.pathname, queryClient]);
   return (
     <Modal>
-      <main className="min-h-screen bg-black text-white">
-        <Suspense fallback={<Spinner />}>
-          <Routes location={location} key={location.pathname}>
-            <Route element={<MainLayout />}>
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <Home />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/movie/:id"
-                element={
-                  <PrivateRoute>
-                    <MovieDetail />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/my-list"
-                element={
-                  <PrivateRoute>
-                    <WatchListPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/account"
-                element={
-                  <PrivateRoute>
-                    <Account />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <PrivateRoute>
-                    <AdminDashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/movies"
-                element={
-                  <PrivateRoute>
-                    <MoviePage />
-                  </PrivateRoute>
-                }
-              />
-
-              <Route
-                path="*"
-                element={
-                  <PrivateRoute>
-                    <NotFound />
-                  </PrivateRoute>
-                }
-              />
-            </Route>
+      <Suspense fallback={<Spinner />}>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route 
+              index 
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              } 
+            />
+            <Route
+              path="/movie/:id"
+              element={
+                <PrivateRoute>
+                  <MovieDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/movies"
+              element={
+                <PrivateRoute>
+                  <MoviePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-list"
+              element={
+                <PrivateRoute>
+                  <WatchListPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute>
+                  <Account />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <SearchPage />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/auth/login"
               element={
@@ -155,17 +152,13 @@ export default function App() {
                 </GuestRoute>
               }
             />
-            <Route
-              path="/search"
-              element={
-                <PrivateRoute>
-                  <SearchPage />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </Suspense>
-      </main>
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+        <Modal.Window name="modal">
+          <div></div>
+        </Modal.Window>
+      </Suspense>
     </Modal>
   );
 }

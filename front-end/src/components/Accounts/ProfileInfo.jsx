@@ -5,6 +5,7 @@ export default function ProfileInfo({
   isEditing,
   setIsEditing,
   handleProfilePhotoChange,
+  profilePhotoPreview,
 }) {
   return (
     <div className="bg-gray-900/80 border border-gray-700/50 rounded-lg p-5 sm:p-6 shadow-xl">
@@ -22,7 +23,7 @@ export default function ProfileInfo({
       </div>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center mb-6">
         <div className="relative">
-          <UserAvatar user={user} size={80} />
+          <UserAvatar user={user} size={80} preview={profilePhotoPreview} />
           {isEditing && (
             <>
               <button
