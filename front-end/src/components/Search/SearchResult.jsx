@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
+import { ProgressiveImage } from '../ui/ProgressiveImage';
 export default function SearchResult({ query, movies }) {
   if (movies.length === 0) {
     return (
@@ -34,14 +35,12 @@ export default function SearchResult({ query, movies }) {
             <div className="relative flex-shrink-0 w-full sm:w-64 h-36 md:h-40 rounded-lg overflow-hidden bg-gray-800">
               <div className="w-full h-full">
                 {movie.poster ? (
-                  <img
+                  <ProgressiveImage
                     src={movie.poster}
                     alt={movie.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = '/placeholder-poster.png';
-                    }}
+                    className="w-full h-full"
+                    loading="lazy"
+                    priority="low"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-800">

@@ -106,6 +106,14 @@ function NavBar() {
 
   const { close } = useContext(ModalContext);
 
+  const handleCloseSearchModal = useCallback(() => {
+    setShowSearchModal(false);
+    setShowDropdown(false);
+    setQuery('');
+    // Clear cached search results so reopening the modal doesn't show old items
+    queryClient.removeQueries({ queryKey: ['search'] });
+  }, [queryClient]);
+
   const handleLogout = useCallback(() => {
     close(); // Close the modal first
     dispatch(logout());
@@ -392,7 +400,7 @@ function NavBar() {
                 />
               </form>
               <button
-                onClick={() => setShowSearchModal(false)}
+                onClick={handleCloseSearchModal}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:text-black"
               >
                 <X size={20} />
@@ -407,10 +415,7 @@ function NavBar() {
                   <SearchResult
                     key={movie._id}
                     movie={movie}
-                    onClick={() => {
-                      setShowSearchModal(false);
-                      setQuery('');
-                    }}
+                    onClick={handleCloseSearchModal}
                   />
                 ))
               ) : (
