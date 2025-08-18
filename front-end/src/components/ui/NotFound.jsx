@@ -11,12 +11,10 @@ const NotFound = () => {
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Background with gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-black/90 z-0">
         <div className="absolute inset-0 bg-[url('/background.jpg')] bg-cover bg-center opacity-20" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-16 text-center">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-8xl md:text-9xl font-bold text-red-600 mb-4">
@@ -26,10 +24,10 @@ const NotFound = () => {
             Lost in the Movie Universe
           </h2>
           <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-            The page you're looking for doesn't exist or has been moved.
-            Don't worry, let's get you back to the action!
+            The page you're looking for doesn't exist or has been moved. Don't
+            worry, let's get you back to the action!
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate(-1)}
@@ -44,7 +42,7 @@ const NotFound = () => {
               {isAuthenticated ? 'Go to Home' : 'Sign In'}
             </Link>
           </div>
-          
+
           <div className="mt-12 text-gray-400 text-sm">
             <p>Error code: 404</p>
             <p className="mt-2">

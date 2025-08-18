@@ -13,39 +13,32 @@ export default function AuthWatcher() {
     if (!user) return;
 
     const checkUserExistence = async () => {
-      // Check network status first
       if (!navigator.onLine) {
         console.log('No internet connection. Will retry...');
-        return; // Don't log out, just wait for next check
+        return;
       }
 
       try {
         const response = await axiosInstance.get(`/users/me`);
-        
-        // Only log out if the response indicates the user is not authenticated
+
         if (response.data.status !== 'success' || !response.data.data?._id) {
           dispatch(logout());
           navigate('/auth/signup');
         }
       } catch (error) {
         console.error('Error checking user session:', error);
-        
-        // Only log out for 401 Unauthorized errors
+
         if (error.response?.status === 401) {
           dispatch(logout());
           navigate('/auth/signup');
         }
-        // For other errors (like network issues), just log them and don't log out
       }
     };
 
-    // Initial check
     checkUserExistence();
-    
-    // Set up interval for periodic checks
+
     const interval = setInterval(checkUserExistence, 10000);
-    
-    // Clean up interval on unmount
+
     return () => clearInterval(interval);
   }, [user, dispatch, navigate]);
 

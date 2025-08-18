@@ -51,7 +51,6 @@ export default function SearchPage() {
   });
   const inputRef = useRef(null);
 
-  // Focus search input when component mounts
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -63,7 +62,6 @@ export default function SearchPage() {
     inputRef.current?.focus();
   };
 
-  // Hide on desktop screens (md and up)
   return (
     <div className="min-h-screen bg-black text-white relative md:hidden">
       <AnimatePresence mode="wait">
@@ -74,11 +72,11 @@ export default function SearchPage() {
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="min-h-screen"
         >
-          {/* Header with back button and search */}
           <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md px-4 py-4 space-y-4">
-            {/* Desktop redirect notice - shown only on desktop */}
             <div className="hidden md:flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="text-lg text-gray-300 mb-4">Please use the search bar in the navigation menu</p>
+              <p className="text-lg text-gray-300 mb-4">
+                Please use the search bar in the navigation menu
+              </p>
               <button
                 onClick={() => navigate('/')}
                 className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
@@ -95,8 +93,7 @@ export default function SearchPage() {
                 <ArrowLeft className="w-5 h-5 text-white group-hover:-translate-x-0.5 transition-transform duration-300" />
               </button>
             </div>
-            
-            {/* Search input */}
+
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <SearchIcon className="h-5 w-5 text-gray-400" />
@@ -123,7 +120,6 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Search results */}
           <div className="w-full px-4 py-2">
             {isLoading ? (
               <div className="flex justify-center items-center py-12">

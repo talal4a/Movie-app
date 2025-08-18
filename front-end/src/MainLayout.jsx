@@ -15,7 +15,7 @@ const MainLayout = () => {
     const handleRouteChange = () => {
       setIsVisible(false);
       const timer = setTimeout(() => setIsVisible(true), 10);
-      // Always scroll to top when route changes
+
       if (typeof window !== 'undefined') {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       }
@@ -25,14 +25,12 @@ const MainLayout = () => {
     handleRouteChange();
   }, [location.pathname]);
 
-  // Disable browser's automatic scroll restoration so we fully control it
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
   }, []);
 
-  // List of routes where we don't want to show the navbar
   const hideNavbarRoutes = [
     '/auth/login',
     '/auth/signup',
@@ -40,7 +38,7 @@ const MainLayout = () => {
     '/auth/reset-password',
   ];
 
-  const shouldShowNavbar = !hideNavbarRoutes.some(route => 
+  const shouldShowNavbar = !hideNavbarRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
@@ -49,7 +47,7 @@ const MainLayout = () => {
       <AuthWatcher />
       {shouldShowNavbar && (isMobile ? <MobileNavbar /> : <NavBar />)}
       <div className="flex-1">
-        <div 
+        <div
           style={{
             opacity: isVisible ? 1 : 0,
             transition: 'opacity 0.3s ease-in-out',

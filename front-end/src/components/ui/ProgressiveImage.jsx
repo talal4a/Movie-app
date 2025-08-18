@@ -50,31 +50,26 @@ export const ProgressiveImage = ({
 }) => {
   const [loaded, setLoaded] = useState(false);
 
-  // Load image immediately for all priorities
   useEffect(() => {
     if (!src) return;
-    
-    // Add to loaded images cache
+
     if (loadedImages.has(src)) {
       setLoaded(true);
       return;
     }
-    
-    // Create and load image
+
     const img = new Image();
     img.src = src;
     img.onload = () => {
       loadedImages.add(src);
       setLoaded(true);
     };
-    
-    // Cleanup
+
     return () => {
       img.onload = null;
     };
   }, [src]);
-  
-  // Show loading state
+
   if (!loaded) {
     return (
       <div className={`${className} bg-gray-800 animate-pulse`}>
@@ -87,8 +82,7 @@ export const ProgressiveImage = ({
       </div>
     );
   }
-  
-  // Show actual image
+
   return (
     <div className={`${className} relative overflow-hidden`}>
       <img

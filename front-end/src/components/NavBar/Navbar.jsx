@@ -55,7 +55,7 @@ function NavBar() {
   const [showProfile, setShowProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [query, setQuery] = useState('');
-  const [setShowDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const profileRef = useRef(null);
   const searchRef = useRef(null);

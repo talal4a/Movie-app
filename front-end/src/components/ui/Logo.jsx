@@ -5,7 +5,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
     className={className}
   >
     <defs>
-      {/* Cinematic red gradient */}
       <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stopColor="#FF0000" />
         <stop offset="25%" stopColor="#DC143C" />
@@ -14,7 +13,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
         <stop offset="100%" stopColor="#660000" />
       </linearGradient>
 
-      {/* Deep blood red gradient */}
       <linearGradient id="bloodRed" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stopColor="#4A0404" />
         <stop offset="30%" stopColor="#8B0000" />
@@ -22,21 +20,18 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
         <stop offset="100%" stopColor="#4A0404" />
       </linearGradient>
 
-      {/* Bright red accent */}
       <linearGradient id="brightRed" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stopColor="#FF6B6B" />
         <stop offset="50%" stopColor="#FF0000" />
         <stop offset="100%" stopColor="#CC0000" />
       </linearGradient>
 
-      {/* Spotlight effect */}
       <radialGradient id="spotlight">
         <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
         <stop offset="40%" stopColor="#FFCCCC" stopOpacity="0.4" />
         <stop offset="100%" stopColor="#FF0000" stopOpacity="0" />
       </radialGradient>
 
-      {/* Lens flare red */}
       <radialGradient id="lensFlareRed">
         <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
         <stop offset="20%" stopColor="#FF6B6B" stopOpacity="0.6" />
@@ -44,7 +39,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
         <stop offset="100%" stopColor="#8B0000" stopOpacity="0" />
       </radialGradient>
 
-      {/* Complex shadow */}
       <filter id="cinematicShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
         <feOffset dx="0" dy="4" result="offsetblur" />
@@ -56,7 +50,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
         </feMerge>
       </filter>
 
-      {/* Red glow effect */}
       <filter id="redGlow">
         <feGaussianBlur stdDeviation="4" result="coloredBlur" />
         <feFlood floodColor="#FF0000" floodOpacity="0.5" />
@@ -67,7 +60,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
         </feMerge>
       </filter>
 
-      {/* Inner shadow for depth */}
       <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3" />
         <feOffset in="blur" dx="0" dy="2" />
@@ -79,10 +71,8 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       </filter>
     </defs>
 
-    {/* Background circle with gradient */}
     <circle cx="60" cy="60" r="55" fill="url(#bloodRed)" opacity="0.3" />
 
-    {/* Outer ring glow */}
     <circle
       cx="60"
       cy="60"
@@ -94,7 +84,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       filter="url(#redGlow)"
     />
 
-    {/* Lens/Aperture blades */}
     <g transform="translate(60, 60)" filter="url(#cinematicShadow)">
       {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
         <path
@@ -108,7 +97,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       ))}
     </g>
 
-    {/* Inner aperture ring */}
     <circle
       cx="60"
       cy="60"
@@ -119,13 +107,10 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       opacity="0.8"
     />
 
-    {/* Center lens circle */}
     <circle cx="60" cy="60" r="25" fill="#0A0A0A" filter="url(#innerShadow)" />
 
-    {/* Lens glass effect */}
     <circle cx="60" cy="60" r="23" fill="url(#spotlight)" opacity="0.3" />
 
-    {/* Play button with glow */}
     <polygon
       points="52,48 52,72 74,60"
       fill="#FFFFFF"
@@ -133,12 +118,10 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       opacity="0.95"
     />
 
-    {/* Lens flare accents */}
     <circle cx="45" cy="45" r="3" fill="url(#lensFlareRed)" opacity="0.8" />
     <circle cx="75" cy="45" r="2" fill="url(#lensFlareRed)" opacity="0.6" />
     <circle cx="45" cy="75" r="1.5" fill="url(#lensFlareRed)" opacity="0.5" />
 
-    {/* Film strip decorative elements */}
     <rect
       x="5"
       y="55"
@@ -158,7 +141,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       opacity="0.4"
     />
 
-    {/* Perforations */}
     <rect
       x="8"
       y="58"
@@ -215,7 +197,6 @@ const CinverseLogo = ({ className = 'w-12 h-12' }) => (
       opacity="0.6"
     />
 
-    {/* Additional cinematic details */}
     <circle
       cx="60"
       cy="60"

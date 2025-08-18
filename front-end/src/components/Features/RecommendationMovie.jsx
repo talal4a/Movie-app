@@ -56,13 +56,7 @@ export default function RecommendedMovies({ genre, id: currentMovieId }) {
             <ChevronRight />
           </button>
         </div>
-      ) : (
-        <div className="mb-4">
-          <h2 className="text-2xl font-semibold text-white">
-            Recommended Movies in Collection
-          </h2>
-        </div>
-      )}
+      ) : null}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {chunkedMovies.map((movie) => (
