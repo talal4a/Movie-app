@@ -21,22 +21,33 @@ const MainLayout = () => {
     handleRouteChange();
   }, [location.pathname]);
 
+  // List of routes where we don't want to show the navbar
+  const hideNavbarRoutes = [
+    '/auth/login',
+    '/auth/signup',
+    '/forgot-password',
+    '/auth/reset-password',
+  ];
+
+  const shouldShowNavbar = !hideNavbarRoutes.some(route => 
+    location.pathname.startsWith(route)
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <AuthWatcher />
-      {isMobile ? <MobileNavbar /> : <NavBar />}
+      {shouldShowNavbar && (isMobile ? <MobileNavbar /> : <NavBar />)}
       <div className="flex-1">
         <div 
           style={{
             opacity: isVisible ? 1 : 0,
-            transition: 'opacity 0.15s ease-in-out',
-            height: '100%',
+            transition: 'opacity 0.3s ease-in-out',
           }}
         >
           <Outlet />
         </div>
       </div>
-      <NetflixFooter />
+      {shouldShowNavbar && <NetflixFooter />}
     </div>
   );
 };

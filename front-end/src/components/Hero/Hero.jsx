@@ -246,7 +246,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
       }
       return;
     }
-
     setVideoError(false);
 
     let hasStartedAutoplay = false;
@@ -378,7 +377,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
               </div>
             )}
-
             {!videoError && (
               <video
                 ref={videoRef}
