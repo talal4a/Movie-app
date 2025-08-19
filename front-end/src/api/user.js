@@ -1,5 +1,4 @@
 import axiosInstance from '@/api/axiosInstance';
-
 export const updateProfile = async (profileData) => {
   try {
     const formData = new FormData();
