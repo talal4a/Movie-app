@@ -1,4 +1,5 @@
-import axiosInstance from './axioInstance';
+import axiosInstance from '@/api/axiosInstance';
+
 export const markAsWatched = (movieId) => {
   return axiosInstance.post('/continue-watching', { movieId });
 };

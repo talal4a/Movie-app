@@ -1,4 +1,5 @@
-import axiosInstance from '@/api/axioInstance';
+
+import axiosInstance from '@/api/axiosInstance';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchWatchlist = createAsyncThunk(
   'watchlist/fetch',

@@ -81,7 +81,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
 
   const movie = movieProp || (Array.isArray(movies) ? movies[0] : movies);
 
-  // Preload backdrop/poster image and toggle isImageLoaded
   useEffect(() => {
     const src = movie?.backdrop || movie?.posterPath;
     if (!src) {
@@ -367,8 +366,8 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
           style={{
             backgroundImage: `url(${movie.backdrop || movie.posterPath})`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'top center',
             width: '100%',
             height: '100%',
             transform: showVideo && isPlaying ? 'scale(1.02)' : 'scale(1)',
@@ -378,7 +377,6 @@ const Hero = ({ movie: movieProp, onPlayClick }) => {
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent" />
         </div>
 
-        {/* Show spinner while hero image is loading (only when video is not showing) */}
         {!isImageLoaded && !(showVideo && isPlaying) && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40">
             <Spinner />

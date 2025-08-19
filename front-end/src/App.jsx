@@ -145,14 +145,11 @@ export default function App() {
             />
             <Route
               path="/auth/reset-password/:token"
-              element={
-                <GuestRoute>
-                  <ResetPassword />
-                </GuestRoute>
-              }
+              element={<ResetPassword />}
             />
-            <Route path="*" element={<NotFound />} />
           </Route>
+          {/* Render NotFound outside MainLayout to avoid NavBar/Footer on 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Modal.Window name="modal">
           <div></div>

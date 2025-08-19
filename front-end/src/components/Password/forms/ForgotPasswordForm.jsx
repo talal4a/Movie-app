@@ -65,10 +65,11 @@ export default function ForgotPasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
+      className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg p-8"
       noValidate
     >
-      <div className="space-y-5 p-6">
+      <h2 className="text-3xl font-bold text-center mb-8">Forgot Password</h2>
+      <div className="space-y-5">
         <div className="space-y-1">
           <Label htmlFor="email" className="text-sm text-gray-300">
             Email

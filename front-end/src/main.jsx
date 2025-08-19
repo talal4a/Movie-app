@@ -6,7 +6,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import store from './redux/store';
 import { ToastProvider } from './context/ToastContext';
 const queryClient = new QueryClient();
 if ('serviceWorker' in navigator) {

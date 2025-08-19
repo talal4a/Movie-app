@@ -10,7 +10,6 @@ import {
   Film,
   List,
   Home,
-  ArrowLeft,
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useContext } from 'react';
@@ -23,7 +22,6 @@ import { logout } from '../../redux/slice/userSlice';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { searchMovies } from '../../api/movies';
 import { useDebounce } from '../../hooks/useDebounce';
-import CinverseLogo from '../ui/Logo';
 
 const useClickOutside = (ref, handler) => {
   useEffect(() => {
@@ -67,11 +65,11 @@ function NavBar() {
   const hideSearchBar = isSearchPage || isMovieDetailPage || isAccountPage;
 
   const debouncedQuery = useDebounce(query, 300);
-
+  const token = useSelector((state) => state.user?.token);
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['search', debouncedQuery],
-    queryFn: () => searchMovies(debouncedQuery),
-    enabled: debouncedQuery.length >= 2,
+    queryFn: () => searchMovies(debouncedQuery, token),
+    enabled: !!token && debouncedQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
     cacheTime: 1000 * 60 * 10,
   });
@@ -110,15 +108,25 @@ function NavBar() {
     setShowSearchModal(false);
     setShowDropdown(false);
     setQuery('');
-    // Clear cached search results so reopening the modal doesn't show old items
+
     queryClient.removeQueries({ queryKey: ['search'] });
   }, [queryClient]);
 
   const handleLogout = useCallback(() => {
-    close(); // Close the modal first
+    close();
+    setShowSearchModal(false);
+    setShowDropdown(false);
+    setShowMobileMenu(false);
+    setShowProfile(false);
+    setQuery('');
+
     dispatch(logout());
     showToast({ message: 'Signed out successfully', type: 'success' });
     queryClient.clear();
+
+    queryClient.removeQueries({ queryKey: ['search'] });
+
+    navigate('/auth/login');
     navigate('/auth/login');
   }, [dispatch, navigate, queryClient, showToast, close]);
 
@@ -247,9 +255,7 @@ function NavBar() {
             {isAccountPage ? (
               <div className="flex items-center">
                 <Modal.Open opens="logout">
-                  <button
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors mr-4 whitespace-nowrap h-10 shrink-0"
-                  >
+                  <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors mr-4 whitespace-nowrap h-10 shrink-0">
                     <LogOut size={16} />
                     <span>Sign Out</span>
                   </button>
@@ -279,7 +285,11 @@ function NavBar() {
                     aria-haspopup="true"
                     aria-label="User menu"
                   >
-                    <UserAvatar user={user} size={32} className="md:w-10 md:h-10" />
+                    <UserAvatar
+                      user={user}
+                      size={32}
+                      className="md:w-10 md:h-10"
+                    />
                     <span className="hidden md:inline font-medium">
                       {user?.name || 'User'}
                     </span>
@@ -310,18 +320,23 @@ function NavBar() {
                       </div>
 
                       <div className="py-2">
-                        {PROFILE_MENU_ITEMS.map(({ path, label, icon: Icon }) => (
-                          <NavLink
-                            key={path}
-                            to={path}
-                            onClick={() => setShowProfile(false)}
-                            className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors group"
-                            role="menuitem"
-                          >
-                            <Icon size={16} className="text-gray-400 group-hover:text-red-500 transition-colors" />
-                            <span className="text-sm">{label}</span>
-                          </NavLink>
-                        ))}
+                        {PROFILE_MENU_ITEMS.map(
+                          ({ path, label, icon: Icon }) => (
+                            <NavLink
+                              key={path}
+                              to={path}
+                              onClick={() => setShowProfile(false)}
+                              className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-800 transition-colors group"
+                              role="menuitem"
+                            >
+                              <Icon
+                                size={16}
+                                className="text-gray-400 group-hover:text-red-500 transition-colors"
+                              />
+                              <span className="text-sm">{label}</span>
+                            </NavLink>
+                          )
+                        )}
                       </div>
 
                       <div className="border-t border-gray-700 py-2">
@@ -376,8 +391,19 @@ function NavBar() {
               onClick={() => window.history.back()}
               className="text-gray-300 hover:text-white transition-colors flex items-center gap-1 text-sm pl-0"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
               </svg>
               <span>Back</span>
             </button>

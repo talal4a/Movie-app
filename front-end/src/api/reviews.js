@@ -1,4 +1,6 @@
-import axiosInstance from "./axioInstance";
+
+import axiosInstance from "@/api/axiosInstance";
+
 
 export const postReviews = async (movieId, reviewData) => {
   const res = await axiosInstance.post(

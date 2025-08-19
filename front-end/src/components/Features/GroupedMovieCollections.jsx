@@ -1,7 +1,8 @@
-import axiosInstance from '@/api/axioInstance';
+
 import React, { Suspense } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import MovieCollection from './CollectionMovie';
+import axiosInstance from '@/api/axiosInstance';
 const fetchGroupedMovies = async () => {
   const res = await axiosInstance.get('movies/grouped');
   return res.data;

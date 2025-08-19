@@ -1,4 +1,6 @@
-import axiosInstance from './axioInstance';
+import axiosInstance from "./axiosInstance";
+
+
 
 export const signup = async ({ name, email, password, confirmPassword }) => {
   const res = await axiosInstance.post('/auth/signup', {
@@ -32,7 +34,11 @@ export const resetPassword = async ({ token, password, confirmPassword }) => {
   return res.data;
 };
 
-export const updatePassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+export const updatePassword = async ({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+}) => {
   const res = await axiosInstance.patch('/auth/updatePassword', {
     currentPassword,
     newPassword,
@@ -43,8 +49,7 @@ export const updatePassword = async ({ currentPassword, newPassword, confirmPass
 
 export const updateProfile = async (profileData) => {
   const formData = new FormData();
-  
-  // Append all profile data to formData
+
   Object.entries(profileData).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
       formData.append(key, value);

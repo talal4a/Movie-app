@@ -7,6 +7,7 @@ import { fetchMovies } from '@/api/movies';
 import { motion, AnimatePresence } from 'framer-motion';
 import ContinueWatching from '@/components/Features/ContinueWatching';
 import Hero from './../components/Hero/Hero';
+import { useSelector } from 'react-redux';
 const pageVariants = {
   hidden: { opacity: 0, y: 50 },
   enter: { opacity: 1, y: 0 },
@@ -18,16 +19,16 @@ const pageTransition = {
   duration: 0.5,
 };
 export default function Home() {
+  const token = useSelector((state) => state.user?.token);
   const { data: featuredMovie } = useQuery({
     queryKey: ['featured-movie'],
     queryFn: async () => {
-      const movies = await fetchMovies({ limit: 1 });
+      const movies = await fetchMovies({ limit: 1 }, token);
       return movies[0] || null;
     },
     staleTime: 60 * 60 * 1000,
   });
   const genres = ['Action', 'Comedy', 'Drama', 'Horror', 'Thriller'];
-
   return (
     <AnimatePresence mode="wait">
       <motion.div

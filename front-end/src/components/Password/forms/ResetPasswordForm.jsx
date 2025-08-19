@@ -84,34 +84,34 @@ export default function ResetPasswordForm({
       handleSubmit(e);
     }
   };
-
   return (
-    <form
-      onSubmit={handleLocalSubmit}
-      className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg"
-    >
-      <Card className="bg-transparent text-white shadow-md border-none">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center font-bold">
-            Reset Password
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-1">
-            <Label htmlFor="password" className="text-sm text-gray-300">
-              New Password
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={() => handleBlur('password')}
-              className={`bg-gray-900/50 border-gray-700 text-white focus-visible:ring-red-500 ${
-                errors.password ? 'border-red-500' : ''
-              }`}
-            />
+    <div className="flex items-center justify-center min-h-[600px]">
+      <form
+        onSubmit={handleLocalSubmit}
+        className="w-full max-w-md backdrop-blur-sm bg-black/70 rounded-lg mx-4 min-h-[500px] flex flex-col"
+      >
+        <Card className="bg-transparent text-white shadow-md border-none">
+          <CardHeader>
+            <CardTitle className="text-3xl text-center font-bold">
+              Reset Password
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-sm text-gray-300">
+                New Password
+              </Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={() => handleBlur('password')}
+                className={`bg-gray-900/50 border-gray-700 text-white focus-visible:ring-red-500 ${
+                  errors.password ? 'border-red-500' : ''
+                }`}
+              />
             <div className="mt-1">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
                 <span>Password Strength:</span>
@@ -236,8 +236,9 @@ export default function ResetPasswordForm({
               {message}
             </p>
           )}
-        </CardContent>
-      </Card>
-    </form>
+          </CardContent>
+        </Card>
+      </form>
+    </div>
   );
 }

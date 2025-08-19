@@ -19,7 +19,18 @@ export default function LogoutConfirm({
           Cancel
         </button>
         <button
-          onClick={onConfirm}
+          onClick={async () => {
+            try {
+              // Close the modal first
+              onCloseModal?.();
+              // Add a small delay to ensure modal is closed before navigation
+              await new Promise(resolve => setTimeout(resolve, 100));
+              // Then execute the confirm action
+              onConfirm?.();
+            } catch (error) {
+              console.error('Error during logout:', error);
+            }
+          }}
           className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-all duration-200 font-semibold text-base shadow-xl hover:shadow-red-500/25"
         >
           {button}

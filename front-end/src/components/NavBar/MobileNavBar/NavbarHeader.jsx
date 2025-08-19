@@ -5,13 +5,13 @@ import Modal from '../../Modals/Modal';
 import LogoutConfirm from '../../Password/LogoutConfirm';
 
 const NavbarHeader = ({
+  onLogout,
   isScrolled,
   onMenuClick,
   onSearchClick,
   user,
   onProfileClick,
-  isProfileOpen,
-  onLogout,
+  isProfileOpen
 }) => {
   const location = useLocation();
   const isAccountPage = location.pathname.startsWith('/account');
@@ -28,13 +28,12 @@ const NavbarHeader = ({
             >
               CINEVERSE
             </Link>
-            <Modal.Open opens="logout-mobile">
-              <button
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10 shrink-0"
-              >
-                Sign Out
-              </button>
-            </Modal.Open>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10 shrink-0"
+            >
+              Sign Out
+            </button>
           </div>
           <div className="border-t border-gray-800">
             <div className="px-4 py-2">

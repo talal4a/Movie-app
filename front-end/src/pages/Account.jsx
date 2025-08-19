@@ -84,7 +84,7 @@ export default function Account() {
         confirmPassword: '',
       });
     } catch (err) {
-      console.error('Password update error:', err);
+      logger.error('Password update error:', err);
       const errorMessage =
         err.response?.data?.message || 'Failed to update password';
       showToast({ message: errorMessage, type: 'error' });
@@ -134,7 +134,7 @@ export default function Account() {
       setIsEditing(false);
     },
     onError: (error) => {
-      console.error('Profile update error:', error);
+      logger.error('Profile update error:', error);
       const errorMessage =
         error.response?.data?.message || 'Failed to update profile';
       showToast({ message: errorMessage, type: 'error' });

@@ -131,19 +131,8 @@ exports.forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password/${resetToken}`;
-
-    const message = `
-  <div style="font-family: sans-serif; padding: 20px;">
-    <h2>Password Reset Requested</h2>
-    <p>Hi ${user.name},</p>
-    <p>You requested to reset your password. Click the button below to reset:</p>
-    <a href="${resetURL}" 
-       style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-      Verify & Reset Password
-    </a>
-    <p>If you didn’t request this, ignore this email.</p>
-  </div>
-`;
+    const { resetPasswordTemplate } = require('../utils/emailTemplates');
+    const message = resetPasswordTemplate({ name: user.name, resetUrl: resetURL });
 
     try {
       await sendEmail({

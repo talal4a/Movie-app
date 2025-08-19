@@ -1,60 +1,87 @@
-import axiosInstance from './axioInstance';
+import axiosInstance from "./axiosInstance";
 
-export const getMoviesByCollection = async (collectionName) => {
+const getAuthHeader = (token) => ({
+  Authorization: token ? `Bearer ${token}` : '',
+});
+export const getMoviesByCollection = async (collectionName, token) => {
   try {
     const response = await axiosInstance.get(
-      `movies/collection/${collectionName}`
+      `movies/collection/${collectionName}`,
+      { headers: getAuthHeader(token) }
     );
-    return response.data;
+    return response.data.data || [];
   } catch (error) {
     console.error('Error fetching collection movies:', error);
     return [];
   }
 };
-export const getRelatedMovies = async (id) => {
+
+export const getRelatedMovies = async (id, token) => {
   try {
-    const res = await axiosInstance.get(`movies/related/${id}`);
-    return res.data;
+    const res = await axiosInstance.get(`movies/related/${id}`, {
+      headers: getAuthHeader(token),
+    });
+    return res.data.data || [];
   } catch (error) {
     console.error('Error fetching related movies:', error);
-    return { data: [] };
+    return [];
   }
 };
-export const fetchMovies = async () => {
-  const res = await axiosInstance.get('/movies/featured');
-  return res.data.data;
+
+export const fetchMovies = async (token) => {
+  const res = await axiosInstance.get('/movies/featured', {
+    headers: getAuthHeader(token),
+  });
+  return res.data.data || [];
 };
-export const getAllMovies = async () => {
-  const res = await axiosInstance.get('/movies?sort=createdAt&limit=6');
-  return res.data.data;
+
+export const getAllMovies = async (token) => {
+  const res = await axiosInstance.get('/movies', {
+    params: { sort: 'createdAt', limit: 6 },
+    headers: getAuthHeader(token),
+  });
+  return res.data.data || [];
 };
-export const getMoviesByTag = async (tag) => {
-  const allMovies = await getAllMovies();
+
+export const getMoviesByTag = async (tag, token) => {
+  const allMovies = await getAllMovies(token);
   return allMovies.filter((movie) => movie.tags?.includes(tag));
 };
-export const fetchLatestMovies = async () => {
-  const res = await axiosInstance.get(
-    '/movies?sort=-createdAt&limit=6&excludeCollection=true'
-  );
-  return res.data.data;
-};
-export const fetchMoviesByGenre = async (genre) => {
-  const res = await axiosInstance.get(`/movies?genre=${genre}&limit=6`);
-  return res.data.data;
-};
 
-export const getMovieById = async (id) => {
-  const res = await axiosInstance.get(`/movies/${id}`);
-  return res.data.data;
-};
-
-export const getReviewsByMovieId = async (movieId) => {
-  const res = await axiosInstance.get(`/movies/${movieId}/reviews`);
-  return res.data;
-};
-export const searchMovies = async (query) => {
-  const response = await axiosInstance.get(`/movies`, {
-    params: { search: query },
+export const fetchLatestMovies = async (token) => {
+  const res = await axiosInstance.get('/movies', {
+    params: { sort: '-createdAt', limit: 6, excludeCollection: true },
+    headers: getAuthHeader(token),
   });
-  return response.data.data;
+  return res.data.data || [];
+};
+
+export const fetchMoviesByGenre = async (genre, token) => {
+  const res = await axiosInstance.get('/movies', {
+    params: { genre, limit: 6 },
+    headers: getAuthHeader(token),
+  });
+  return res.data.data || [];
+};
+
+export const getMovieById = async (id, token) => {
+  const res = await axiosInstance.get(`/movies/${id}`, {
+    headers: getAuthHeader(token),
+  });
+  return res.data.data || null;
+};
+
+export const getReviewsByMovieId = async (movieId, token) => {
+  const res = await axiosInstance.get(`/movies/${movieId}/reviews`, {
+    headers: getAuthHeader(token),
+  });
+  return res.data.data || [];
+};
+
+export const searchMovies = async (query, token) => {
+  const response = await axiosInstance.get('/movies', {
+    params: { search: query },
+    headers: getAuthHeader(token),
+  });
+  return response.data.data || [];
 };

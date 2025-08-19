@@ -1,4 +1,5 @@
-import axiosInstance from "./axioInstance";
+import axiosInstance from '@/api/axiosInstance';
+
 export const updateProfile = async (profileData) => {
   try {
     const formData = new FormData();
@@ -32,4 +33,3 @@ export const updatePassword = async (passwordData) => {
   }
   return res.data.data;
 };
-
