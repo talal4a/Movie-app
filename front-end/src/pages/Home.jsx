@@ -26,9 +26,12 @@ export default function Home() {
       const movies = await fetchMovies({ limit: 1 }, token);
       return movies[0] || null;
     },
+    enabled: !!token,
     staleTime: 60 * 60 * 1000,
   });
+
   const genres = ['Action', 'Comedy', 'Drama', 'Horror', 'Thriller'];
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -39,13 +42,21 @@ export default function Home() {
         exit="exit"
         transition={pageTransition}
       >
-        <Hero movie={featuredMovie} />
-        <MovieRow title="Trending Now" />
-        <ContinueWatching />
-        <LatestMovies />
-        {genres.map((genre) => (
-          <GenreSection key={genre} genre={genre} />
-        ))}
+        {token ? (
+          <>
+            <Hero movie={featuredMovie} />
+            <MovieRow title="Trending Now" />
+            <ContinueWatching />
+            <LatestMovies />
+            {genres.map((genre) => (
+              <GenreSection key={genre} genre={genre} />
+            ))}
+          </>
+        ) : (
+          <div className="text-center text-gray-400 py-20">
+            Please log in to view movies 🎬
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   );

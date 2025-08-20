@@ -90,13 +90,14 @@ function NavBar() {
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (user && user._id && user._id !== storedUserId) {
+      queryClient.clear();
       dispatch(logout());
       showToast({
         message: 'Session conflict detected. Logged out.',
         type: 'error',
       });
     }
-  }, [user, dispatch, showToast]);
+  }, [user, dispatch, showToast, queryClient]);
 
   useClickOutside(profileRef, () => setShowProfile(false));
   useClickOutside(searchRef, () => setShowDropdown(false));
