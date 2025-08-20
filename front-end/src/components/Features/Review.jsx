@@ -7,37 +7,29 @@ import { postReviews } from '@/api/reviews';
 import { useToast } from '@/context/ToastContext';
 
 export default function Review({ id, refetchMovie }) {
-  // --- State Hooks ---
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
   const [hasReviewed, setHasReviewed] = useState(false);
   const [myReview, setMyReview] = useState(null);
 
-  // --- React Query and Redux Hooks ---
   const user = useSelector((state) => state.user?.user);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  // --- Data Fetching (Query) ---
   const { data: reviewsData, isLoading: isReviewsLoading } = useQuery({
     queryKey: ['reviews', id],
     queryFn: () => getReviewsByMovieId(id),
   });
 
-  // --- Data Mutation (for posting a new review) ---
   const { mutate, isLoading: isPosting } = useMutation({
     mutationFn: (newReview) => postReviews(id, newReview),
     onSuccess: () => {
-      // Invalidate the 'reviews' query cache after a successful post.
-      // This will automatically trigger a re-fetch of the review list.
       queryClient.invalidateQueries(['reviews', id]);
 
-      // If a parent component needs to refetch movie data (e.g., average rating)
       if (refetchMovie) {
         refetchMovie();
       }
 
-      // Reset the form state after a successful submission
       setText('');
       setRating(0);
       showToast({ message: 'Review submitted successfully!', type: 'success' });
@@ -51,18 +43,16 @@ export default function Review({ id, refetchMovie }) {
     },
   });
 
-  // --- Effect to check if the user has already reviewed the movie ---
   useEffect(() => {
     if (!user?.id || !Array.isArray(reviewsData?.data)) return;
     const review = reviewsData.data.find((r) => r.user?._id === user.id);
     setHasReviewed(!!review);
     setMyReview(review || null);
     if (!review) {
-      setRating(0); // Reset rating if the user hasn't reviewed yet
+      setRating(0);
     }
   }, [reviewsData?.data, user?.id]);
 
-  // --- Form Submission Handler ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isPosting || !text.trim() || rating === 0) {
@@ -73,7 +63,6 @@ export default function Review({ id, refetchMovie }) {
       return;
     }
 
-    // Call the mutate function from useMutation
     mutate({ review: text, rating });
   };
 

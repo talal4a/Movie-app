@@ -21,11 +21,10 @@ export default function LogoutConfirm({
         <button
           onClick={async () => {
             try {
-              // Close the modal first
               onCloseModal?.();
-              // Add a small delay to ensure modal is closed before navigation
-              await new Promise(resolve => setTimeout(resolve, 100));
-              // Then execute the confirm action
+
+              await new Promise((resolve) => setTimeout(resolve, 100));
+
               onConfirm?.();
             } catch (error) {
               console.error('Error during logout:', error);

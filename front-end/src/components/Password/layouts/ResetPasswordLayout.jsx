@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { logout } from '@/redux/slice/userSlice';
 import { useMutation } from '@tanstack/react-query';
 import { resetPassword } from '../../../api/auth';
-import ResetPasswordForm from "../forms/ResetPasswordForm";
+import ResetPasswordForm from '../forms/ResetPasswordForm';
 export default function ResetPasswordLayout() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -17,7 +17,6 @@ export default function ResetPasswordLayout() {
   const mutation = useMutation({
     mutationFn: () => resetPassword({ token, ...formData }),
     onSuccess: () => {
-      // Ensure any existing session is cleared so GuestRoute doesn't redirect to home
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -49,11 +48,11 @@ export default function ResetPasswordLayout() {
           className="w-full h-full object-cover"
           style={{
             filter: 'brightness(0.4) blur(4px)',
-            transform: 'scale(1.1)'
+            transform: 'scale(1.1)',
           }}
         />
       </div>
-      
+
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-2xl">
           <ResetPasswordForm
