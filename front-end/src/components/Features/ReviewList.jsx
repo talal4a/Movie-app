@@ -15,25 +15,26 @@ export default function ReviewList({ id }) {
   const { showToast } = useToast();
   const user = useSelector((state) => state.user?.user);
   const queryClient = useQueryClient();
-  const { data, isLoading, isError } = useQuery({
+  const { data: reviews = [], isLoading, isError } = useQuery({
     queryKey: ['reviews', id],
-    queryFn: () => getReviewsByMovieId(id),
+    queryFn: async () => {
+      const data = await getReviewsByMovieId(id);
+      console.log('Fetched reviews:', data); // Debug log
+      return data;
+    },
     retry: false,
   });
   const handleDelete = async (reviewId) => {
     try {
       await deleteReview(reviewId, id);
+      
+      // Invalidate and refetch the reviews query to get fresh data
+      await queryClient.invalidateQueries(['reviews', id]);
+      
       setEditingReviewId(null);
       setEditText('');
       setEditRating(5);
-      // Reset review state in the Review component
-      queryClient.setQueryData(['reviews', id], (oldData) => {
-        if (!oldData?.data) return oldData;
-        return {
-          ...oldData,
-          data: oldData.data.filter(review => review._id !== reviewId)
-        };
-      });
+      
       showToast({ message: 'Review deleted successfully', type: 'success' });
     } catch (err) {
       console.error('Failed to delete review:', err);
@@ -61,7 +62,7 @@ export default function ReviewList({ id }) {
       console.error('Failed to update review:', err);
     }
   };
-  const reviews = Array.isArray(data?.data) ? data.data : [];
+  // Data is already the array of reviews from the select function
   if (isLoading)
     return (
       <p className="text-gray-400">
@@ -85,7 +86,13 @@ export default function ReviewList({ id }) {
                 className="bg-gray-800 p-4 rounded-lg text-white shadow-lg"
               >
                 <div className="flex justify-between items-start">
-                  <UserAvatar user={review.user} size={50} />
+                  <UserAvatar 
+                    user={{
+                      ...review.user,
+                      avatar: review.user?.avatar?.url || review.user?.avatar
+                    }} 
+                    size={50} 
+                  />
                   <div>
                     <h4 className="font-medium text-gray-300">
                       {review.user?.name || 'Anonymous'}

@@ -72,10 +72,16 @@ export const getMovieById = async (id, token) => {
 };
 
 export const getReviewsByMovieId = async (movieId, token) => {
-  const res = await axiosInstance.get(`/movies/${movieId}/reviews`, {
-    headers: getAuthHeader(token),
-  });
-  return res.data.data || [];
+  try {
+    const res = await axiosInstance.get(`/movies/${movieId}/reviews`, {
+      headers: token ? getAuthHeader(token) : {},
+    });
+    // The backend returns { status: "success", data: [...] }
+    return Array.isArray(res.data?.data) ? res.data.data : [];
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
 };
 
 export const searchMovies = async (query, token) => {

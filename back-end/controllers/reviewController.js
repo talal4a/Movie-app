@@ -2,29 +2,92 @@ const mongoose = require("mongoose");
 const Review = require("../models/reviewModel");
 exports.createReview = async (req, res) => {
   try {
+    console.log('Creating review with data:', {
+      body: req.body,
+      params: req.params,
+      user: req.user
+    });
+
     const { review, rating } = req.body;
     const movieId = req.params.movieId;
-    if (!mongoose.Types.ObjectId.isValid(movieId)) {
+    
+    if (!review || rating === undefined) {
+      console.error('Missing required fields:', { review, rating });
       return res.status(400).json({
         status: "error",
-        message: "Invalid movie ID format",
+        message: "Review and rating are required"
       });
     }
-    const newReview = await Review.create({
+
+    if (!mongoose.Types.ObjectId.isValid(movieId)) {
+      console.error('Invalid movie ID:', movieId);
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid movie ID format"
+      });
+    }
+
+    if (!req.user?.id) {
+      console.error('No user ID in request');
+      return res.status(401).json({
+        status: "error",
+        message: "User not authenticated"
+      });
+    }
+
+    const reviewData = {
       review,
-      rating,
+      rating: Number(rating),
       movie: movieId,
-      user: req.user.id,
-    });
-    await Review.calcAverageRatings(movieId);
+      user: req.user.id
+    };
+
+    console.log('Attempting to create review:', reviewData);
+    
+    const newReview = await Review.create(reviewData);
+    console.log('Review created successfully:', newReview);
+    
+    try {
+      await Review.calcAverageRatings(movieId);
+      console.log('Successfully updated average ratings');
+    } catch (calcError) {
+      console.error('Error updating average ratings:', calcError);
+      // Don't fail the request if just the average update fails
+    }
+    
     res.status(201).json({
       status: "success",
       data: newReview,
     });
   } catch (err) {
+    console.error('Error in createReview:', {
+      error: err,
+      message: err.message,
+      stack: err.stack
+    });
+    
+    // Handle duplicate key error (same user reviewing same movie twice)
+    if (err.code === 11000) {
+      return res.status(400).json({
+        status: "error",
+        message: "You have already reviewed this movie. Please update your existing review instead."
+      });
+    }
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(val => val.message);
+      return res.status(400).json({
+        status: "error",
+        message: `Validation error: ${messages.join(', ')}`
+      });
+    }
+    
     res.status(500).json({
       status: "error",
-      message: err.message,
+      message: process.env.NODE_ENV === 'development' 
+        ? err.message 
+        : 'An error occurred while creating the review'
     });
   }
 };
@@ -39,7 +102,14 @@ exports.getMovieReviews = async (req, res) => {
       });
     }
     const reviews = await Review.find({ movie: movieId })
-      .populate("user", "name email")
+      .populate({
+        path: 'user',
+        select: 'name email avatar',
+        populate: {
+          path: 'avatar',
+          select: 'url'
+        }
+      })
       .sort("-createdAt");
     res.status(200).json({
       status: "success",
