@@ -19,8 +19,4 @@ app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/movies/:movieId/reviews", reviewRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/continue-watching", continueWatchingRoutes);
-app.get("/", (req, res) => {
-  res.send("🎬 Movie App Backend is running 🚀");
-});
-
 module.exports = app;
